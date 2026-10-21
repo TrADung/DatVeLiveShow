@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Camera, CheckCircle, XCircle, AlertTriangle, Loader2, X, User, Hash, Building, Calendar, ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
@@ -300,15 +300,17 @@ export default function QRScannerPage() {
                     </div>
 
                     <div className="space-y-3 mb-6">
-                      {[
-                        [User, 'Họ tên', scanResult.ticket.full_name],
-                        [Calendar, 'Ngày sinh', formatDate(scanResult.ticket.dob)],
-                        [Building, 'Trường/Đơn vị', scanResult.ticket.organization],
-                        [Hash, 'Số may mắn', scanResult.ticket.lucky_number?.toString() || '-'],
-                      ].map(([Icon, label, value]) => (
-                        <div key={String(label)} className="flex items-center gap-3">
+                      {(
+                        [
+                          { IconComp: User, label: 'Họ tên', value: scanResult.ticket.full_name },
+                          { IconComp: Calendar, label: 'Ngày sinh', value: formatDate(scanResult.ticket.dob) },
+                          { IconComp: Building, label: 'Trường/Đơn vị', value: scanResult.ticket.organization },
+                          { IconComp: Hash, label: 'Số may mắn', value: scanResult.ticket.lucky_number?.toString() || '-' },
+                        ] as { IconComp: React.ElementType; label: string; value: string }[]
+                      ).map(({ IconComp, label, value }) => (
+                        <div key={label} className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-lg bg-[#D4AF37]/10 flex items-center justify-center">
-                            <Icon size={16} className="text-[#D4AF37]" />
+                            <IconComp size={16} className="text-[#D4AF37]" />
                           </div>
                           <div>
                             <div className="text-xs text-[#A8A090]">{label}</div>

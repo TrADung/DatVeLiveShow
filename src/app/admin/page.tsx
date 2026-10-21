@@ -314,7 +314,7 @@ export default function AdminDashboard() {
                     <p className="text-xs text-[#A8A090] mb-2">Giới tính</p>
                     <ResponsiveContainer width="100%" height={140}>
                       <PieChart>
-                        <Pie data={stats.genderData} dataKey="count" nameKey="gender" cx="50%" cy="50%" outerRadius={55} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                        <Pie data={stats.genderData} dataKey="count" nameKey="gender" cx="50%" cy="50%" outerRadius={55} label={(props: { name?: string; percent?: number }) => `${props.name ?? ''} ${((props.percent ?? 0) * 100).toFixed(0)}%`}>
                           {stats.genderData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                         </Pie>
                         <Tooltip contentStyle={{ background: '#1A1A1A', border: '1px solid #D4AF37', color: '#F5F2EB' }} />
@@ -355,7 +355,7 @@ export default function AdminDashboard() {
                 <h3 className="text-sm font-bold text-[#F5F2EB] mb-4">Kênh Truyền Thông</h3>
                 <ResponsiveContainer width="100%" height={200}>
                   <PieChart>
-                    <Pie data={stats.referralData} dataKey="count" nameKey="source" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}>
+                    <Pie data={stats.referralData} dataKey="count" nameKey="source" cx="50%" cy="50%" outerRadius={80} label={(props: { name?: string; percent?: number }) => `${((props.percent ?? 0) * 100).toFixed(0)}%`}>
                       {stats.referralData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                     </Pie>
                     <Tooltip contentStyle={{ background: '#1A1A1A', border: '1px solid #D4AF37', color: '#F5F2EB' }} formatter={(val, name) => [val, name]} />

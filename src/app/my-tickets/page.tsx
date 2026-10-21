@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Ticket, Hash, Clock, CheckCircle, XCircle, AlertCircle, RefreshCw } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+
 import { useAuth } from '@/hooks/useAuth'
 import { useAudio } from '@/hooks/useAudio'
 import { formatDate, formatDateTime, formatCurrency } from '@/lib/utils'
@@ -12,7 +12,7 @@ import QRCode from 'qrcode'
 import Link from 'next/link'
 import Header from '@/components/Header'
 import MusicPlayer from '@/components/MusicPlayer'
-import { useState as useCountdown, useEffect as useCountEffect } from 'react'
+
 
 const statusConfig = {
   pending: { label: 'Chờ Duyệt', icon: <AlertCircle size={16} />, class: 'status-pending' },

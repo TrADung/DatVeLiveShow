@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Ticket, Heart, Instagram, Facebook, Youtube } from 'lucide-react'
+import { Ticket, Heart, Globe, Share2, Video } from 'lucide-react'
 import { useAudio } from '@/hooks/useAudio'
 
 interface FooterProps {
@@ -47,7 +47,7 @@ export default function Footer({ onBuyTicket }: FooterProps) {
               <div>📧 club@example.com</div>
               <div>📱 0912 345 678</div>
               <div className="flex gap-3 mt-3">
-                {[Facebook, Instagram, Youtube].map((Icon, i) => (
+                {[Globe, Share2, Video].map((Icon, i) => (
                   <button
                     key={i}
                     onClick={() => playClickSound()}
