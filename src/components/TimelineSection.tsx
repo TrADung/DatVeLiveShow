@@ -2,85 +2,125 @@
 
 import { useRef } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
-import { Clock, Music, Mic, Gift, Users, Star, Sparkles, Camera } from 'lucide-react'
+import { Clock, Music, Mic, Gift, Users, Star, Sparkles, MapPin, Calendar } from 'lucide-react'
 
-interface TimelineEvent {
-  time: string
+interface TimelineStage {
+  id: string
+  phase: string
+  timeRange: string
   title: string
-  description: string
-  icon: React.ReactNode
-  tag: string
-  highlight?: boolean
-  imageUrl: string
+  subtitle: string
+  subEvents: { time: string; name: string }[]
+  side: 'left' | 'right'
+  photos: {
+    url: string
+    alt: string
+    caption: string
+  }[]
 }
 
-const timelineEvents: TimelineEvent[] = [
+const timelineStages: TimelineStage[] = [
   {
-    time: '18:30',
-    title: 'Mở Cổng & Check-in Photo Wall',
-    description: 'Đón tiếp khán giả, quét vé điện tử QR siêu tốc, nhận vòng tay dạ quang cờ vua và chụp hình kỷ niệm tại sảnh Photo Booth.',
-    icon: <Users size={15} />,
-    tag: 'Đón Khách',
-    imageUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=700&q=80',
+    id: 'stage-1',
+    phase: 'Chặng 01',
+    timeRange: '18:30 – 19:15',
+    title: 'Đón Khách & Khai Mạc',
+    subtitle: 'Đón tiếp khán giả, quét vé điện tử QR siêu tốc, nhận vòng tay dạ quang cờ vua và chụp hình tại sảnh Photo Booth.',
+    subEvents: [
+      { time: '18:30', name: 'Mở Cổng & Check-in Photo Wall' },
+      { time: '19:00', name: 'Khai Mạc Đêm Nhạc & Nghi Thức Cờ Vua' },
+    ],
+    side: 'left',
+    photos: [
+      {
+        url: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&q=80',
+        alt: 'Sảnh đón khách và check-in',
+        caption: 'Sảnh Đón Khách',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&q=80',
+        alt: 'Photo Booth cờ vua',
+        caption: 'Photo Booth',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&q=80',
+        alt: 'Không gian chào mừng',
+        caption: 'Welcome Vibe',
+      },
+    ],
   },
   {
-    time: '19:00',
-    title: 'Khai Mạc Đêm Nhạc & Nghi Thức Cờ Vua',
-    description: 'Nghi thức khai mạc chính thức, phát biểu của Ban chủ nhiệm CLB Âm Nhạc và công bố thể lệ quay số may mắn minigame.',
-    icon: <Star size={15} />,
-    tag: 'Khai Mạc',
-    highlight: true,
-    imageUrl: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=700&q=80',
+    id: 'stage-2',
+    phase: 'Chặng 02',
+    timeRange: '19:15 – 20:00',
+    title: 'Acoustic Journey',
+    subtitle: 'Những bản tình ca mộc mạc lắng đọng, hòa quyện giữa tiếng guitar mộc, cajon nhịp nhàng và âm sắc violin da diết.',
+    subEvents: [
+      { time: '19:15', name: 'Acoustic Melodies Mộc Mạc' },
+      { time: '19:40', name: 'Hòa Tấu Guitar & Violin Cảm Xúc' },
+    ],
+    side: 'right',
+    photos: [
+      {
+        url: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=600&q=80',
+        alt: 'Tiết mục Guitar Acoustic',
+        caption: 'Guitar Mộc',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=600&q=80',
+        alt: 'Sân khấu Acoustic ấm áp',
+        caption: 'Acoustic Set',
+      },
+    ],
   },
   {
-    time: '19:15',
-    title: 'Phần I: Acoustic Melodies Mộc Mạc',
-    description: 'Những bản tình ca acoustic nhẹ nhàng, hòa quyện giữa tiếng guitar mộc, cajon nhịp nhàng và âm sắc violin da diết.',
-    icon: <Music size={15} />,
-    tag: 'Acoustic Set',
-    imageUrl: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=700&q=80',
+    id: 'stage-3',
+    phase: 'Chặng 03',
+    timeRange: '20:00 – 21:30',
+    title: 'Live Band & Khách Mời',
+    subtitle: 'Dàn nhạc sống CLB thăng hoa với loạt ca khúc Rock & Pop sôi động, kết hợp màn song ca cùng Special Guest Artists bí mật.',
+    subEvents: [
+      { time: '20:00', name: 'Phần II: Live Band Trình Diễn Bùng Nổ' },
+      { time: '20:45', name: 'Phần III: Màn Kết Hợp Cùng Special Guest' },
+    ],
+    side: 'left',
+    photos: [
+      {
+        url: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&q=80',
+        alt: 'Live band biểu diễn',
+        caption: 'Live Band CLB',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&q=80',
+        alt: 'Special Guest Artists',
+        caption: 'Special Guest',
+      },
+    ],
   },
   {
-    time: '20:00',
-    title: 'Phần II: Live Band Trình Diễn Bùng Nổ',
-    description: 'Dàn nhạc sống chính của CLB thăng hoa với loạt ca khúc Rock & Pop sôi động, mashup các bản hit được phối khí độc quyền.',
-    icon: <Mic size={15} />,
-    tag: 'Live Band',
-    highlight: true,
-    imageUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=700&q=80',
-  },
-  {
-    time: '20:45',
-    title: 'Phần III: Special Guest Artists',
-    description: 'Tiết mục kết hợp đặc sắc và màn song ca thăng hoa giữa ban nhạc CLB và các ca sĩ khách mời đặc biệt được giữ bí mật.',
-    icon: <Sparkles size={15} />,
-    tag: 'Khách Mời',
-    imageUrl: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=700&q=80',
-  },
-  {
-    time: '21:30',
-    title: 'Thổi Nến Sinh Nhật & Giao Lưu Khán Phòng',
-    description: 'Nghi thức cắt bánh mừng CLB tròn tuổi mới, tri ân khán giả và tiệc ngọt giao lưu thân mật giữa các thế hệ thành viên.',
-    icon: <Gift size={15} />,
-    tag: 'Sinh Nhật',
-    imageUrl: 'https://images.unsplash.com/photo-1468359601543-843bfaef291a?w=700&q=80',
-  },
-  {
-    time: '21:45',
-    title: 'Quay Số May Mắn Trực Tiếp (Lucky Draw LED)',
-    description: 'Bốc thăm trúng thưởng trực tiếp trên màn hình LED sân khấu trao giải thưởng cây đàn Guitar Epiphone và tai nghe kiểm âm cao cấp.',
-    icon: <Sparkles size={15} />,
-    tag: 'Lucky Draw',
-    highlight: true,
-    imageUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=700&q=80',
-  },
-  {
-    time: '22:15',
-    title: 'Grand Finale & Chụp Ảnh Toàn Thể Khán Phòng',
-    description: 'Màn đồng ca tập thể khép lại đêm liveshow trọn vẹn cảm xúc và chụp hình lưu niệm toàn thể khán giả có mặt.',
-    icon: <Camera size={15} />,
-    tag: 'Bế Mạc',
-    imageUrl: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=700&q=80',
+    id: 'stage-4',
+    phase: 'Chặng 04',
+    timeRange: '21:30 – 22:30',
+    title: 'Sinh Nhật & Lucky Draw',
+    subtitle: 'Nghi thức thổi nến mừng CLB tròn tuổi mới, bốc thăm may mắn trao giải cây đàn Guitar Epiphone và chụp ảnh kỷ niệm.',
+    subEvents: [
+      { time: '21:30', name: 'Thổi Nến Sinh Nhật & Giao Lưu Khán Phòng' },
+      { time: '21:45', name: 'Quay Số May Mắn Trực Tiếp (Lucky Draw LED)' },
+      { time: '22:15', name: 'Grand Finale & Chụp Ảnh Toàn Thể' },
+    ],
+    side: 'right',
+    photos: [
+      {
+        url: 'https://images.unsplash.com/photo-1468359601543-843bfaef291a?w=600&q=80',
+        alt: 'Bánh kem sinh nhật ánh nến',
+        caption: 'Thổi Nến Sinh Nhật',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&q=80',
+        alt: 'Grand Finale toàn khán phòng',
+        caption: 'Grand Finale',
+      },
+    ],
   },
 ]
 
@@ -91,9 +131,9 @@ export default function TimelineSection() {
     offset: ['start end', 'end start'],
   })
 
-  // Parallax subtle float for chess watermarks
-  const yParallax = useTransform(scrollYProgress, [0, 1], [-40, 40])
-  const opacityParallax = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.3, 0.7, 0.7, 0.3])
+  // Subtle floating parallax for background watermarks
+  const yParallax = useTransform(scrollYProgress, [0, 1], [-50, 50])
+  const opacityParallax = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.2, 0.6, 0.6, 0.2])
 
   return (
     <section
@@ -101,147 +141,320 @@ export default function TimelineSection() {
       ref={containerRef}
       className="relative w-full min-h-screen py-20 md:py-32 overflow-hidden flex flex-col justify-center bg-[#0D0D0D]"
     >
-      {/* Background chess watermark with parallax */}
+      {/* Background chess watermark */}
       <motion.div
         style={{ y: yParallax, opacity: opacityParallax }}
-        className="absolute top-1/3 -left-12 select-none text-white/[0.025] text-[280px] font-serif pointer-events-none leading-none z-0"
+        className="absolute top-1/4 -left-12 select-none text-white/[0.025] text-[260px] font-serif pointer-events-none leading-none z-0"
       >
         ♔
       </motion.div>
       <motion.div
         style={{ y: yParallax, opacity: opacityParallax }}
-        className="absolute bottom-1/4 -right-12 select-none text-white/[0.025] text-[280px] font-serif pointer-events-none leading-none z-0"
+        className="absolute bottom-1/4 -right-12 select-none text-white/[0.025] text-[260px] font-serif pointer-events-none leading-none z-0"
       >
         ♜
       </motion.div>
 
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Section Header */}
-        <div className="text-center mb-16 md:mb-24">
-          <div className="section-heading-line mb-4 flex justify-center">
-            <span className="text-[11px] sm:text-xs font-black uppercase tracking-[0.25em] text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/30 px-4 py-1.5 rounded-full inline-flex items-center gap-1.5">
-              <Clock size={13} />
-              <span>TIMELINE SỰ KIỆN CHÍNH THỨC</span>
-            </span>
+        {/* Japan Tour Inspired Section Header with Horizontal Dividing Lines */}
+        <div className="flex items-center justify-center gap-4 sm:gap-8 mb-16 md:mb-24">
+          <div className="h-[1px] flex-1 max-w-[80px] sm:max-w-xs bg-gradient-to-r from-transparent to-white/30" />
+          <div className="text-center shrink-0">
+            <div className="text-[10px] sm:text-xs font-black uppercase tracking-[0.3em] text-[#D4AF37] mb-1.5 flex items-center justify-center gap-1.5">
+              <Clock size={12} />
+              <span>ABOUT THE SHOW</span>
+            </div>
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-widest uppercase font-sans">
+              Lịch Trình Đêm Nhạc
+            </h2>
           </div>
-
-          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-4">
-            Lịch Trình Đêm Nhạc
-          </h2>
-
-          <p className="text-sm md:text-base text-neutral-400 max-w-2xl mx-auto leading-relaxed">
-            Hành trình kết nối cảm xúc xuyên suốt đêm diễn từ 18:30 đến 22:30. Mỗi mốc thời gian là một nốt thăng hoa nghệ thuật.
-          </p>
+          <div className="h-[1px] flex-1 max-w-[80px] sm:max-w-xs bg-gradient-to-l from-transparent to-white/30" />
         </div>
 
-        {/* Timeline Axis Container */}
-        <div className="relative w-full">
-          {/* Vertical Timeline Axis Line: Left-6 on Mobile, Center on Tablet & Desktop */}
-          <div className="absolute top-4 bottom-4 left-6 md:left-1/2 -translate-x-1/2 w-[2px] bg-[#D4AF37]/50 pointer-events-none z-0" />
+        {/* 2-Column Japan Tour Layout: Left Narrative + Right Minimalist Collage Timeline */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+          {/* LEFT COLUMN: Editorial Narrative (Inspired by Japan Tour text side) */}
+          <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-28">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-[#D4AF37]">
+              <Sparkles size={13} className="text-[#D4AF37]" />
+              <span>Hành Trình Âm Nhạc 4 Tiếng Liền Mạch</span>
+            </div>
 
-          {/* Timeline Nodes & Cards */}
-          <div className="space-y-10 sm:space-y-12 md:space-y-16">
-            {timelineEvents.map((event, index) => {
-              const isEven = index % 2 === 0
-              return (
-                <div
-                  key={index}
-                  className="relative flex items-center w-full"
-                >
-                  {/* Glowing Node on Axis Line */}
-                  <div className="absolute left-6 md:left-1/2 -translate-x-1/2 top-6 md:top-1/2 -translate-y-1/2 z-20 flex items-center justify-center pointer-events-none">
-                    <div className="relative flex items-center justify-center">
-                      <span className="absolute w-5 h-5 rounded-full bg-[#D4AF37]/30 animate-ping" />
-                      <div
-                        className={`w-4 h-4 rounded-full bg-[#D4AF37] shadow-[0_0_12px_#D4AF37] ring-4 ring-[#0D0D0D] transition-transform duration-300 ${
-                          event.highlight ? 'bg-[#E53935] shadow-[0_0_15px_#E53935]' : ''
-                        }`}
-                      />
-                    </div>
-                  </div>
+            <p className="text-sm sm:text-base text-neutral-300 leading-relaxed font-normal">
+              Chúng tôi đã lên kế hoạch cho một lịch trình nghệ thuật tiện nghi và trọn vẹn gồm{' '}
+              <strong className="text-white font-bold">4 chặng cảm xúc</strong> cho đêm nhạc{' '}
+              <strong className="text-[#D4AF37] font-bold">Chess Night</strong>. Bạn sẽ đi qua:{' '}
+              <span className="text-[#D4AF37] font-semibold">Đón Khách Check-in</span>,{' '}
+              <span className="text-white font-semibold">Acoustic Journey</span>,{' '}
+              <span className="text-[#E53935] font-semibold">Live Band & Khách Mời</span>, và{' '}
+              <span className="text-[#D4AF37] font-semibold">Quay Số Lucky Draw</span>.
+            </p>
 
-                  {/* Event Content Container:
-                      - Mobile (< md): 1 column on right of line (pl-14 w-full)
-                      - Desktop & Tablet (>= md): Zigzag 50/50:
-                        * Even: w-1/2 pr-12 text-right
-                        * Odd: w-1/2 pl-12 text-left ml-auto
-                  */}
-                  <div
-                    className={`w-full pl-14 md:pl-0 ${
-                      isEven
-                        ? 'md:w-1/2 md:pr-12 md:text-right'
-                        : 'md:w-1/2 md:pl-12 md:text-left md:ml-auto'
-                    }`}
+            <p className="text-sm sm:text-base text-neutral-400 leading-relaxed font-normal">
+              Không cần lo lắng về việc sắp xếp thời gian hay bỏ lỡ tiết mục yêu thích — toàn bộ đêm diễn đã được dàn dựng khoa học. Chúng tôi sẽ mang đến âm thanh chân thực, ánh sáng sân khấu thị giác và không gian acoustic ấm cúng, để bạn chỉ việc{' '}
+              <span className="text-[#D4AF37] font-semibold italic">hòa mình và tận hưởng trọn vẹn hành trình.</span>
+            </p>
+
+            {/* Quick Specs Pill Box */}
+            <div className="pt-4 border-t border-white/10 grid grid-cols-2 gap-4 text-xs">
+              <div className="space-y-1">
+                <span className="text-neutral-500 font-bold uppercase tracking-wider block text-[10px]">Thời Gian</span>
+                <span className="text-white font-semibold flex items-center gap-1.5">
+                  <Calendar size={13} className="text-[#D4AF37]" />
+                  31.12.2025 • 18:30
+                </span>
+              </div>
+              <div className="space-y-1">
+                <span className="text-neutral-500 font-bold uppercase tracking-wider block text-[10px]">Địa Điểm</span>
+                <span className="text-white font-semibold flex items-center gap-1.5 truncate">
+                  <MapPin size={13} className="text-[#E53935]" />
+                  Hà Nội Concert Hall
+                </span>
+              </div>
+            </div>
+
+            {/* Quote decoration */}
+            <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 text-xs text-neutral-400 italic">
+              &ldquo;Mỗi mốc thời gian là một nước cờ nghệ thuật đưa cảm xúc khán giả chạm tới đỉnh cao.&rdquo;
+            </div>
+          </div>
+
+          {/* RIGHT COLUMN: Japan Tour Timeline (Thin Axis Line + Circular Nodes + Organic Collage Photos) */}
+          <div className="lg:col-span-7 relative">
+            {/* The Vertical Axis Line: Positioned at 42% on desktop, left-5 on mobile */}
+            <div className="absolute top-4 bottom-8 left-5 sm:left-6 lg:left-[44%] w-[1.5px] bg-gradient-to-b from-transparent via-[#D4AF37]/50 to-transparent pointer-events-none z-0" />
+
+            <div className="space-y-16 sm:space-y-20 lg:space-y-24">
+              {timelineStages.map((stage, stageIndex) => {
+                const isLeftPhotos = stage.side === 'left'
+
+                return (
+                  <motion.div
+                    key={stage.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: '-60px' }}
+                    transition={{ duration: 0.5, ease: 'easeOut', delay: stageIndex * 0.05 }}
+                    className="relative w-full"
                   >
-                    <motion.div
-                      initial={{ opacity: 0, y: 25, scale: 0.96 }}
-                      whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                      viewport={{ once: true, margin: '-40px' }}
-                      transition={{ duration: 0.45, ease: 'easeOut', delay: index * 0.04 }}
-                      className={`card-chess rounded-2xl sm:rounded-3xl p-5 sm:p-6 transition-all duration-300 group ${
-                        event.highlight
-                          ? 'border-[#D4AF37]/50 bg-gradient-to-b from-[#1C1C1E] via-[#1C1C1E] to-[#D4AF37]/10'
-                          : 'border-white/10'
-                      }`}
-                    >
-                      {/* Meta Header */}
-                      <div
-                        className={`flex items-center gap-2 mb-3 flex-wrap ${
-                          isEven ? 'md:justify-end' : 'md:justify-start'
-                        }`}
-                      >
-                        <span
-                          className={`inline-block text-xs sm:text-sm font-black px-3 py-1 rounded-xl font-mono ${
-                            event.highlight
-                              ? 'bg-[#E53935] text-white shadow-md shadow-[#E53935]/30'
-                              : 'bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30'
-                          }`}
-                        >
-                          {event.time}
+                    {/* Node Dot on the Axis Line */}
+                    <div className="absolute left-5 sm:left-6 lg:left-[44%] -translate-x-1/2 top-1.5 z-20 flex items-center justify-center pointer-events-none">
+                      <div className="relative flex items-center justify-center">
+                        <span className="absolute w-5 h-5 rounded-full bg-[#D4AF37]/30 animate-ping" />
+                        <div className="w-3.5 h-3.5 rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,0.9)] ring-4 ring-[#0D0D0D]" />
+                      </div>
+                    </div>
+
+                    {/* DESKTOP LAYOUT (>= lg): Asymmetrical layout with text on one side, photos collage on the other */}
+                    <div className="hidden lg:grid lg:grid-cols-12 gap-8 items-start w-full">
+                      {/* Left side of the Axis Line (Cols 1-5, before axis at 44%) */}
+                      <div className="col-span-5 flex flex-col justify-start">
+                        {isLeftPhotos ? (
+                          /* Collaged Photos on Left */
+                          <div className="relative pt-1 pr-6 flex justify-end">
+                            <div className="relative">
+                              {/* Primary Photo */}
+                              <div className="w-44 h-32 rounded-xl overflow-hidden shadow-2xl border border-white/10 bg-neutral-900 group">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={stage.photos[0]?.url}
+                                  alt={stage.photos[0]?.alt}
+                                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-108"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src =
+                                      'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&q=80'
+                                  }}
+                                />
+                              </div>
+
+                              {/* Overlapping Secondary Photo (Japan Tour style) */}
+                              {stage.photos[1] && (
+                                <div className="absolute -bottom-6 -left-8 w-36 h-24 rounded-xl overflow-hidden shadow-2xl border-2 border-[#0D0D0D] bg-neutral-900 z-10 group">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img
+                                    src={stage.photos[1].url}
+                                    alt={stage.photos[1].alt}
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-108"
+                                    onError={(e) => {
+                                      (e.target as HTMLImageElement).src =
+                                        'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&q=80'
+                                    }}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          /* Title & Stage Details on Left (when photos are on Right) */
+                          <div className="text-right pr-8 pt-0.5">
+                            <span className="text-[11px] font-bold tracking-wider text-neutral-400 uppercase font-mono">
+                              {stage.timeRange}
+                            </span>
+                            <h3 className="text-xl font-black text-white uppercase tracking-tight mt-0.5 mb-1">
+                              {stage.title}
+                            </h3>
+                            <p className="text-xs text-neutral-400 leading-relaxed max-w-xs ml-auto">
+                              {stage.subtitle}
+                            </p>
+
+                            {/* Sub-events list */}
+                            <div className="mt-3 space-y-1.5">
+                              {stage.subEvents.map((sub, i) => (
+                                <div key={i} className="flex items-center justify-end gap-2 text-xs text-neutral-300">
+                                  <span className="font-semibold text-white">{sub.name}</span>
+                                  <span className="text-[10px] font-mono text-[#D4AF37] bg-[#D4AF37]/10 px-2 py-0.5 rounded">
+                                    {sub.time}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Spacer col for the axis at 44% */}
+                      <div className="col-span-1" />
+
+                      {/* Right side of the Axis Line (Cols 7-12, after axis) */}
+                      <div className="col-span-6 flex flex-col justify-start pl-4">
+                        {isLeftPhotos ? (
+                          /* Title & Details on Right (when photos are on Left) */
+                          <div className="text-left pt-0.5">
+                            <span className="text-[11px] font-bold tracking-wider text-neutral-400 uppercase font-mono">
+                              {stage.timeRange}
+                            </span>
+                            <h3 className="text-xl font-black text-white uppercase tracking-tight mt-0.5 mb-1">
+                              {stage.title}
+                            </h3>
+                            <p className="text-xs text-neutral-400 leading-relaxed max-w-xs">
+                              {stage.subtitle}
+                            </p>
+
+                            {/* Sub-events list */}
+                            <div className="mt-3 space-y-1.5">
+                              {stage.subEvents.map((sub, i) => (
+                                <div key={i} className="flex items-center gap-2 text-xs text-neutral-300">
+                                  <span className="text-[10px] font-mono text-[#D4AF37] bg-[#D4AF37]/10 px-2 py-0.5 rounded">
+                                    {sub.time}
+                                  </span>
+                                  <span className="font-semibold text-white">{sub.name}</span>
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* Supplementary single thumbnail on right */}
+                            {stage.photos[2] && (
+                              <div className="mt-4 w-40 h-28 rounded-xl overflow-hidden shadow-xl border border-white/10 group">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={stage.photos[2].url}
+                                  alt={stage.photos[2].alt}
+                                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-108"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src =
+                                      'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&q=80'
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          /* Collaged Photos on Right (when details are on Left) */
+                          <div className="relative pt-1 pl-2">
+                            <div className="relative">
+                              {/* Primary Photo */}
+                              <div className="w-48 h-32 rounded-xl overflow-hidden shadow-2xl border border-white/10 bg-neutral-900 group">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={stage.photos[0]?.url}
+                                  alt={stage.photos[0]?.alt}
+                                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-108"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src =
+                                      'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=600&q=80'
+                                  }}
+                                />
+                              </div>
+
+                              {/* Overlapping Secondary Photo */}
+                              {stage.photos[1] && (
+                                <div className="absolute -bottom-6 -right-6 w-36 h-24 rounded-xl overflow-hidden shadow-2xl border-2 border-[#0D0D0D] bg-neutral-900 z-10 group">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img
+                                    src={stage.photos[1].url}
+                                    alt={stage.photos[1].alt}
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-108"
+                                    onError={(e) => {
+                                      (e.target as HTMLImageElement).src =
+                                        'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=600&q=80'
+                                    }}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* MOBILE & TABLET LAYOUT (< lg): Single clean column on right of axis line */}
+                    <div className="lg:hidden pl-12 sm:pl-16 w-full">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className="text-xs font-mono font-bold text-[#D4AF37] bg-[#D4AF37]/10 px-2.5 py-0.5 rounded-lg border border-[#D4AF37]/20">
+                          {stage.timeRange}
                         </span>
-                        <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-neutral-400 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">
-                          {event.tag}
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+                          {stage.phase}
                         </span>
                       </div>
 
-                      {/* Title */}
-                      <h3 className="text-base sm:text-lg md:text-xl font-black text-white mb-2 group-hover:text-[#D4AF37] transition-colors leading-snug">
-                        {event.title}
+                      <h3 className="text-lg sm:text-xl font-black text-white uppercase tracking-tight mb-1.5">
+                        {stage.title}
                       </h3>
 
-                      {/* Description */}
-                      <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed mb-4">
-                        {event.description}
+                      <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed mb-3">
+                        {stage.subtitle}
                       </p>
 
-                      {/* Artistic Thumbnail Image */}
-                      <div className="relative w-full h-44 md:h-48 rounded-xl overflow-hidden border border-white/10 bg-neutral-900 shadow-md mt-3">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={event.imageUrl}
-                          alt={event.title}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-108"
-                          loading="lazy"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src =
-                              'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=700&q=80'
-                          }}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
-                        <div
-                          className={`absolute bottom-2.5 ${
-                            isEven ? 'left-3 md:right-3 md:left-auto' : 'left-3'
-                          } text-[11px] font-bold text-white/90 drop-shadow flex items-center gap-1.5`}
-                        >
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]" />
-                          <span>Chess Night Live</span>
-                        </div>
+                      {/* Sub-events list */}
+                      <div className="space-y-1 mb-4">
+                        {stage.subEvents.map((sub, i) => (
+                          <div key={i} className="flex items-center gap-2 text-xs text-neutral-300">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]" />
+                            <span className="font-mono text-neutral-400 text-[11px]">{sub.time}</span>
+                            <span className="font-medium text-white">{sub.name}</span>
+                          </div>
+                        ))}
                       </div>
-                    </motion.div>
-                  </div>
-                </div>
-              )
-            })}
+
+                      {/* Asymmetric Mobile Photo Collage (Scrollable / Overlapping) */}
+                      <div className="flex items-center gap-3 pt-1 overflow-x-auto pb-2">
+                        {stage.photos.map((photo, pIdx) => (
+                          <div
+                            key={pIdx}
+                            className={`shrink-0 rounded-xl overflow-hidden border border-white/10 shadow-lg ${
+                              pIdx === 0 ? 'w-48 h-32' : 'w-36 h-28 -ml-4 z-10 border-2 border-[#0D0D0D]'
+                            }`}
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={photo.url}
+                              alt={photo.alt}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src =
+                                  'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&q=80'
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </div>
           </div>
         </div>
       </div>
