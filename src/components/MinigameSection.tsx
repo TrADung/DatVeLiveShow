@@ -34,12 +34,12 @@ export default function MinigameSection() {
   return (
     <section
       id="minigame"
-      className="relative w-full block py-24 md:py-32 overflow-hidden bg-[#0D0D0D]"
+      className="relative w-full min-h-screen py-20 md:py-32 overflow-hidden flex flex-col justify-center bg-[#0D0D0D]"
     >
-      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
         {/* Section Header */}
-        <div className="section-heading-line mb-4">
-          <span className="text-[11px] sm:text-xs font-black uppercase tracking-[0.25em] text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/30 px-4 py-1.5 rounded-full flex items-center gap-1.5">
+        <div className="section-heading-line mb-4 flex justify-center">
+          <span className="text-[11px] sm:text-xs font-black uppercase tracking-[0.25em] text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/30 px-4 py-1.5 rounded-full inline-flex items-center gap-1.5">
             <Gift size={13} />
             <span>MINIGAME ĐỘC QUYỀN SÂN KHẤU</span>
           </span>

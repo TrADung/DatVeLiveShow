@@ -209,8 +209,8 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-[#0A0A0C] text-white pb-24">
       <Header />
 
-      {/* Main content with generous top padding to ensure header never overlaps KPI cards */}
-      <main className="pt-28 sm:pt-36 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      {/* Main content wrapped in full-width responsive container */}
+      <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-12">
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           {/* Top Title & Quick Actions Bar */}
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
@@ -441,8 +441,8 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+            <div className="overflow-x-auto w-full">
+              <table className="w-full min-w-[700px] text-left text-xs">
                 <thead>
                   <tr className="bg-white/5 border-b border-white/10 text-slate-400 font-bold uppercase tracking-wider">
                     {['Mã Đơn', 'Họ Tên', 'Email', 'Trường / Đơn Vị', 'Số May Mắn', 'Trạng Thái', 'Thao Tác'].map((h) => (

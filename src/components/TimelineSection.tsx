@@ -1,7 +1,6 @@
 'use client'
 
 import { useRef } from 'react'
-import Image from 'next/image'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { Clock, Music, Mic, Gift, Users, Star, Sparkles, Camera } from 'lucide-react'
 
@@ -86,13 +85,13 @@ const timelineEvents: TimelineEvent[] = [
 ]
 
 export default function TimelineSection() {
-  const containerRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLElement>(null)
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start end', 'end start'],
   })
 
-  // Parallax subtle float
+  // Parallax subtle float for chess watermarks
   const yParallax = useTransform(scrollYProgress, [0, 1], [-40, 40])
   const opacityParallax = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.3, 0.7, 0.7, 0.3])
 
@@ -100,7 +99,7 @@ export default function TimelineSection() {
     <section
       id="timeline"
       ref={containerRef}
-      className="relative w-full block py-24 md:py-32 overflow-hidden bg-[#0D0D0D]"
+      className="relative w-full min-h-screen py-20 md:py-32 overflow-hidden flex flex-col justify-center bg-[#0D0D0D]"
     >
       {/* Background chess watermark with parallax */}
       <motion.div
@@ -116,11 +115,11 @@ export default function TimelineSection() {
         ♜
       </motion.div>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
         <div className="text-center mb-16 md:mb-24">
-          <div className="section-heading-line mb-4">
-            <span className="text-[11px] sm:text-xs font-black uppercase tracking-[0.25em] text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/30 px-4 py-1.5 rounded-full flex items-center gap-1.5">
+          <div className="section-heading-line mb-4 flex justify-center">
+            <span className="text-[11px] sm:text-xs font-black uppercase tracking-[0.25em] text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/30 px-4 py-1.5 rounded-full inline-flex items-center gap-1.5">
               <Clock size={13} />
               <span>TIMELINE SỰ KIỆN CHÍNH THỨC</span>
             </span>
@@ -136,46 +135,48 @@ export default function TimelineSection() {
         </div>
 
         {/* Timeline Axis Container */}
-        <div className="relative">
-          {/* Vertical Timeline Axis Line (Centered on Desktop, Left on Mobile) */}
-          <div className="absolute top-4 bottom-4 left-4 sm:left-6 md:left-1/2 md:-translate-x-1/2 w-[2px] bg-gradient-to-b from-transparent via-[#D4AF37]/60 to-transparent z-0" />
+        <div className="relative w-full">
+          {/* Vertical Timeline Axis Line: Left-6 on Mobile, Center on Tablet & Desktop */}
+          <div className="absolute top-4 bottom-4 left-6 md:left-1/2 -translate-x-1/2 w-[2px] bg-[#D4AF37]/50 pointer-events-none z-0" />
 
           {/* Timeline Nodes & Cards */}
-          <div className="space-y-12 sm:space-y-16 md:space-y-20">
+          <div className="space-y-10 sm:space-y-12 md:space-y-16">
             {timelineEvents.map((event, index) => {
               const isEven = index % 2 === 0
               return (
                 <div
                   key={index}
-                  className="relative flex flex-col md:flex-row items-start md:items-center w-full"
+                  className="relative flex items-center w-full"
                 >
-                  {/* Glowing Node Marker on the Line */}
-                  <div className="absolute left-4 sm:left-6 md:left-1/2 -translate-x-1/2 z-20 flex items-center justify-center">
-                    <div
-                      className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-transform duration-300 hover:scale-115 ${
-                        event.highlight
-                          ? 'bg-[#E53935] text-white border-2 border-white/60 shadow-[0_0_20px_rgba(229,57,53,0.6)]'
-                          : 'bg-[#1C1C1E] text-[#D4AF37] border-2 border-[#D4AF37]/70 shadow-[0_0_15px_rgba(212,175,55,0.35)]'
-                      }`}
-                    >
-                      {event.icon}
+                  {/* Glowing Node on Axis Line */}
+                  <div className="absolute left-6 md:left-1/2 -translate-x-1/2 top-6 md:top-1/2 -translate-y-1/2 z-20 flex items-center justify-center pointer-events-none">
+                    <div className="relative flex items-center justify-center">
+                      <span className="absolute w-5 h-5 rounded-full bg-[#D4AF37]/30 animate-ping" />
+                      <div
+                        className={`w-4 h-4 rounded-full bg-[#D4AF37] shadow-[0_0_12px_#D4AF37] ring-4 ring-[#0D0D0D] transition-transform duration-300 ${
+                          event.highlight ? 'bg-[#E53935] shadow-[0_0_15px_#E53935]' : ''
+                        }`}
+                      />
                     </div>
                   </div>
 
-                  {/* Desktop Alternating Zigzag Layout:
-                      - If Even: Content on Left column (md:pr-12 md:text-right)
-                      - If Odd: Content on Right column (md:pl-12 md:text-left)
-                      - On Mobile: Always on right of the line (pl-12 sm:pl-16)
+                  {/* Event Content Container:
+                      - Mobile (< md): 1 column on right of line (pl-14 w-full)
+                      - Desktop & Tablet (>= md): Zigzag 50/50:
+                        * Even: w-1/2 pr-12 text-right
+                        * Odd: w-1/2 pl-12 text-left ml-auto
                   */}
                   <div
-                    className={`w-full md:w-1/2 pl-12 sm:pl-16 md:pl-0 ${
-                      isEven ? 'md:pr-12 md:text-right md:mr-auto' : 'md:pl-12 md:text-left md:ml-auto'
+                    className={`w-full pl-14 md:pl-0 ${
+                      isEven
+                        ? 'md:w-1/2 md:pr-12 md:text-right'
+                        : 'md:w-1/2 md:pl-12 md:text-left md:ml-auto'
                     }`}
                   >
                     <motion.div
-                      initial={{ opacity: 0, y: 30, scale: 0.96 }}
+                      initial={{ opacity: 0, y: 25, scale: 0.96 }}
                       whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                      viewport={{ once: true, margin: '-50px' }}
+                      viewport={{ once: true, margin: '-40px' }}
                       transition={{ duration: 0.45, ease: 'easeOut', delay: index * 0.04 }}
                       className={`card-chess rounded-2xl sm:rounded-3xl p-5 sm:p-6 transition-all duration-300 group ${
                         event.highlight
@@ -183,9 +184,9 @@ export default function TimelineSection() {
                           : 'border-white/10'
                       }`}
                     >
-                      {/* Meta header */}
+                      {/* Meta Header */}
                       <div
-                        className={`flex items-center gap-2 mb-3 ${
+                        className={`flex items-center gap-2 mb-3 flex-wrap ${
                           isEven ? 'md:justify-end' : 'md:justify-start'
                         }`}
                       >
@@ -198,7 +199,7 @@ export default function TimelineSection() {
                         >
                           {event.time}
                         </span>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">
+                        <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-neutral-400 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">
                           {event.tag}
                         </span>
                       </div>
@@ -214,7 +215,7 @@ export default function TimelineSection() {
                       </p>
 
                       {/* Artistic Thumbnail Image */}
-                      <div className="relative w-full h-36 sm:h-44 md:h-48 rounded-xl overflow-hidden border border-white/10 bg-neutral-900 shadow-md">
+                      <div className="relative w-full h-44 md:h-48 rounded-xl overflow-hidden border border-white/10 bg-neutral-900 shadow-md mt-3">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={event.imageUrl}
@@ -222,10 +223,11 @@ export default function TimelineSection() {
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-108"
                           loading="lazy"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=700&q=80'
+                            (e.target as HTMLImageElement).src =
+                              'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=700&q=80'
                           }}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
                         <div
                           className={`absolute bottom-2.5 ${
                             isEven ? 'left-3 md:right-3 md:left-auto' : 'left-3'

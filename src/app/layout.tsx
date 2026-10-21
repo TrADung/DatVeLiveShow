@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi">
-      <body className={`${inter.className} bg-[#FAFAFA] text-slate-900 min-h-screen antialiased selection:bg-red-500 selection:text-white`}>
+      <body className={`${inter.className} bg-[#0D0D0D] text-white min-h-screen antialiased selection:bg-[#E53935] selection:text-white`}>
         {children}
       </body>
     </html>

@@ -100,13 +100,13 @@ export default function ActivitiesSection() {
   return (
     <section
       id="activities"
-      className="relative w-full block py-24 md:py-32 overflow-hidden bg-[#141414]"
+      className="relative w-full min-h-screen py-20 md:py-32 overflow-hidden flex flex-col justify-center bg-[#141414]"
     >
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
         <div className="text-center mb-16 md:mb-20">
-          <div className="section-heading-line mb-4">
-            <span className="text-[11px] sm:text-xs font-black uppercase tracking-[0.25em] text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/30 px-4 py-1.5 rounded-full flex items-center gap-1.5">
+          <div className="section-heading-line mb-4 flex justify-center">
+            <span className="text-[11px] sm:text-xs font-black uppercase tracking-[0.25em] text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/30 px-4 py-1.5 rounded-full inline-flex items-center gap-1.5">
               <Music size={13} />
               <span>HÀNH TRÌNH HOẠT ĐỘNG CLB</span>
             </span>
@@ -122,7 +122,7 @@ export default function ActivitiesSection() {
         </div>
 
         {/* Bento Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 w-full">
           {activities.map((activity, index) => (
             <motion.div
               key={activity.id}

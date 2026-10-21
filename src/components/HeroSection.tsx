@@ -39,7 +39,7 @@ export default function HeroSection({ onBuyTicket }: HeroSectionProps) {
     <section
       id="hero"
       ref={sectionRef}
-      className="relative w-full block pt-24 sm:pt-28 md:pt-32 pb-24 md:pb-32 overflow-hidden bg-[#0D0D0D] editorial-grid"
+      className="relative w-full min-h-screen py-20 md:py-32 overflow-hidden flex flex-col justify-center bg-[#0D0D0D] editorial-grid"
     >
       {/* Background Ambient Glows with Morphing */}
       <motion.div
@@ -65,7 +65,7 @@ export default function HeroSection({ onBuyTicket }: HeroSectionProps) {
         ♞
       </motion.div>
 
-      <div className="relative z-10 text-center max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center flex flex-col items-center">
         {/* Top Tag Badge */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
