@@ -1,12 +1,28 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, User, Calendar, Phone, Building, Send, Check, Upload, Loader2, AlertCircle, Mail, MessageSquare } from 'lucide-react'
+import {
+  X,
+  User,
+  Calendar,
+  Phone,
+  Building,
+  Send,
+  Check,
+  Upload,
+  Loader2,
+  AlertCircle,
+  Mail,
+  MessageSquare,
+  Sparkles,
+  Copy,
+} from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { useAudio } from '@/hooks/useAudio'
-import { generateOrderCode, generateVietQRUrl } from '@/lib/utils'
+import { generateVietQRUrl } from '@/lib/utils'
 import type { BookingFormData, Gender } from '@/types'
 
 interface BookingModalProps {
@@ -29,6 +45,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
   const { playClickSound, playSuccessSound, playErrorSound } = useAudio()
   const supabase = createClient()
 
+  const [mounted, setMounted] = useState(false)
   const [step, setStep] = useState<Step>('form')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -39,6 +56,8 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
   const [proofUploading, setProofUploading] = useState(false)
   const [proofPreview, setProofPreview] = useState<string | null>(null)
   const [emailInput, setEmailInput] = useState('')
+  const [copiedBank, setCopiedBank] = useState(false)
+  const [copiedCode, setCopiedCode] = useState(false)
 
   const [form, setForm] = useState<BookingFormData>({
     full_name: '',
@@ -55,7 +74,23 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
   const ACCOUNT_NO = process.env.NEXT_PUBLIC_VIETQR_ACCOUNT_NO || '1234567890'
   const ACCOUNT_NAME = process.env.NEXT_PUBLIC_VIETQR_ACCOUNT_NAME || 'CLB AM NHAC'
 
-  // Autofill if logged in
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isOpen])
+
+  // Autofill user details
   useEffect(() => {
     if (user?.email) {
       setEmailInput(user.email)
@@ -87,9 +122,22 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
 
   useEffect(() => {
     if (!isOpen) {
-      setTimeout(resetModal, 300)
+      const timer = setTimeout(resetModal, 300)
+      return () => clearTimeout(timer)
     }
   }, [isOpen, resetModal])
+
+  const copyToClipboard = (text: string, type: 'bank' | 'code') => {
+    playClickSound()
+    navigator.clipboard.writeText(text)
+    if (type === 'bank') {
+      setCopiedBank(true)
+      setTimeout(() => setCopiedBank(false), 2000)
+    } else {
+      setCopiedCode(true)
+      setTimeout(() => setCopiedCode(false), 2000)
+    }
+  }
 
   const handleSubmitForm = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -193,44 +241,48 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
     ? generateVietQRUrl(BANK_ID, ACCOUNT_NO, TICKET_PRICE, orderCode, ACCOUNT_NAME)
     : ''
 
-  return (
+  if (!mounted) return null
+
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 overflow-y-auto">
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 15 }}
-            className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-6 max-h-[90vh] flex flex-col"
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+            className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-[#D4AF37]/30 bg-[#1A1A1A] text-white shadow-2xl my-auto flex flex-col"
           >
-            {/* Modal Header */}
-            <div className="bg-slate-900 px-6 py-4.5 text-white flex items-center justify-between shrink-0">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#141414] shrink-0 sticky top-0 z-10">
               <div className="flex items-center gap-2.5">
-                <span className="text-xl text-red-500">♟</span>
+                <span className="text-xl text-[#D4AF37]">♟</span>
                 <div>
-                  <h3 className="text-base font-black tracking-wide uppercase">
-                    {step === 'form' && 'ĐẶT VÉ THAM DỰ LIVE SHOW'}
+                  <h3 className="text-sm font-black tracking-wider uppercase text-white">
+                    {step === 'form' && 'ĐẶT VÉ LIVE CONCERT'}
                     {step === 'payment' && 'THANH TOÁN VIETQR'}
-                    {step === 'success' && 'ĐẶT VÉ THÀNH CÔNG!'}
+                    {step === 'success' && 'ĐẶT VÉ THÀNH CÔNG'}
                   </h3>
-                  <p className="text-[11px] text-slate-300 font-medium">Chess Night - 31/12/2025 • Hà Nội</p>
+                  <p className="text-[11px] text-[#D4AF37] font-medium">Chess Night • 31/12/2025</p>
                 </div>
               </div>
               <button
                 onClick={() => { playClickSound(); onClose() }}
-                className="p-1.5 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                className="p-1.5 rounded-full text-neutral-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                aria-label="Đóng"
               >
                 <X size={18} />
               </button>
             </div>
 
-            {/* Step Progress Indicators */}
-            <div className="px-6 py-3.5 bg-slate-50 border-b border-slate-100 shrink-0">
+            {/* Step indicators */}
+            <div className="px-6 py-3 bg-[#111111] border-b border-white/5 shrink-0">
               <div className="flex items-center justify-between">
                 {[
                   { id: 'form', label: '1. Thông tin' },
                   { id: 'payment', label: '2. Thanh toán' },
-                  { id: 'success', label: '3. Hoàn tất' },
+                  { id: 'success', label: '3. Nhận vé' },
                 ].map((s, idx) => {
                   const isActive = step === s.id
                   const isPast =
@@ -241,15 +293,15 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                       <div
                         className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
                           isActive
-                            ? 'bg-red-600 text-white shadow-xs'
+                            ? 'bg-[#D4AF37] text-black shadow-md shadow-[#D4AF37]/30'
                             : isPast
-                            ? 'bg-slate-900 text-white'
-                            : 'bg-slate-200 text-slate-500'
+                            ? 'bg-[#E53935] text-white'
+                            : 'bg-white/10 text-neutral-500'
                         }`}
                       >
                         {isPast ? '✓' : idx + 1}
                       </div>
-                      <span className={`text-xs font-bold ${isActive ? 'text-red-600' : isPast ? 'text-slate-900' : 'text-slate-400'}`}>
+                      <span className={`text-xs font-bold ${isActive ? 'text-[#D4AF37]' : isPast ? 'text-white' : 'text-neutral-500'}`}>
                         {s.label}
                       </span>
                     </div>
@@ -258,16 +310,15 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
               </div>
             </div>
 
-            {/* Modal Body */}
+            {/* Body */}
             <div className="p-6 overflow-y-auto flex-1">
-              {/* STEP 1: Registration Form */}
               {step === 'form' && (
                 <form onSubmit={handleSubmitForm} className="space-y-4">
                   {/* Full Name */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1.5">
-                      <User size={13} className="text-red-600" />
-                      <span>Họ và tên <span className="text-red-500">*</span></span>
+                    <label className="flex items-center gap-1.5 text-xs font-bold text-neutral-300 mb-1.5">
+                      <User size={13} className="text-[#D4AF37]" />
+                      <span>Họ và tên <span className="text-[#E53935]">*</span></span>
                     </label>
                     <input
                       required
@@ -275,15 +326,15 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                       value={form.full_name}
                       onChange={(e) => setForm((f) => ({ ...f, full_name: e.target.value }))}
                       placeholder="Nguyễn Văn A"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all font-medium"
+                      className="w-full bg-[#141414] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-all font-medium"
                     />
                   </div>
 
                   {/* Email */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1.5">
-                      <Mail size={13} className="text-red-600" />
-                      <span>Email nhận vé điện tử <span className="text-red-500">*</span></span>
+                    <label className="flex items-center gap-1.5 text-xs font-bold text-neutral-300 mb-1.5">
+                      <Mail size={13} className="text-[#D4AF37]" />
+                      <span>Email nhận vé điện tử <span className="text-[#E53935]">*</span></span>
                     </label>
                     <input
                       required
@@ -291,35 +342,35 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                       value={emailInput}
                       onChange={(e) => setEmailInput(e.target.value)}
                       placeholder="tenban@gmail.com"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all font-medium"
+                      className="w-full bg-[#141414] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-all font-mono"
                     />
                   </div>
 
                   {/* DOB & Gender */}
                   <div className="grid grid-cols-2 gap-3.5">
                     <div>
-                      <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1.5">
-                        <Calendar size={13} className="text-red-600" />
-                        <span>Ngày sinh <span className="text-red-500">*</span></span>
+                      <label className="flex items-center gap-1.5 text-xs font-bold text-neutral-300 mb-1.5">
+                        <Calendar size={13} className="text-[#D4AF37]" />
+                        <span>Ngày sinh <span className="text-[#E53935]">*</span></span>
                       </label>
                       <input
                         required
                         type="date"
                         value={form.dob}
                         onChange={(e) => setForm((f) => ({ ...f, dob: e.target.value }))}
-                        max={new Date().toISOString().split('T')[0]}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all font-medium"
+                        max="2025-12-31"
+                        className="w-full bg-[#141414] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-all"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                        Giới tính <span className="text-red-500">*</span>
+                      <label className="block text-xs font-bold text-neutral-300 mb-1.5">
+                        Giới tính <span className="text-[#E53935]">*</span>
                       </label>
                       <select
                         required
                         value={form.gender}
                         onChange={(e) => setForm((f) => ({ ...f, gender: e.target.value as Gender }))}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all font-medium cursor-pointer"
+                        className="w-full bg-[#141414] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-all cursor-pointer"
                       >
                         <option value="Nam">Nam</option>
                         <option value="Nu">Nữ</option>
@@ -331,23 +382,23 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                   {/* Phone & Organization */}
                   <div className="grid grid-cols-2 gap-3.5">
                     <div>
-                      <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1.5">
-                        <Phone size={13} className="text-red-600" />
-                        <span>Số điện thoại <span className="text-red-500">*</span></span>
+                      <label className="flex items-center gap-1.5 text-xs font-bold text-neutral-300 mb-1.5">
+                        <Phone size={13} className="text-[#D4AF37]" />
+                        <span>Số điện thoại <span className="text-[#E53935]">*</span></span>
                       </label>
                       <input
                         required
                         type="tel"
                         value={form.phone}
                         onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-                        placeholder="0912345678"
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all font-medium"
+                        placeholder="0912 345 678"
+                        className="w-full bg-[#141414] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-all"
                       />
                     </div>
                     <div>
-                      <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1.5">
-                        <Building size={13} className="text-red-600" />
-                        <span>Trường / Đơn vị <span className="text-red-500">*</span></span>
+                      <label className="flex items-center gap-1.5 text-xs font-bold text-neutral-300 mb-1.5">
+                        <Building size={13} className="text-[#D4AF37]" />
+                        <span>Trường / Đơn vị <span className="text-[#E53935]">*</span></span>
                       </label>
                       <input
                         required
@@ -355,21 +406,21 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                         value={form.organization}
                         onChange={(e) => setForm((f) => ({ ...f, organization: e.target.value }))}
                         placeholder="ĐH Ngoại Thương..."
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all font-medium"
+                        className="w-full bg-[#141414] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-all"
                       />
                     </div>
                   </div>
 
                   {/* Referral Source */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                      Bạn biết tới show từ đâu? <span className="text-red-500">*</span>
+                    <label className="block text-xs font-bold text-neutral-300 mb-1.5">
+                      Bạn biết tới show từ đâu? <span className="text-[#E53935]">*</span>
                     </label>
                     <select
                       required
                       value={form.referral_source}
                       onChange={(e) => setForm((f) => ({ ...f, referral_source: e.target.value }))}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all font-medium cursor-pointer"
+                      className="w-full bg-[#141414] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-all cursor-pointer"
                     >
                       <option value="">-- Chọn kênh tiếp cận --</option>
                       {referralOptions.map((opt) => (
@@ -380,8 +431,8 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
 
                   {/* Feedback */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1.5">
-                      <MessageSquare size={13} className="text-red-600" />
+                    <label className="flex items-center gap-1.5 text-xs font-bold text-neutral-300 mb-1.5">
+                      <MessageSquare size={13} className="text-[#D4AF37]" />
                       <span>Lời nhắn gửi ban nhạc (không bắt buộc)</span>
                     </label>
                     <textarea
@@ -389,101 +440,114 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                       value={form.feedback}
                       onChange={(e) => setForm((f) => ({ ...f, feedback: e.target.value }))}
                       placeholder="Bài hát bạn mong muốn được nghe..."
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all resize-none font-normal"
+                      className="w-full bg-[#141414] border border-white/10 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-all resize-none font-normal"
                     />
                   </div>
 
                   {error && (
-                    <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs flex items-center gap-2">
-                      <AlertCircle size={15} className="shrink-0" />
+                    <div className="p-3 rounded-xl bg-red-950/40 border border-red-500/30 text-red-300 text-xs flex items-center gap-2">
+                      <AlertCircle size={15} className="shrink-0 text-red-400" />
                       <span>{error}</span>
                     </div>
                   )}
 
-                  {/* Price Summary */}
-                  <div className="flex items-center justify-between p-3.5 rounded-2xl bg-red-50 border border-red-200">
-                    <span className="text-xs font-bold text-slate-700">Tổng thanh toán (1 vé):</span>
-                    <span className="text-xl font-black text-red-600">150.000đ</span>
+                  {/* Price Box */}
+                  <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/30">
+                    <span className="text-xs font-bold text-neutral-300">Tổng thanh toán (1 vé):</span>
+                    <span className="text-xl font-black text-[#D4AF37] font-mono">150.000đ</span>
                   </div>
 
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-red-600 hover:bg-red-700 text-white font-black py-3.5 rounded-xl shadow-lg shadow-red-600/25 transition-all flex items-center justify-center gap-2 text-sm cursor-pointer disabled:opacity-50 active:scale-98"
+                    className="w-full btn-velvet py-3.5 rounded-xl font-black text-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                   >
                     {loading ? (
                       <Loader2 size={18} className="animate-spin" />
                     ) : (
                       <>
                         <Send size={16} />
-                        <span>TIẾP TỤC THANH TOÁN</span>
+                        <span>TIẾP TỤC ĐẾN BƯỚC THANH TOÁN</span>
                       </>
                     )}
                   </button>
                 </form>
               )}
 
-              {/* STEP 2: VietQR Payment */}
               {step === 'payment' && (
-                <div className="space-y-5 text-center">
-                  <div className="p-3.5 rounded-2xl bg-slate-100 border border-slate-200">
-                    <div className="text-xs font-bold text-slate-500 uppercase">Mã Đơn Hàng Của Bạn</div>
-                    <div className="text-2xl font-black text-red-600 font-mono tracking-wider">{orderCode}</div>
+                <div className="space-y-4 text-center">
+                  <div className="p-3 rounded-xl bg-[#141414] border border-white/10 flex items-center justify-between">
+                    <div className="text-left">
+                      <div className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Mã đơn hàng</div>
+                      <div className="text-xl font-black text-[#D4AF37] font-mono">{orderCode}</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard(orderCode, 'code')}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-semibold text-neutral-300"
+                    >
+                      {copiedCode ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
+                      <span>{copiedCode ? 'Đã sao chép' : 'Sao chép'}</span>
+                    </button>
                   </div>
 
-                  {/* VietQR Code */}
-                  <div className="inline-block p-4 bg-white rounded-2xl border-2 border-slate-900 shadow-md">
+                  {/* VietQR Frame */}
+                  <div className="inline-block p-4 bg-white rounded-2xl shadow-xl">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={vietQRUrl}
                       alt="VietQR Code"
                       className="w-48 h-48 object-contain mx-auto"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`Thanh toan ${TICKET_PRICE} VND cho ${ACCOUNT_NAME} - ${orderCode}`)}`
+                        (e.target as HTMLImageElement).src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`Thanh toan 150000 VND cho ${ACCOUNT_NAME} - ${orderCode}`)}`
                       }}
                     />
-                    <div className="mt-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                      Quét bằng ứng dụng ngân hàng bất kỳ
+                    <div className="mt-1.5 text-[10px] font-bold text-slate-800 uppercase tracking-wider">
+                      Quét bằng app ngân hàng bất kỳ
                     </div>
                   </div>
 
-                  {/* Bank Transfer Info */}
-                  <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 text-xs text-left space-y-2">
+                  {/* Banking Info */}
+                  <div className="bg-[#141414] rounded-xl p-3.5 border border-white/10 text-xs text-left space-y-2 font-medium">
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Ngân hàng:</span>
-                      <span className="font-bold text-slate-900">{BANK_ID}</span>
+                      <span className="text-neutral-400">Ngân hàng:</span>
+                      <span className="font-bold text-white">{BANK_ID}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-neutral-400">Số tài khoản:</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono font-bold text-white">{ACCOUNT_NO}</span>
+                        <button onClick={() => copyToClipboard(ACCOUNT_NO, 'bank')} className="text-neutral-400 hover:text-white">
+                          {copiedBank ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
+                        </button>
+                      </div>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Số tài khoản:</span>
-                      <span className="font-bold text-slate-900 font-mono text-sm">{ACCOUNT_NO}</span>
+                      <span className="text-neutral-400">Chủ tài khoản:</span>
+                      <span className="font-bold text-white uppercase">{ACCOUNT_NAME}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Chủ tài khoản:</span>
-                      <span className="font-bold text-slate-900">{ACCOUNT_NAME}</span>
+                      <span className="text-neutral-400">Số tiền:</span>
+                      <span className="font-black text-[#D4AF37] font-mono">150.000đ</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Số tiền:</span>
-                      <span className="font-black text-red-600 text-sm">150.000đ</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Nội dung chuyển:</span>
-                      <span className="font-black text-red-600 font-mono bg-red-50 px-2 py-0.5 rounded">
-                        Thanh toan ve {orderCode}
+                    <div className="flex justify-between pt-1 border-t border-white/10">
+                      <span className="text-neutral-400">Nội dung chuyển khoản:</span>
+                      <span className="font-mono font-black text-[#E53935] bg-red-950/40 px-2 py-0.5 rounded border border-red-500/30">
+                        {orderCode}
                       </span>
                     </div>
                   </div>
 
                   {/* Proof upload */}
                   <div className="text-left">
-                    <label className="block text-xs font-bold text-slate-700 mb-2">
-                      Ảnh chụp màn hình chuyển khoản thành công:
+                    <label className="block text-xs font-bold text-neutral-300 mb-1.5">
+                      Ảnh chụp màn hình chuyển khoản:
                     </label>
-                    <label className="block border-2 border-dashed border-slate-300 hover:border-red-600 rounded-2xl p-4 text-center cursor-pointer bg-slate-50 hover:bg-red-50/20 transition-all">
-                      <Upload size={22} className="mx-auto mb-1.5 text-slate-400" />
-                      <span className="text-xs text-slate-600 font-semibold block">
-                        {proofFile ? proofFile.name : 'Bấm để tải ảnh biên lai chuyển khoản'}
+                    <label className="block border-2 border-dashed border-white/20 hover:border-[#D4AF37] rounded-xl p-3.5 text-center cursor-pointer bg-white/5 hover:bg-[#D4AF37]/5 transition-all">
+                      <Upload size={20} className="mx-auto mb-1 text-neutral-400" />
+                      <span className="text-xs text-neutral-300 font-semibold block">
+                        {proofFile ? proofFile.name : 'Tải ảnh biên lai chuyển khoản'}
                       </span>
-                      <span className="text-[10px] text-slate-400 block mt-0.5">PNG, JPG hoặc ảnh chụp màn hình</span>
                       <input
                         type="file"
                         accept="image/*"
@@ -494,9 +558,9 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                   </div>
 
                   {proofPreview && (
-                    <div className="p-2 bg-slate-100 rounded-xl text-center">
+                    <div className="p-2 bg-white/5 rounded-xl text-center">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={proofPreview} alt="Biên lai" className="max-h-36 mx-auto rounded-lg object-contain shadow-xs" />
+                      <img src={proofPreview} alt="Biên lai" className="max-h-32 mx-auto rounded-lg object-contain" />
                     </div>
                   )}
 
@@ -504,64 +568,65 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                     type="button"
                     onClick={handleProofUpload}
                     disabled={proofUploading}
-                    className="w-full bg-red-600 hover:bg-red-700 text-white font-black py-3.5 rounded-xl shadow-lg shadow-red-600/25 transition-all flex items-center justify-center gap-2 text-sm cursor-pointer disabled:opacity-50"
+                    className="w-full btn-velvet py-3.5 rounded-xl font-black text-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                   >
                     {proofUploading ? (
                       <Loader2 size={18} className="animate-spin" />
                     ) : (
                       <>
                         <Check size={18} />
-                        <span>TÔI ĐÃ CHUYỂN KHOẢN THÀNH CÔNG</span>
+                        <span>TÔI ĐÃ CHUYỂN KHOẢN XONG</span>
                       </>
                     )}
                   </button>
                 </div>
               )}
 
-              {/* STEP 3: Success Screen */}
               {step === 'success' && (
-                <div className="text-center space-y-6 py-2">
-                  <div className="w-16 h-16 mx-auto rounded-full bg-red-50 text-red-600 flex items-center justify-center border-2 border-red-600 shadow-md">
+                <div className="text-center space-y-5 py-4">
+                  <div className="w-16 h-16 mx-auto rounded-full bg-emerald-950/40 text-emerald-400 flex items-center justify-center border-2 border-emerald-500 shadow-xl">
                     <Check size={32} />
                   </div>
 
                   <div>
-                    <h3 className="text-2xl font-black text-slate-900 mb-1">ĐẶT VÉ THÀNH CÔNG!</h3>
-                    <p className="text-xs text-slate-600 max-w-sm mx-auto">
-                      Hệ thống đã ghi nhận đơn vé của bạn. Ban tổ chức sẽ đối chiếu và gửi vé điện tử qua email.
+                    <h3 className="text-xl font-black text-white mb-1">ĐẶT VÉ THÀNH CÔNG!</h3>
+                    <p className="text-xs text-neutral-400 max-w-sm mx-auto">
+                      Hệ thống đã tiếp nhận thông tin đơn vé. Ban tổ chức sẽ đối chiếu và gửi vé điện tử về email của bạn.
                     </p>
                   </div>
 
-                  {/* Ticket Details card */}
-                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-left text-xs space-y-2">
+                  <div className="bg-[#141414] border border-white/10 rounded-xl p-4 text-left text-xs space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Mã đơn hàng:</span>
-                      <span className="font-black text-red-600 font-mono text-sm">{orderCode}</span>
+                      <span className="text-neutral-400">Mã đơn hàng:</span>
+                      <span className="font-mono font-black text-[#D4AF37]">{orderCode}</span>
                     </div>
                     {luckyNumber && (
-                      <div className="flex justify-between items-center bg-red-50 p-2 rounded-xl border border-red-200">
-                        <span className="font-bold text-slate-700">🎰 Số May Mắn Minigame:</span>
-                        <span className="font-black text-red-600 text-base font-mono">#{luckyNumber}</span>
+                      <div className="flex justify-between items-center bg-[#D4AF37]/10 p-2.5 rounded-lg border border-[#D4AF37]/30">
+                        <span className="font-bold text-white flex items-center gap-1.5">
+                          <Sparkles size={14} className="text-[#D4AF37]" />
+                          <span>Số May Mắn Minigame:</span>
+                        </span>
+                        <span className="font-mono font-black text-[#D4AF37] text-base">#{luckyNumber}</span>
                       </div>
                     )}
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Trạng thái:</span>
-                      <span className="font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
-                        Chờ Admin xác nhận
+                      <span className="text-neutral-400">Trạng thái:</span>
+                      <span className="font-bold text-amber-400 bg-amber-950/40 px-2.5 py-0.5 rounded-full border border-amber-500/30">
+                        Chờ xác nhận
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 pt-2">
                     <button
                       onClick={() => { playClickSound(); window.location.href = '/my-tickets' }}
-                      className="flex-1 bg-slate-900 hover:bg-black text-white font-bold py-3 rounded-xl text-xs transition-colors cursor-pointer"
+                      className="flex-1 bg-white text-black font-bold py-3 rounded-xl text-xs hover:bg-neutral-200 transition-colors cursor-pointer"
                     >
                       Xem Vé Của Tôi
                     </button>
                     <button
                       onClick={() => { playClickSound(); onClose() }}
-                      className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl text-xs transition-colors cursor-pointer"
+                      className="flex-1 btn-gold py-3 rounded-xl text-xs transition-colors cursor-pointer"
                     >
                       Đóng
                     </button>
@@ -572,6 +637,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
           </motion.div>
         </div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   )
 }

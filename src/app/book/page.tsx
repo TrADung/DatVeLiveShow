@@ -24,7 +24,6 @@ import {
   Music,
   CheckCircle2,
   Copy,
-  ExternalLink,
 } from 'lucide-react'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -207,16 +206,16 @@ export default function BookPage() {
     : ''
 
   return (
-    <div className="min-h-screen bg-[#0A0A0C] text-white flex flex-col">
+    <div className="relative w-full min-h-screen bg-[#0D0D0D] text-white flex flex-col">
       <Header />
 
-      <main className="flex-1 pt-24 sm:pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+      <main className="relative w-full flex-1 block pt-8 sm:pt-12 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         {/* Navigation Breadcrumb */}
         <div className="mb-8">
           <Link
             href="/"
             onClick={playClickSound}
-            className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-400 hover:text-white transition-colors group"
+            className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-neutral-400 hover:text-[#D4AF37] transition-colors group"
           >
             <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" />
             <span>Quay lại Trang Chủ</span>
@@ -226,102 +225,101 @@ export default function BookPage() {
         {/* 2-Column Responsive Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
           
-          {/* LEFT COLUMN: Event Details & Ticket Summary */}
+          {/* LEFT COLUMN: Event Details & Summary */}
           <div className="lg:col-span-5 space-y-6">
-            {/* Event Header Banner Card */}
-            <div className="card-luxury rounded-3xl p-6 sm:p-8 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-48 h-48 bg-red-600/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="card-chess rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-[#D4AF37]/10 rounded-full blur-3xl pointer-events-none" />
               
               <div className="flex items-center gap-2 mb-4">
-                <span className="text-xl text-red-500">♟</span>
-                <span className="text-xs font-black tracking-widest text-red-500 uppercase">
+                <span className="text-xl text-[#D4AF37]">♟</span>
+                <span className="text-xs font-black tracking-widest text-[#D4AF37] uppercase">
                   CHESS NIGHT 2025
                 </span>
-                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse ml-auto" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#E53935] animate-pulse ml-auto" />
               </div>
 
               <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-3">
                 Live Show Sinh Nhật CLB Âm Nhạc
               </h1>
 
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed mb-6">
-                Đêm nhạc tôn vinh nghệ thuật giao thoa giữa giai điệu Acoustic mộc mạc và phong cách Bàn Cờ Vua đương đại. Số lượng vé phát hành giới hạn!
+              <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed mb-6">
+                Đêm nhạc tôn vinh nghệ thuật giao thoa giữa giai điệu Acoustic mộc mạc và phong cách Bàn Cờ Vua đương đại. Số lượng vé phát hành có giới hạn!
               </p>
 
               {/* Event Meta List */}
               <div className="space-y-3.5 pt-4 border-t border-white/10 text-xs sm:text-sm">
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-red-400">
+                  <div className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-[#D4AF37]">
                     <Calendar size={16} />
                   </div>
                   <div>
-                    <div className="text-slate-400 text-[11px] uppercase font-bold tracking-wider">Thời gian</div>
+                    <div className="text-neutral-400 text-[11px] uppercase font-bold tracking-wider">Thời gian</div>
                     <div className="font-bold text-white">31 Tháng 12, 2025 • 19:00 - 22:30</div>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-red-400">
+                  <div className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-[#D4AF37]">
                     <MapPin size={16} />
                   </div>
                   <div>
-                    <div className="text-slate-400 text-[11px] uppercase font-bold tracking-wider">Địa điểm</div>
+                    <div className="text-neutral-400 text-[11px] uppercase font-bold tracking-wider">Địa điểm</div>
                     <div className="font-bold text-white">Hà Nội Concert Hall (Phố Nghệ Thuật)</div>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-red-400">
+                  <div className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-[#D4AF37]">
                     <Music size={16} />
                   </div>
                   <div>
-                    <div className="text-slate-400 text-[11px] uppercase font-bold tracking-wider">Trình diễn</div>
-                    <div className="font-bold text-white">Acoustic Set + Full Band Live + Nghệ Sĩ Khách Mời</div>
+                    <div className="text-neutral-400 text-[11px] uppercase font-bold tracking-wider">Trình diễn</div>
+                    <div className="font-bold text-white">Acoustic Set + Full Band Live + Khách Mời</div>
                   </div>
                 </div>
               </div>
 
               {/* Perks List */}
               <div className="mt-6 pt-6 border-t border-white/10">
-                <div className="text-xs font-black uppercase tracking-wider text-slate-300 mb-3 flex items-center gap-1.5">
-                  <Sparkles size={14} className="text-red-500" />
+                <div className="text-xs font-black uppercase tracking-wider text-neutral-300 mb-3 flex items-center gap-1.5">
+                  <Sparkles size={14} className="text-[#D4AF37]" />
                   <span>Đặc Quyền Kèm Theo Mỗi Vé</span>
                 </div>
-                <div className="space-y-2 text-xs text-slate-300">
+                <div className="space-y-2 text-xs text-neutral-300">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 size={14} className="text-red-500 shrink-0" />
+                    <CheckCircle2 size={14} className="text-[#D4AF37] shrink-0" />
                     <span>01 Đồ uống welcome drink & snack cao cấp</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 size={14} className="text-red-500 shrink-0" />
+                    <CheckCircle2 size={14} className="text-[#D4AF37] shrink-0" />
                     <span>01 Vòng tay dạ quang lưu niệm Chess Night</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 size={14} className="text-red-500 shrink-0" />
+                    <CheckCircle2 size={14} className="text-[#D4AF37] shrink-0" />
                     <span>01 Mã số may mắn tham gia Lucky Draw sân khấu</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 size={14} className="text-red-500 shrink-0" />
+                    <CheckCircle2 size={14} className="text-[#D4AF37] shrink-0" />
                     <span>Vé điện tử QR Check-in siêu tốc tại cửa</span>
                   </div>
                 </div>
               </div>
 
               {/* Price Box */}
-              <div className="mt-6 p-4 rounded-2xl bg-red-600/10 border border-red-500/20 flex items-center justify-between">
+              <div className="mt-6 p-4 rounded-2xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-between">
                 <div>
-                  <div className="text-[11px] font-bold text-slate-400 uppercase">Giá niêm yết</div>
-                  <div className="text-xs text-slate-300 font-medium">Bao gồm toàn bộ quyền lợi</div>
+                  <div className="text-[11px] font-bold text-neutral-400 uppercase">Giá niêm yết</div>
+                  <div className="text-xs text-neutral-300 font-medium">Bao gồm toàn bộ quyền lợi</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-black text-red-500 font-mono">150.000đ</div>
-                  <div className="text-[10px] text-slate-400">1 vé / người</div>
+                  <div className="text-2xl font-black text-[#D4AF37] font-mono">150.000đ</div>
+                  <div className="text-[10px] text-neutral-400">1 vé / người</div>
                 </div>
               </div>
             </div>
 
             {/* Assistance card */}
-            <div className="card-luxury rounded-2xl p-4 sm:p-5 text-xs text-slate-400 flex items-center gap-3">
+            <div className="card-chess rounded-2xl p-4 sm:p-5 text-xs text-neutral-400 flex items-center gap-3">
               <ShieldCheck size={24} className="text-emerald-400 shrink-0" />
               <div>
                 <span className="text-white font-bold block">Bảo đảm & Hỗ trợ đặt vé</span>
@@ -332,7 +330,7 @@ export default function BookPage() {
 
           {/* RIGHT COLUMN: 3-Step Interactive Checkout Form */}
           <div className="lg:col-span-7">
-            <div className="card-luxury rounded-3xl p-6 sm:p-8 relative">
+            <div className="card-chess rounded-3xl p-6 sm:p-8 relative">
               {/* Step indicator header */}
               <div className="mb-8 pb-6 border-b border-white/10">
                 <div className="flex items-center justify-between">
@@ -350,17 +348,17 @@ export default function BookPage() {
                         <div
                           className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                             isActive
-                              ? 'bg-red-600 text-white shadow-lg shadow-red-600/40 ring-4 ring-red-600/20'
+                              ? 'bg-[#D4AF37] text-black shadow-lg shadow-[#D4AF37]/40 ring-4 ring-[#D4AF37]/20 font-black'
                               : isPast
-                              ? 'bg-white text-slate-900 font-black'
-                              : 'bg-white/10 text-slate-400'
+                              ? 'bg-[#E53935] text-white font-black'
+                              : 'bg-white/10 text-neutral-500'
                           }`}
                         >
                           {isPast ? '✓' : idx + 1}
                         </div>
                         <span
                           className={`text-xs sm:text-sm font-bold hidden sm:inline ${
-                            isActive ? 'text-white' : isPast ? 'text-slate-300' : 'text-slate-500'
+                            isActive ? 'text-[#D4AF37]' : isPast ? 'text-neutral-300' : 'text-neutral-500'
                           }`}
                         >
                           {s.label}
@@ -376,16 +374,16 @@ export default function BookPage() {
                 <form onSubmit={handleSubmitForm} className="space-y-5">
                   <div className="border-b border-white/10 pb-4 mb-4">
                     <h2 className="text-lg font-bold text-white">Điền thông tin đặt vé</h2>
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="text-xs text-neutral-400 mt-0.5">
                       Vé điện tử và mã QR check-in sẽ được gửi trực tiếp đến địa chỉ email này.
                     </p>
                   </div>
 
                   {/* Full Name */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-xs font-bold text-slate-300 mb-1.5">
-                      <User size={14} className="text-red-500" />
-                      <span>Họ và tên <span className="text-red-500">*</span></span>
+                    <label className="flex items-center gap-1.5 text-xs font-bold text-neutral-300 mb-1.5">
+                      <User size={14} className="text-[#D4AF37]" />
+                      <span>Họ và tên <span className="text-[#E53935]">*</span></span>
                     </label>
                     <input
                       required
@@ -393,15 +391,15 @@ export default function BookPage() {
                       value={form.full_name}
                       onChange={(e) => setForm((f) => ({ ...f, full_name: e.target.value }))}
                       placeholder="Nguyễn Văn A"
-                      className="w-full bg-[#18181B] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all"
+                      className="w-full bg-[#141414] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all"
                     />
                   </div>
 
                   {/* Email */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-xs font-bold text-slate-300 mb-1.5">
-                      <Mail size={14} className="text-red-500" />
-                      <span>Email nhận vé điện tử <span className="text-red-500">*</span></span>
+                    <label className="flex items-center gap-1.5 text-xs font-bold text-neutral-300 mb-1.5">
+                      <Mail size={14} className="text-[#D4AF37]" />
+                      <span>Email nhận vé điện tử <span className="text-[#E53935]">*</span></span>
                     </label>
                     <input
                       required
@@ -409,16 +407,16 @@ export default function BookPage() {
                       value={emailInput}
                       onChange={(e) => setEmailInput(e.target.value)}
                       placeholder="ban@gmail.com"
-                      className="w-full bg-[#18181B] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all font-mono"
+                      className="w-full bg-[#141414] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all font-mono"
                     />
                   </div>
 
                   {/* DOB & Gender */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="flex items-center gap-1.5 text-xs font-bold text-slate-300 mb-1.5">
-                        <Calendar size={14} className="text-red-500" />
-                        <span>Ngày tháng năm sinh <span className="text-red-500">*</span></span>
+                      <label className="flex items-center gap-1.5 text-xs font-bold text-neutral-300 mb-1.5">
+                        <Calendar size={14} className="text-[#D4AF37]" />
+                        <span>Ngày tháng năm sinh <span className="text-[#E53935]">*</span></span>
                       </label>
                       <input
                         required
@@ -426,18 +424,18 @@ export default function BookPage() {
                         value={form.dob}
                         onChange={(e) => setForm((f) => ({ ...f, dob: e.target.value }))}
                         max="2025-12-31"
-                        className="w-full bg-[#18181B] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all"
+                        className="w-full bg-[#141414] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-300 mb-1.5">
-                        Giới tính <span className="text-red-500">*</span>
+                      <label className="block text-xs font-bold text-neutral-300 mb-1.5">
+                        Giới tính <span className="text-[#E53935]">*</span>
                       </label>
                       <select
                         required
                         value={form.gender}
                         onChange={(e) => setForm((f) => ({ ...f, gender: e.target.value as Gender }))}
-                        className="w-full bg-[#18181B] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all cursor-pointer"
+                        className="w-full bg-[#141414] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all cursor-pointer"
                       >
                         <option value="Nam">Nam</option>
                         <option value="Nu">Nữ</option>
@@ -449,9 +447,9 @@ export default function BookPage() {
                   {/* Phone & Organization */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="flex items-center gap-1.5 text-xs font-bold text-slate-300 mb-1.5">
-                        <Phone size={14} className="text-red-500" />
-                        <span>Số điện thoại <span className="text-red-500">*</span></span>
+                      <label className="flex items-center gap-1.5 text-xs font-bold text-neutral-300 mb-1.5">
+                        <Phone size={14} className="text-[#D4AF37]" />
+                        <span>Số điện thoại <span className="text-[#E53935]">*</span></span>
                       </label>
                       <input
                         required
@@ -459,39 +457,39 @@ export default function BookPage() {
                         value={form.phone}
                         onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
                         placeholder="0912 345 678"
-                        className="w-full bg-[#18181B] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all"
+                        className="w-full bg-[#141414] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all"
                       />
                     </div>
                     <div>
-                      <label className="flex items-center gap-1.5 text-xs font-bold text-slate-300 mb-1.5">
-                        <Building size={14} className="text-red-500" />
-                        <span>Trường học / Đơn vị <span className="text-red-500">*</span></span>
+                      <label className="flex items-center gap-1.5 text-xs font-bold text-neutral-300 mb-1.5">
+                        <Building size={14} className="text-[#D4AF37]" />
+                        <span>Trường học / Đơn vị <span className="text-[#E53935]">*</span></span>
                       </label>
                       <input
                         required
                         type="text"
                         value={form.organization}
                         onChange={(e) => setForm((f) => ({ ...f, organization: e.target.value }))}
-                        placeholder="ĐH Quốc Gia, ĐH Bách Khoa..."
-                        className="w-full bg-[#18181B] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all"
+                        placeholder="ĐH Ngoại Thương, ĐH Bách Khoa..."
+                        className="w-full bg-[#141414] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all"
                       />
                     </div>
                   </div>
 
                   {/* Referral Source */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-1.5">
-                      Bạn biết tới show từ kênh nào? <span className="text-red-500">*</span>
+                    <label className="block text-xs font-bold text-neutral-300 mb-1.5">
+                      Bạn biết tới show từ kênh nào? <span className="text-[#E53935]">*</span>
                     </label>
                     <select
                       required
                       value={form.referral_source}
                       onChange={(e) => setForm((f) => ({ ...f, referral_source: e.target.value }))}
-                      className="w-full bg-[#18181B] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all cursor-pointer"
+                      className="w-full bg-[#141414] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all cursor-pointer"
                     >
                       <option value="">-- Chọn kênh tiếp cận --</option>
                       {referralOptions.map((opt) => (
-                        <option key={opt} value={opt} className="bg-[#18181B]">
+                        <option key={opt} value={opt} className="bg-[#1C1C1E]">
                           {opt}
                         </option>
                       ))}
@@ -500,8 +498,8 @@ export default function BookPage() {
 
                   {/* Feedback */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-xs font-bold text-slate-300 mb-1.5">
-                      <MessageSquare size={14} className="text-red-500" />
+                    <label className="flex items-center gap-1.5 text-xs font-bold text-neutral-300 mb-1.5">
+                      <MessageSquare size={14} className="text-[#D4AF37]" />
                       <span>Lời nhắn gửi ban nhạc (không bắt buộc)</span>
                     </label>
                     <textarea
@@ -509,12 +507,12 @@ export default function BookPage() {
                       value={form.feedback}
                       onChange={(e) => setForm((f) => ({ ...f, feedback: e.target.value }))}
                       placeholder="Bài hát bạn mong muốn được nghe trong đêm diễn..."
-                      className="w-full bg-[#18181B] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all resize-none"
+                      className="w-full bg-[#141414] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all resize-none"
                     />
                   </div>
 
                   {error && (
-                    <div className="p-4 rounded-xl bg-red-900/30 border border-red-500/40 text-red-300 text-xs flex items-center gap-2">
+                    <div className="p-4 rounded-xl bg-red-950/40 border border-red-500/30 text-red-300 text-xs flex items-center gap-2">
                       <AlertCircle size={16} className="shrink-0 text-red-400" />
                       <span>{error}</span>
                     </div>
@@ -525,7 +523,7 @@ export default function BookPage() {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full btn-crimson py-4 rounded-2xl font-black text-base flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                      className="w-full btn-velvet py-4 rounded-2xl font-black text-base flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                     >
                       {loading ? (
                         <Loader2 size={20} className="animate-spin" />
@@ -545,25 +543,25 @@ export default function BookPage() {
                 <div className="space-y-6">
                   <div className="border-b border-white/10 pb-4">
                     <h2 className="text-lg font-bold text-white">Quét mã VietQR chuyển khoản</h2>
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="text-xs text-neutral-400 mt-0.5">
                       Mở app ngân hàng bất kỳ để quét mã QR có sẵn số tiền và nội dung đơn.
                     </p>
                   </div>
 
                   {/* Order code card */}
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+                  <div className="p-4 rounded-2xl bg-[#141414] border border-white/10 flex items-center justify-between">
                     <div>
-                      <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                      <div className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider">
                         Mã đơn hàng
                       </div>
-                      <div className="text-2xl font-black text-red-500 font-mono tracking-wider">
+                      <div className="text-2xl font-black text-[#D4AF37] font-mono tracking-wider">
                         {orderCode}
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => copyToClipboard(orderCode, 'code')}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-slate-300 transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-neutral-300 transition-colors"
                     >
                       {copiedCode ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
                       <span>{copiedCode ? 'Đã sao chép' : 'Sao chép'}</span>
@@ -589,35 +587,35 @@ export default function BookPage() {
                   </div>
 
                   {/* Bank Info Table */}
-                  <div className="bg-[#18181B] rounded-2xl p-4 sm:p-5 border border-white/10 text-xs sm:text-sm space-y-3 font-medium">
+                  <div className="bg-[#141414] rounded-2xl p-4 sm:p-5 border border-white/10 text-xs sm:text-sm space-y-3 font-medium">
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-400">Ngân hàng:</span>
+                      <span className="text-neutral-400">Ngân hàng:</span>
                       <span className="font-bold text-white">{BANK_ID}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-400">Số tài khoản:</span>
+                      <span className="text-neutral-400">Số tài khoản:</span>
                       <div className="flex items-center gap-2">
                         <span className="font-mono font-bold text-white text-base">{ACCOUNT_NO}</span>
                         <button
                           type="button"
                           onClick={() => copyToClipboard(ACCOUNT_NO, 'bank')}
-                          className="text-slate-400 hover:text-white"
+                          className="text-neutral-400 hover:text-white"
                         >
                           {copiedBank ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
                         </button>
                       </div>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-400">Chủ tài khoản:</span>
+                      <span className="text-neutral-400">Chủ tài khoản:</span>
                       <span className="font-bold text-white uppercase">{ACCOUNT_NAME}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-400">Số tiền:</span>
-                      <span className="font-black text-red-500 font-mono text-base">150.000đ</span>
+                      <span className="text-neutral-400">Số tiền:</span>
+                      <span className="font-black text-[#D4AF37] font-mono text-base">150.000đ</span>
                     </div>
                     <div className="flex justify-between items-center pt-2 border-t border-white/10">
-                      <span className="text-slate-400">Nội dung chuyển khoản:</span>
-                      <span className="font-mono font-black text-red-400 bg-red-950/50 px-2 py-1 rounded border border-red-500/30">
+                      <span className="text-neutral-400">Nội dung chuyển khoản:</span>
+                      <span className="font-mono font-black text-[#E53935] bg-red-950/40 px-2 py-1 rounded border border-red-500/30">
                         {orderCode}
                       </span>
                     </div>
@@ -625,15 +623,15 @@ export default function BookPage() {
 
                   {/* Proof Upload Area */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-2">
+                    <label className="block text-xs font-bold text-neutral-300 mb-2">
                       Tải lên ảnh chụp màn hình biên lai chuyển khoản:
                     </label>
-                    <label className="block border-2 border-dashed border-white/20 hover:border-red-500 rounded-2xl p-6 text-center cursor-pointer bg-white/5 hover:bg-red-500/5 transition-all">
-                      <Upload size={24} className="mx-auto mb-2 text-slate-400" />
-                      <span className="text-xs sm:text-sm text-slate-300 font-bold block">
+                    <label className="block border-2 border-dashed border-white/20 hover:border-[#D4AF37] rounded-2xl p-6 text-center cursor-pointer bg-white/5 hover:bg-[#D4AF37]/5 transition-all">
+                      <Upload size={24} className="mx-auto mb-2 text-neutral-400" />
+                      <span className="text-xs sm:text-sm text-neutral-300 font-bold block">
                         {proofFile ? proofFile.name : 'Bấm vào đây để chọn ảnh chụp màn hình'}
                       </span>
-                      <span className="text-[11px] text-slate-500 block mt-1">
+                      <span className="text-[11px] text-neutral-500 block mt-1">
                         Hỗ trợ PNG, JPG, JPEG (Tối đa 10MB)
                       </span>
                       <input
@@ -661,7 +659,7 @@ export default function BookPage() {
                     type="button"
                     onClick={handleProofUpload}
                     disabled={proofUploading}
-                    className="w-full btn-crimson py-4 rounded-2xl font-black text-base flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="w-full btn-velvet py-4 rounded-2xl font-black text-base flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                   >
                     {proofUploading ? (
                       <Loader2 size={20} className="animate-spin" />
@@ -678,7 +676,7 @@ export default function BookPage() {
               {/* STEP 3: Success Screen */}
               {step === 'success' && (
                 <div className="text-center space-y-6 py-6">
-                  <div className="w-20 h-20 mx-auto rounded-full bg-red-600/20 text-red-500 flex items-center justify-center border-2 border-red-500 shadow-xl shadow-red-500/20">
+                  <div className="w-20 h-20 mx-auto rounded-full bg-emerald-950/40 text-emerald-400 flex items-center justify-center border-2 border-emerald-500 shadow-xl shadow-emerald-500/20">
                     <Check size={40} />
                   </div>
 
@@ -686,36 +684,36 @@ export default function BookPage() {
                     <h2 className="text-2xl sm:text-3xl font-black text-white mb-2">
                       ĐẶT VÉ THÀNH CÔNG!
                     </h2>
-                    <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
+                    <p className="text-xs sm:text-sm text-neutral-400 max-w-md mx-auto leading-relaxed">
                       Cảm ơn bạn đã đồng hành cùng <strong className="text-white">Chess Night</strong>. Ban tổ chức đang đối chiếu giao dịch và sẽ phát hành vé điện tử có mã QR về email của bạn.
                     </p>
                   </div>
 
                   {/* Ticket Details Box */}
-                  <div className="bg-[#18181B] border border-white/10 rounded-2xl p-5 text-left text-xs sm:text-sm space-y-3 font-medium">
+                  <div className="bg-[#141414] border border-white/10 rounded-2xl p-5 text-left text-xs sm:text-sm space-y-3 font-medium">
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-400">Mã đơn hàng:</span>
-                      <span className="font-mono font-black text-red-500 text-base">{orderCode}</span>
+                      <span className="text-neutral-400">Mã đơn hàng:</span>
+                      <span className="font-mono font-black text-[#D4AF37] text-base">{orderCode}</span>
                     </div>
                     {luckyNumber && (
-                      <div className="flex justify-between items-center bg-red-600/10 p-3 rounded-xl border border-red-500/30">
+                      <div className="flex justify-between items-center bg-[#D4AF37]/10 p-3 rounded-xl border border-[#D4AF37]/30">
                         <span className="font-bold text-white flex items-center gap-1.5">
-                          <Sparkles size={16} className="text-red-400" />
+                          <Sparkles size={16} className="text-[#D4AF37]" />
                           <span>Số May Mắn Dự Thưởng:</span>
                         </span>
-                        <span className="font-mono font-black text-red-400 text-lg">
+                        <span className="font-mono font-black text-[#D4AF37] text-lg">
                           #{luckyNumber}
                         </span>
                       </div>
                     )}
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-400">Trạng thái:</span>
+                      <span className="text-neutral-400">Trạng thái:</span>
                       <span className="font-bold text-amber-400 bg-amber-950/40 px-3 py-1 rounded-full border border-amber-500/30">
                         Đang Chờ Xác Nhận
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-400">Email nhận vé:</span>
+                      <span className="text-neutral-400">Email nhận vé:</span>
                       <span className="text-white font-mono">{emailInput || user?.email}</span>
                     </div>
                   </div>
@@ -725,7 +723,7 @@ export default function BookPage() {
                     <Link
                       href="/my-tickets"
                       onClick={playClickSound}
-                      className="w-full bg-white text-slate-900 hover:bg-slate-100 font-bold py-3.5 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-md"
+                      className="w-full bg-white text-black hover:bg-neutral-200 font-bold py-3.5 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-md"
                     >
                       <User size={16} />
                       <span>Xem Vé Của Tôi & QR</span>
@@ -734,7 +732,7 @@ export default function BookPage() {
                     <Link
                       href="/"
                       onClick={playClickSound}
-                      className="w-full btn-crimson font-bold py-3.5 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 transition-all"
+                      className="w-full btn-gold font-bold py-3.5 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 transition-all"
                     >
                       <span>Về Trang Chủ</span>
                     </Link>

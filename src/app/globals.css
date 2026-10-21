@@ -1,14 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --bg-primary: #0A0A0C;
-  --bg-secondary: #121214;
-  --bg-card: #18181B;
+  --bg-primary: #0D0D0D;
+  --bg-secondary: #141414;
+  --bg-card: #1C1C1E;
   --text-primary: #FFFFFF;
-  --text-secondary: #94A3B8;
-  --accent-red: #EF4444;
-  --accent-red-hover: #DC2626;
-  --border-dark: rgba(255, 255, 255, 0.08);
+  --text-secondary: #A1A1AA;
+  --accent-gold: #D4AF37;
+  --accent-gold-hover: #E5C158;
+  --accent-red: #E53935;
+  --accent-red-hover: #D32F2F;
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --border-gold: rgba(212, 175, 55, 0.25);
 }
 
 * {
@@ -29,47 +32,55 @@ body {
   overflow-x: hidden;
 }
 
-/* Subtle modern mesh noise & grid */
+/* Subtle modern chess tournament grid */
 .editorial-grid {
-  background-size: 60px 60px;
+  background-size: 64px 64px;
   background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-}
-
-/* Frosted glass header */
-.glass-nav {
-  background: rgba(10, 10, 12, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
 }
 
 /* Luxury card surface */
-.card-luxury {
-  background: #141417;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+.card-chess {
+  background-color: #1C1C1E;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.6);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.card-luxury:hover {
-  border-color: rgba(239, 68, 68, 0.5);
-  box-shadow: 0 10px 30px -5px rgba(239, 68, 68, 0.15);
-  transform: translateY(-2px);
+.card-chess:hover {
+  border-color: rgba(212, 175, 55, 0.45);
+  box-shadow: 0 12px 36px -6px rgba(212, 175, 55, 0.12);
+  transform: translateY(-3px);
 }
 
-/* Glowing Crimson CTA */
-.btn-crimson {
-  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+/* Gold CTA Button */
+.btn-gold {
+  background: linear-gradient(135deg, #D4AF37 0%, #AA820A 100%);
+  color: #0D0D0D;
+  font-weight: 800;
+  box-shadow: 0 10px 25px -5px rgba(212, 175, 55, 0.4);
+  transition: all 0.25s ease;
+}
+
+.btn-gold:hover {
+  background: linear-gradient(135deg, #F0CA50 0%, #D4AF37 100%);
+  box-shadow: 0 14px 30px -5px rgba(212, 175, 55, 0.55);
+  transform: translateY(-1px);
+}
+
+/* Velvet Red CTA Button */
+.btn-velvet {
+  background: linear-gradient(135deg, #E53935 0%, #B71C1C 100%);
   color: #FFFFFF;
-  box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.4);
-  transition: all 0.2s ease;
+  font-weight: 800;
+  box-shadow: 0 10px 25px -5px rgba(229, 57, 53, 0.4);
+  transition: all 0.25s ease;
 }
 
-.btn-crimson:hover {
-  background: linear-gradient(135deg, #F87171 0%, #EF4444 100%);
-  box-shadow: 0 15px 30px -5px rgba(239, 68, 68, 0.5);
+.btn-velvet:hover {
+  background: linear-gradient(135deg, #EF5350 0%, #E53935 100%);
+  box-shadow: 0 14px 30px -5px rgba(229, 57, 53, 0.55);
   transform: translateY(-1px);
 }
 
@@ -80,7 +91,7 @@ body {
 }
 
 .marquee-track {
-  animation: marquee 30s linear infinite;
+  animation: marquee 32s linear infinite;
   display: flex;
   width: max-content;
 }
@@ -95,16 +106,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0A0A0C;
+  background: #0D0D0D;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #3F3F46;
+  background: #27272A;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #EF4444;
+  background: #D4AF37;
 }
 
 /* Section title horizontal lines like Japan Tours */
@@ -112,7 +123,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 1.25rem;
   width: 100%;
 }
 
@@ -121,5 +132,5 @@ body {
   content: '';
   flex: 1;
   height: 1px;
-  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.15), transparent);
+  background: linear-gradient(to right, transparent, rgba(212, 175, 55, 0.35), transparent);
 }
