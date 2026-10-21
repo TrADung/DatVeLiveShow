@@ -153,7 +153,6 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
     try {
       let finalProofUrl = proofPreview || 'https://via.placeholder.com/400x300.png?text=Payment+Proof'
 
-      // Try uploading to Supabase Storage if file is present
       if (proofFile) {
         try {
           const fileExt = proofFile.name.split('.').pop()
@@ -168,9 +167,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
               .getPublicUrl(fileName)
             finalProofUrl = urlData.publicUrl
           }
-        } catch {
-          // Fallback to inline preview if storage bucket not yet created
-        }
+        } catch {}
       }
 
       await fetch('/api/tickets/proof', {
@@ -186,7 +183,6 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
       playSuccessSound()
     } catch {
       playErrorSound()
-      // Even if upload has issue, advance to success with order code
       setStep('success')
     } finally {
       setProofUploading(false)
@@ -200,24 +196,24 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 15 }}
-            className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-8"
+            className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-6 max-h-[90vh] flex flex-col"
           >
             {/* Modal Header */}
-            <div className="bg-slate-900 px-6 py-4.5 text-white flex items-center justify-between">
+            <div className="bg-slate-900 px-6 py-4.5 text-white flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2.5">
                 <span className="text-xl text-red-500">♟</span>
                 <div>
                   <h3 className="text-base font-black tracking-wide uppercase">
-                    {step === 'form' && 'Đặt Vé Tham Dự Live Show'}
-                    {step === 'payment' && 'Thanh Toán VietQR'}
-                    {step === 'success' && 'Đặt Vé Thành Công!'}
+                    {step === 'form' && 'ĐẶT VÉ THAM DỰ LIVE SHOW'}
+                    {step === 'payment' && 'THANH TOÁN VIETQR'}
+                    {step === 'success' && 'ĐẶT VÉ THÀNH CÔNG!'}
                   </h3>
-                  <p className="text-[11px] text-slate-300">Chess Night - 31/12/2025 • Hà Nội</p>
+                  <p className="text-[11px] text-slate-300 font-medium">Chess Night - 31/12/2025 • Hà Nội</p>
                 </div>
               </div>
               <button
@@ -228,8 +224,8 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
               </button>
             </div>
 
-            {/* Stepper Indicator */}
-            <div className="px-6 pt-5 pb-2">
+            {/* Step Progress Indicators */}
+            <div className="px-6 py-3.5 bg-slate-50 border-b border-slate-100 shrink-0">
               <div className="flex items-center justify-between">
                 {[
                   { id: 'form', label: '1. Thông tin' },
@@ -248,7 +244,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                             ? 'bg-red-600 text-white shadow-xs'
                             : isPast
                             ? 'bg-slate-900 text-white'
-                            : 'bg-slate-100 text-slate-400'
+                            : 'bg-slate-200 text-slate-500'
                         }`}
                       >
                         {isPast ? '✓' : idx + 1}
@@ -262,73 +258,68 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
               </div>
             </div>
 
-            <div className="p-6">
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto flex-1">
               {/* STEP 1: Registration Form */}
               {step === 'form' && (
-                <form onSubmit={handleSubmitForm} className="space-y-3.5">
+                <form onSubmit={handleSubmitForm} className="space-y-4">
                   {/* Full Name */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Họ và tên <span className="text-red-500">*</span>
+                    <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1.5">
+                      <User size={13} className="text-red-600" />
+                      <span>Họ và tên <span className="text-red-500">*</span></span>
                     </label>
-                    <div className="relative">
-                      <User size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                      <input
-                        required
-                        type="text"
-                        value={form.full_name}
-                        onChange={(e) => setForm((f) => ({ ...f, full_name: e.target.value }))}
-                        placeholder="Nguyễn Văn A"
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all"
-                      />
-                    </div>
+                    <input
+                      required
+                      type="text"
+                      value={form.full_name}
+                      onChange={(e) => setForm((f) => ({ ...f, full_name: e.target.value }))}
+                      placeholder="Nguyễn Văn A"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all font-medium"
+                    />
                   </div>
 
                   {/* Email */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Email nhận vé điện tử <span className="text-red-500">*</span>
+                    <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1.5">
+                      <Mail size={13} className="text-red-600" />
+                      <span>Email nhận vé điện tử <span className="text-red-500">*</span></span>
                     </label>
-                    <div className="relative">
-                      <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                      <input
-                        required
-                        type="email"
-                        value={emailInput}
-                        onChange={(e) => setEmailInput(e.target.value)}
-                        placeholder="tenban@gmail.com"
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all"
-                      />
-                    </div>
+                    <input
+                      required
+                      type="email"
+                      value={emailInput}
+                      onChange={(e) => setEmailInput(e.target.value)}
+                      placeholder="tenban@gmail.com"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all font-medium"
+                    />
                   </div>
 
                   {/* DOB & Gender */}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-3.5">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Ngày sinh <span className="text-red-500">*</span>
+                      <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1.5">
+                        <Calendar size={13} className="text-red-600" />
+                        <span>Ngày sinh <span className="text-red-500">*</span></span>
                       </label>
-                      <div className="relative">
-                        <Calendar size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                        <input
-                          required
-                          type="date"
-                          value={form.dob}
-                          onChange={(e) => setForm((f) => ({ ...f, dob: e.target.value }))}
-                          max={new Date().toISOString().split('T')[0]}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all"
-                        />
-                      </div>
+                      <input
+                        required
+                        type="date"
+                        value={form.dob}
+                        onChange={(e) => setForm((f) => ({ ...f, dob: e.target.value }))}
+                        max={new Date().toISOString().split('T')[0]}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all font-medium"
+                      />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
                         Giới tính <span className="text-red-500">*</span>
                       </label>
                       <select
                         required
                         value={form.gender}
                         onChange={(e) => setForm((f) => ({ ...f, gender: e.target.value as Gender }))}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all font-medium"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all font-medium cursor-pointer"
                       >
                         <option value="Nam">Nam</option>
                         <option value="Nu">Nữ</option>
@@ -338,51 +329,47 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                   </div>
 
                   {/* Phone & Organization */}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-3.5">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Số điện thoại <span className="text-red-500">*</span>
+                      <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1.5">
+                        <Phone size={13} className="text-red-600" />
+                        <span>Số điện thoại <span className="text-red-500">*</span></span>
                       </label>
-                      <div className="relative">
-                        <Phone size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                        <input
-                          required
-                          type="tel"
-                          value={form.phone}
-                          onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-                          placeholder="0912345678"
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all"
-                        />
-                      </div>
+                      <input
+                        required
+                        type="tel"
+                        value={form.phone}
+                        onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                        placeholder="0912345678"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all font-medium"
+                      />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Trường / Đơn vị <span className="text-red-500">*</span>
+                      <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1.5">
+                        <Building size={13} className="text-red-600" />
+                        <span>Trường / Đơn vị <span className="text-red-500">*</span></span>
                       </label>
-                      <div className="relative">
-                        <Building size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                        <input
-                          required
-                          type="text"
-                          value={form.organization}
-                          onChange={(e) => setForm((f) => ({ ...f, organization: e.target.value }))}
-                          placeholder="ĐH Ngoại Thương..."
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all"
-                        />
-                      </div>
+                      <input
+                        required
+                        type="text"
+                        value={form.organization}
+                        onChange={(e) => setForm((f) => ({ ...f, organization: e.target.value }))}
+                        placeholder="ĐH Ngoại Thương..."
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all font-medium"
+                      />
                     </div>
                   </div>
 
                   {/* Referral Source */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
                       Bạn biết tới show từ đâu? <span className="text-red-500">*</span>
                     </label>
                     <select
                       required
                       value={form.referral_source}
                       onChange={(e) => setForm((f) => ({ ...f, referral_source: e.target.value }))}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all font-medium"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all font-medium cursor-pointer"
                     >
                       <option value="">-- Chọn kênh tiếp cận --</option>
                       {referralOptions.map((opt) => (
@@ -393,15 +380,16 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
 
                   {/* Feedback */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Lời nhắn gửi ban nhạc (không bắt buộc)
+                    <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1.5">
+                      <MessageSquare size={13} className="text-red-600" />
+                      <span>Lời nhắn gửi ban nhạc (không bắt buộc)</span>
                     </label>
                     <textarea
                       rows={2}
                       value={form.feedback}
                       onChange={(e) => setForm((f) => ({ ...f, feedback: e.target.value }))}
                       placeholder="Bài hát bạn mong muốn được nghe..."
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all resize-none"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all resize-none font-normal"
                     />
                   </div>
 
@@ -421,7 +409,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-red-600 hover:bg-red-700 text-white font-black py-3.5 rounded-xl shadow-lg shadow-red-600/25 transition-all flex items-center justify-center gap-2 text-sm cursor-pointer disabled:opacity-50"
+                    className="w-full bg-red-600 hover:bg-red-700 text-white font-black py-3.5 rounded-xl shadow-lg shadow-red-600/25 transition-all flex items-center justify-center gap-2 text-sm cursor-pointer disabled:opacity-50 active:scale-98"
                   >
                     {loading ? (
                       <Loader2 size={18} className="animate-spin" />
@@ -438,7 +426,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
               {/* STEP 2: VietQR Payment */}
               {step === 'payment' && (
                 <div className="space-y-5 text-center">
-                  <div className="p-3 rounded-2xl bg-slate-100 border border-slate-200">
+                  <div className="p-3.5 rounded-2xl bg-slate-100 border border-slate-200">
                     <div className="text-xs font-bold text-slate-500 uppercase">Mã Đơn Hàng Của Bạn</div>
                     <div className="text-2xl font-black text-red-600 font-mono tracking-wider">{orderCode}</div>
                   </div>

@@ -1,7 +1,6 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import Image from 'next/image'
 import { Calendar, MapPin, Users, Music } from 'lucide-react'
 
 interface ActivityItem {
@@ -24,7 +23,7 @@ const activities: ActivityItem[] = [
     venue: 'Hà Nội',
     attendees: '80+ khán giả',
     type: 'acoustic',
-    imageUrl: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80',
     description: 'Đêm acoustic đầu tiên của CLB với những giai điệu mộc mạc và gần gũi.',
     tags: ['Acoustic', 'Offline'],
   },
@@ -35,9 +34,9 @@ const activities: ActivityItem[] = [
     venue: 'Nhà Hát Tuổi Trẻ, Hà Nội',
     attendees: '250+ khán giả',
     type: 'liveshow',
-    imageUrl: 'https://images.unsplash.com/photo-1501386761578-eaa54b4e5f96?w=600&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=80',
     description: 'Đêm nhạc mùa hè bùng nổ với dàn nhạc sống kết hợp ánh sáng hiện đại.',
-    tags: ['Live Band', 'Concert', 'Special'],
+    tags: ['Live Band', 'Concert'],
   },
   {
     id: 3,
@@ -46,9 +45,9 @@ const activities: ActivityItem[] = [
     venue: 'Studio CLB Âm Nhạc',
     attendees: '60 thành viên',
     type: 'workshop',
-    imageUrl: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=600&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=800&q=80',
     description: 'Buổi chia sẻ kỹ thuật đệm hát và hòa thanh dành cho thành viên trẻ.',
-    tags: ['Workshop', 'Guitar', 'Học Thuật'],
+    tags: ['Workshop', 'Guitar'],
   },
   {
     id: 4,
@@ -57,7 +56,7 @@ const activities: ActivityItem[] = [
     venue: 'The Rooftop Cafe, Hà Nội',
     attendees: '120+ khán giả',
     type: 'acoustic',
-    imageUrl: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&q=80',
     description: 'Trở lại với không gian lãng mạn trên cao và những bản tình ca bất hủ.',
     tags: ['Acoustic', 'Rooftop'],
   },
@@ -68,9 +67,9 @@ const activities: ActivityItem[] = [
     venue: 'Trung Tâm Nghệ Thuật Hà Nội',
     attendees: '300+ khán giả',
     type: 'liveshow',
-    imageUrl: 'https://images.unsplash.com/photo-1468359601543-843bfaef291a?w=600&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1468359601543-843bfaef291a?w=800&q=80',
     description: 'Đêm nhạc tổng kết năm với các tiết mục đặc sắc chào đón năm mới.',
-    tags: ['Year End', 'Gala', 'Live Band'],
+    tags: ['Year End', 'Gala'],
   },
   {
     id: 6,
@@ -79,7 +78,7 @@ const activities: ActivityItem[] = [
     venue: 'Cơ sở sinh hoạt CLB',
     attendees: '70 thành viên',
     type: 'acoustic',
-    imageUrl: 'https://images.unsplash.com/photo-1471478331149-c72f17e33c73?w=600&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&q=80',
     description: 'Buổi giao lưu thân mật giữa các thế hệ cựu thành viên và khóa mới.',
     tags: ['Offline', 'Giao Lưu'],
   },
@@ -99,55 +98,57 @@ const typeLabel = {
 
 export default function ActivitiesSection() {
   return (
-    <section id="activities" className="py-20 px-4 bg-white">
+    <section id="activities" className="py-24 px-4 sm:px-6 bg-white">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-1.5 bg-red-50 text-red-600 border border-red-200 text-xs font-bold px-3 py-1 rounded-full mb-3">
+          <div className="inline-flex items-center gap-1.5 bg-red-50 text-red-600 border border-red-200 text-xs font-bold px-3 py-1 rounded-full mb-3 shadow-2xs">
             <Music size={13} />
             <span>DẤU ẤN HOẠT ĐỘNG</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight mb-3">
             Các Show Đã Tổ Chức
           </h2>
-          <p className="text-slate-600 text-sm sm:text-base max-w-xl mx-auto">
+          <p className="text-slate-600 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
             Hành trình âm nhạc của CLB qua những đêm acoustic ấm cúng, live concert hoành tráng và workshop bổ ích.
           </p>
         </div>
 
         {/* Bento Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {activities.map((activity, index) => (
             <motion.div
               key={activity.id}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-20px' }}
-              transition={{ duration: 0.3, delay: index * 0.05 }}
+              transition={{ duration: 0.25, delay: index * 0.04 }}
               whileHover={{ y: -4 }}
-              className="group bg-white rounded-2xl overflow-hidden border border-slate-200 hover:border-red-500 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col"
+              className="group bg-white rounded-3xl overflow-hidden border border-slate-200 hover:border-red-500 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col"
             >
-              {/* Image */}
-              <div className="relative h-48 sm:h-52 overflow-hidden bg-slate-100">
-                <Image
+              {/* Image with fallback */}
+              <div className="relative h-48 sm:h-52 w-full overflow-hidden bg-slate-100">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={activity.imageUrl}
                   alt={activity.title}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  unoptimized
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80'
+                  }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+
                 {/* Type Badge */}
-                <span className={`absolute top-3 left-3 text-xs font-bold px-2.5 py-1 rounded-lg border backdrop-blur-md ${typeBadge[activity.type]}`}>
+                <span className={`absolute top-3 left-3 text-xs font-bold px-2.5 py-1 rounded-lg border backdrop-blur-md shadow-xs ${typeBadge[activity.type]}`}>
                   {typeLabel[activity.type]}
                 </span>
               </div>
 
               {/* Content */}
-              <div className="p-5 flex-1 flex flex-col justify-between">
+              <div className="p-6 flex-1 flex flex-col justify-between">
                 <div>
-                  <h3 className="font-bold text-slate-900 text-base mb-2 group-hover:text-red-600 transition-colors">
+                  <h3 className="font-bold text-slate-900 text-base sm:text-lg mb-2 group-hover:text-red-600 transition-colors">
                     {activity.title}
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-600 mb-4 line-clamp-2 leading-relaxed">
@@ -155,7 +156,7 @@ export default function ActivitiesSection() {
                   </p>
                 </div>
 
-                <div className="pt-3 border-t border-slate-100">
+                <div className="pt-4 border-t border-slate-100">
                   <div className="grid grid-cols-2 gap-2 text-xs text-slate-500 mb-3 font-medium">
                     <div className="flex items-center gap-1.5 truncate">
                       <Calendar size={13} className="text-red-600 shrink-0" />
