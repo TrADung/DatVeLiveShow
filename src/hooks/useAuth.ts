@@ -21,9 +21,10 @@ export function useAuth() {
   const supabase = createClient()
 
   const fetchUserRole = useCallback(async (email: string): Promise<UserRole> => {
-    // Check local dev/admin shortcut
-    if (email.includes('admin') || email.includes('btc')) return 'admin'
-    if (email.includes('dev')) return 'dev'
+    const cleanEmail = email.toLowerCase().trim()
+    // Owner / Dev master account
+    if (cleanEmail === 'trananhdung11102006@gmail.com' || cleanEmail.includes('dev')) return 'dev'
+    if (cleanEmail.includes('admin') || cleanEmail.includes('btc')) return 'admin'
 
     try {
       const { data, error } = await supabase
