@@ -9,7 +9,7 @@ import {
 import {
   Users, Ticket, TrendingUp, CheckCircle, Mail, DollarSign,
   RefreshCw, Send, Shield, Download, Search, Eye,
-  X, Loader2, Sparkles, AlertTriangle, ArrowLeft
+  X, Loader2, Sparkles, AlertTriangle, ArrowLeft, Camera, ExternalLink
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useAudio } from '@/hooks/useAudio'
@@ -19,7 +19,7 @@ import type { Ticket as TicketType } from '@/types'
 import Header from '@/components/Header'
 import Link from 'next/link'
 
-const COLORS = ['#DC2626', '#0F172A', '#2563EB', '#10B981', '#F59E0B', '#8B5CF6']
+const COLORS = ['#EF4444', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899']
 
 interface StatsData {
   kpi: {
@@ -40,7 +40,7 @@ interface StatsData {
 }
 
 export default function AdminDashboard() {
-  const { user, userRole, loading: authLoading, quickDemoLogin } = useAuth()
+  const { user, userRole, loading: authLoading } = useAuth()
   const { playClickSound, playSuccessSound, playErrorSound } = useAudio()
   const router = useRouter()
 
@@ -68,7 +68,7 @@ export default function AdminDashboard() {
       const data = await res.json()
       setStats(data)
     } catch {
-      // Fallback sample stats for initial setup
+      // Fallback sample stats
       setStats({
         kpi: { total: 120, paid: 95, pending: 20, rejected: 5, checkedIn: 48, emailSent: 90, revenue: 14250000 },
         orgData: [{ org: 'ĐH Ngoại Thương', count: 35 }, { org: 'ĐH Bách Khoa', count: 28 }, { org: 'ĐH Quốc Gia', count: 22 }],
@@ -174,18 +174,27 @@ export default function AdminDashboard() {
 
   const exportCSV = () => {
     playClickSound()
-    const headers = ['Mã Đơn', 'Email', 'Họ Tên', 'Ngày Sinh', 'Giới Tính', 'SĐT', 'Đơn Vị', 'Kênh', 'Trạng Thái', 'Số May Mắn', 'Đã Check-in']
+    const headers = ['Order Code', 'Email', 'Full Name', 'DOB', 'Gender', 'Phone', 'Organization', 'Referral', 'Status', 'Lucky Number', 'Checked In', 'Created At']
     const rows = tickets.map((t) => [
-      t.order_code, t.user_email, t.full_name, t.dob, t.gender, t.phone,
-      t.organization, t.referral_source, t.payment_status,
-      t.lucky_number || '', t.is_checked_in ? 'Yes' : 'No'
+      t.order_code,
+      t.user_email,
+      t.full_name,
+      t.dob,
+      t.gender,
+      t.phone,
+      t.organization,
+      t.referral_source,
+      t.payment_status,
+      t.lucky_number || '',
+      t.is_checked_in ? 'Yes' : 'No',
+      t.created_at,
     ])
     const csv = [headers, ...rows].map((r) => r.map((v) => `"${v}"`).join(',')).join('\n')
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `chess-night-danh-sach-ve-${new Date().toISOString().split('T')[0]}.csv`
+    a.download = `chess-night-tickets-${new Date().toISOString().split('T')[0]}.csv`
     a.click()
   }
 
@@ -197,89 +206,96 @@ export default function AdminDashboard() {
   )
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] text-slate-900 pb-20">
+    <div className="min-h-screen bg-[#0A0A0C] text-white pb-24">
       <Header />
 
-      <main className="pt-24 px-4 sm:px-6 max-w-7xl mx-auto">
-        {/* Page Header */}
-        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="pt-4 mb-8">
+      {/* Main content with generous top padding to ensure header never overlaps KPI cards */}
+      <main className="pt-28 sm:pt-36 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+          {/* Top Title & Quick Actions Bar */}
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div>
-              <div className="flex items-center gap-2">
-                <Link href="/" className="text-slate-400 hover:text-slate-900 transition-colors">
-                  <ArrowLeft size={18} />
+              <div className="flex items-center gap-2.5">
+                <Link href="/" className="text-slate-400 hover:text-white transition-colors">
+                  <ArrowLeft size={20} />
                 </Link>
-                <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-                  <Shield className="text-red-600" size={24} />
+                <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2">
+                  <Shield className="text-red-500" size={26} />
                   <span>Admin Dashboard</span>
                 </h1>
               </div>
-              <p className="text-xs sm:text-sm text-slate-500 mt-1 ml-6.5">
-                Bảng điều khiển quản lý vé, thống kê sự kiện & quay số minigame
+              <p className="text-xs sm:text-sm text-slate-400 mt-1 ml-7">
+                Quản lý vé, đối chiếu biên lai, thống kê sự kiện & quay số minigame
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-2.5">
+            <div className="flex flex-wrap items-center gap-2.5">
               <button
                 onClick={() => { playClickSound(); fetchStats(); fetchTickets() }}
-                className="flex items-center gap-1.5 bg-white border border-slate-200 hover:border-slate-800 text-slate-700 text-xs font-bold px-3.5 py-2 rounded-xl shadow-2xs transition-all cursor-pointer"
+                className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white text-xs font-bold px-3.5 py-2.5 rounded-xl transition-all cursor-pointer"
               >
-                <RefreshCw size={13} />
+                <RefreshCw size={14} />
                 <span>Làm mới</span>
               </button>
+
               <button
                 onClick={exportCSV}
-                className="flex items-center gap-1.5 bg-white border border-slate-200 hover:border-slate-800 text-slate-700 text-xs font-bold px-3.5 py-2 rounded-xl shadow-2xs transition-all cursor-pointer"
+                className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white text-xs font-bold px-3.5 py-2.5 rounded-xl transition-all cursor-pointer"
               >
-                <Download size={13} />
+                <Download size={14} />
                 <span>Xuất CSV</span>
               </button>
+
               <button
                 onClick={handleSendEmails}
                 disabled={sendingEmails}
-                className="flex items-center gap-1.5 bg-slate-900 hover:bg-black text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs transition-all cursor-pointer disabled:opacity-50"
+                className="flex items-center gap-1.5 bg-white text-slate-900 hover:bg-slate-200 text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg transition-all cursor-pointer disabled:opacity-50"
               >
-                {sendingEmails ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
-                <span>Gửi Vé Hàng Loạt</span>
+                {sendingEmails ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                <span>Gửi Vé Email</span>
               </button>
+
               <button
                 onClick={() => { playClickSound(); setLuckyDrawOpen(true) }}
-                className="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-black px-4 py-2 rounded-xl shadow-md shadow-red-600/20 transition-all cursor-pointer"
+                className="flex items-center gap-1.5 btn-crimson text-xs font-black px-4 py-2.5 rounded-xl shadow-lg shadow-red-600/30 transition-all cursor-pointer"
               >
-                <Sparkles size={13} />
+                <Sparkles size={14} />
                 <span>🎰 Lucky Draw LED</span>
               </button>
+
               <Link
                 href="/admin/checkin"
-                className="flex items-center gap-1.5 bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 text-xs font-bold px-4 py-2 rounded-xl transition-all"
+                onClick={playClickSound}
+                className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md transition-all"
               >
-                <span>📱 Camera Check-in</span>
+                <Camera size={14} />
+                <span>📱 Quét QR Check-in</span>
               </Link>
             </div>
           </div>
 
           {emailResult && (
-            <div className="mb-6 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
-              <CheckCircle size={16} className="text-emerald-600 shrink-0" />
+            <div className="mb-6 p-4 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-xs font-semibold flex items-center gap-2.5">
+              <CheckCircle size={18} className="text-emerald-400 shrink-0" />
               <span>{emailResult}</span>
             </div>
           )}
 
-          {/* KPI Cards */}
+          {/* KPI CARDS (Unobstructed, High Contrast) */}
           {stats && (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 mb-8">
               {[
-                { label: 'Tổng Vé Đặt', value: stats.kpi.total, icon: <Ticket size={18} />, color: 'text-slate-900' },
-                { label: 'Đã Xác Nhận', value: stats.kpi.paid, icon: <CheckCircle size={18} />, color: 'text-emerald-600' },
-                { label: 'Chờ Duyệt', value: stats.kpi.pending, icon: <RefreshCw size={18} />, color: 'text-amber-600' },
-                { label: 'Check-in Thực Tế', value: `${stats.kpi.checkedIn}/${stats.kpi.paid}`, icon: <Users size={18} />, color: 'text-blue-600' },
-                { label: 'Đã Gửi Email', value: stats.kpi.emailSent, icon: <Mail size={18} />, color: 'text-purple-600' },
-                { label: 'Tổng Doanh Thu', value: formatCurrency(stats.kpi.revenue), icon: <DollarSign size={18} />, color: 'text-red-600' },
+                { label: 'Tổng Vé Đặt', value: stats.kpi.total, icon: <Ticket size={18} />, color: 'text-white' },
+                { label: 'Đã Xác Nhận', value: stats.kpi.paid, icon: <CheckCircle size={18} />, color: 'text-emerald-400' },
+                { label: 'Chờ Duyệt', value: stats.kpi.pending, icon: <RefreshCw size={18} />, color: 'text-amber-400' },
+                { label: 'Check-in Thực Tế', value: `${stats.kpi.checkedIn}/${stats.kpi.paid}`, icon: <Users size={18} />, color: 'text-blue-400' },
+                { label: 'Đã Gửi Email', value: stats.kpi.emailSent, icon: <Mail size={18} />, color: 'text-purple-400' },
+                { label: 'Tổng Doanh Thu', value: formatCurrency(stats.kpi.revenue), icon: <DollarSign size={18} />, color: 'text-red-400' },
               ].map((kpi, idx) => (
-                <div key={idx} className="bg-white rounded-2xl p-4 border border-slate-200 shadow-2xs">
-                  <div className={`${kpi.color} mb-1.5`}>{kpi.icon}</div>
-                  <div className={`text-xl font-black ${kpi.color} tracking-tight`}>{kpi.value}</div>
-                  <div className="text-[11px] font-bold text-slate-500 uppercase mt-0.5">{kpi.label}</div>
+                <div key={idx} className="card-luxury rounded-2xl p-4.5 border border-white/10">
+                  <div className={`${kpi.color} mb-2`}>{kpi.icon}</div>
+                  <div className={`text-xl font-black ${kpi.color} font-mono tracking-tight`}>{kpi.value}</div>
+                  <div className="text-[11px] font-bold text-slate-400 uppercase mt-1">{kpi.label}</div>
                 </div>
               ))}
             </div>
@@ -287,22 +303,22 @@ export default function AdminDashboard() {
 
           {/* Check-in Progress Bar */}
           {stats && (
-            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs mb-8">
+            <div className="card-luxury rounded-2xl p-5 border border-white/10 mb-8">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-                  Tiến độ Check-in tại cổng
+                <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                  Tiến độ Check-in tại cổng đón khách
                 </span>
-                <span className="text-sm font-black text-red-600">
+                <span className="text-sm font-black text-red-500 font-mono">
                   {stats.kpi.paid > 0 ? Math.round((stats.kpi.checkedIn / stats.kpi.paid) * 100) : 0}%
                 </span>
               </div>
-              <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-2.5 bg-white/5 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-red-600 rounded-full transition-all duration-500"
+                  className="h-full bg-gradient-to-r from-red-600 to-rose-400 rounded-full transition-all duration-500"
                   style={{ width: `${stats.kpi.paid > 0 ? (stats.kpi.checkedIn / stats.kpi.paid) * 100 : 0}%` }}
                 />
               </div>
-              <div className="text-[11px] text-slate-500 mt-2 font-medium">
+              <div className="text-[11px] text-slate-400 mt-2 font-medium">
                 {stats.kpi.checkedIn} / {stats.kpi.paid} người mua đã dán vòng tay check-in vào sự kiện.
               </div>
             </div>
@@ -312,48 +328,48 @@ export default function AdminDashboard() {
           {stats && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
               {/* Velocity */}
-              <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs">
-                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-2">
-                  <TrendingUp size={16} className="text-red-600" />
+              <div className="card-luxury rounded-2xl p-5 border border-white/10">
+                <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <TrendingUp size={16} className="text-red-500" />
                   <span>Tốc Độ Đặt Vé Theo Ngày</span>
                 </h3>
                 <ResponsiveContainer width="100%" height={200}>
                   <LineChart data={stats.velocityData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
-                    <XAxis dataKey="date" tick={{ fill: '#64748B', fontSize: 11 }} />
-                    <YAxis tick={{ fill: '#64748B', fontSize: 11 }} />
-                    <Tooltip contentStyle={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, color: '#0F172A' }} />
-                    <Line type="monotone" dataKey="count" stroke="#DC2626" strokeWidth={2.5} dot={{ fill: '#DC2626' }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
+                    <XAxis dataKey="date" tick={{ fill: '#A1A1AA', fontSize: 11 }} />
+                    <YAxis tick={{ fill: '#A1A1AA', fontSize: 11 }} />
+                    <Tooltip contentStyle={{ background: '#18181B', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, color: '#FFFFFF' }} />
+                    <Line type="monotone" dataKey="count" stroke="#EF4444" strokeWidth={2.5} dot={{ fill: '#EF4444' }} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
 
               {/* Demographics: Gender & Age */}
-              <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs">
-                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4">
+              <div className="card-luxury rounded-2xl p-5 border border-white/10">
+                <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-4">
                   Cơ Cấu Giới Tính & Độ Tuổi
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-[11px] font-bold text-slate-500 mb-2">Giới tính</p>
+                    <p className="text-[11px] font-bold text-slate-400 mb-2">Giới tính</p>
                     <ResponsiveContainer width="100%" height={140}>
                       <PieChart>
                         <Pie data={stats.genderData} dataKey="count" nameKey="gender" cx="50%" cy="50%" outerRadius={50} label={(props: { name?: string; percent?: number }) => `${props.name ?? ''} ${((props.percent ?? 0) * 100).toFixed(0)}%`}>
                           {stats.genderData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                         </Pie>
-                        <Tooltip />
+                        <Tooltip contentStyle={{ background: '#18181B', border: '1px solid rgba(255,255,255,0.1)', color: '#FFFFFF' }} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
                   <div>
-                    <p className="text-[11px] font-bold text-slate-500 mb-2">Độ tuổi</p>
+                    <p className="text-[11px] font-bold text-slate-400 mb-2">Độ tuổi</p>
                     <ResponsiveContainer width="100%" height={140}>
                       <BarChart data={stats.ageData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
-                        <XAxis dataKey="age_group" tick={{ fill: '#64748B', fontSize: 10 }} />
-                        <YAxis tick={{ fill: '#64748B', fontSize: 10 }} />
-                        <Tooltip />
-                        <Bar dataKey="count" fill="#0F172A" radius={[4, 4, 0, 0]} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
+                        <XAxis dataKey="age_group" tick={{ fill: '#A1A1AA', fontSize: 10 }} />
+                        <YAxis tick={{ fill: '#A1A1AA', fontSize: 10 }} />
+                        <Tooltip contentStyle={{ background: '#18181B', border: '1px solid rgba(255,255,255,0.1)', color: '#FFFFFF' }} />
+                        <Bar dataKey="count" fill="#EF4444" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -361,24 +377,24 @@ export default function AdminDashboard() {
               </div>
 
               {/* Organization */}
-              <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs">
-                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4">
+              <div className="card-luxury rounded-2xl p-5 border border-white/10">
+                <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-4">
                   Top Trường / Đơn Vị Công Tác
                 </h3>
                 <ResponsiveContainer width="100%" height={200}>
                   <BarChart data={stats.orgData.slice(0, 6)} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
-                    <XAxis type="number" tick={{ fill: '#64748B', fontSize: 11 }} />
-                    <YAxis type="category" dataKey="org" tick={{ fill: '#64748B', fontSize: 10 }} width={120} />
-                    <Tooltip />
-                    <Bar dataKey="count" fill="#DC2626" radius={[0, 4, 4, 0]} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
+                    <XAxis type="number" tick={{ fill: '#A1A1AA', fontSize: 11 }} />
+                    <YAxis type="category" dataKey="org" tick={{ fill: '#A1A1AA', fontSize: 10 }} width={120} />
+                    <Tooltip contentStyle={{ background: '#18181B', border: '1px solid rgba(255,255,255,0.1)', color: '#FFFFFF' }} />
+                    <Bar dataKey="count" fill="#EF4444" radius={[0, 4, 4, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
 
               {/* Referral */}
-              <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs">
-                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4">
+              <div className="card-luxury rounded-2xl p-5 border border-white/10">
+                <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-4">
                   Hiệu Quả Kênh Truyền Thông
                 </h3>
                 <ResponsiveContainer width="100%" height={200}>
@@ -386,20 +402,20 @@ export default function AdminDashboard() {
                     <Pie data={stats.referralData} dataKey="count" nameKey="source" cx="50%" cy="50%" outerRadius={75} label={(props: { name?: string; percent?: number }) => `${((props.percent ?? 0) * 100).toFixed(0)}%`}>
                       {stats.referralData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                     </Pie>
-                    <Tooltip />
-                    <Legend formatter={(val) => <span className="text-xs text-slate-600">{val}</span>} />
+                    <Tooltip contentStyle={{ background: '#18181B', border: '1px solid rgba(255,255,255,0.1)', color: '#FFFFFF' }} />
+                    <Legend formatter={(val) => <span className="text-xs text-slate-400">{val}</span>} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
             </div>
           )}
 
-          {/* Ticket Table */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
-            <div className="p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
+          {/* TICKET TABLE WITH ID="TICKETS" FOR DIRECT HEADER JUMP */}
+          <div id="tickets" className="card-luxury rounded-3xl border border-white/10 overflow-hidden">
+            <div className="p-5 sm:p-6 border-b border-white/10 flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h2 className="text-base font-black text-slate-900">Quản Lý Vé Đã Đặt</h2>
-                <p className="text-xs text-slate-500">Đối chiếu biên lai và xác nhận thanh toán</p>
+                <h2 className="text-base sm:text-lg font-black text-white">Quản Lý Vé Đã Đặt</h2>
+                <p className="text-xs text-slate-400 mt-0.5">Đối chiếu biên lai ngân hàng và xác nhận duyệt vé</p>
               </div>
 
               <div className="flex gap-2.5 flex-wrap">
@@ -409,18 +425,18 @@ export default function AdminDashboard() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Tìm tên, mã đơn..."
-                    className="bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white w-44"
+                    className="bg-[#18181B] border border-white/10 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-red-500 w-48"
                   />
                 </div>
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-red-600 font-medium"
+                  className="bg-[#18181B] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500 font-medium cursor-pointer"
                 >
-                  <option value="all">Tất cả</option>
-                  <option value="pending">Chờ duyệt</option>
-                  <option value="paid">Đã xác nhận</option>
-                  <option value="rejected">Từ chối</option>
+                  <option value="all" className="bg-[#18181B]">Tất cả trạng thái</option>
+                  <option value="pending" className="bg-[#18181B]">Chờ duyệt</option>
+                  <option value="paid" className="bg-[#18181B]">Đã xác nhận</option>
+                  <option value="rejected" className="bg-[#18181B]">Từ chối</option>
                 </select>
               </div>
             </div>
@@ -428,66 +444,66 @@ export default function AdminDashboard() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
+                  <tr className="bg-white/5 border-b border-white/10 text-slate-400 font-bold uppercase tracking-wider">
                     {['Mã Đơn', 'Họ Tên', 'Email', 'Trường / Đơn Vị', 'Số May Mắn', 'Trạng Thái', 'Thao Tác'].map((h) => (
-                      <th key={h} className="px-4 py-3">{h}</th>
+                      <th key={h} className="px-4 py-3.5">{h}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-white/5">
                   {ticketsLoading ? (
                     <tr>
-                      <td colSpan={7} className="py-8 text-center text-slate-400">
-                        <Loader2 className="animate-spin mx-auto mb-2" size={20} />
-                        Đang tải dữ liệu...
+                      <td colSpan={7} className="py-10 text-center text-slate-400">
+                        <Loader2 className="animate-spin mx-auto mb-2 text-red-500" size={24} />
+                        Đang tải danh sách vé...
                       </td>
                     </tr>
                   ) : filteredTickets.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="py-8 text-center text-slate-400">
-                        Không có dữ liệu phù hợp
+                      <td colSpan={7} className="py-10 text-center text-slate-500 font-medium">
+                        Không có dữ liệu vé phù hợp
                       </td>
                     </tr>
                   ) : (
                     filteredTickets.map((t) => (
-                      <tr key={t.id} className="hover:bg-slate-50/70 transition-colors">
-                        <td className="px-4 py-3 font-mono font-black text-red-600">{t.order_code}</td>
-                        <td className="px-4 py-3 font-bold text-slate-900">{t.full_name}</td>
-                        <td className="px-4 py-3 text-slate-600">{t.user_email}</td>
-                        <td className="px-4 py-3 text-slate-600">{t.organization}</td>
-                        <td className="px-4 py-3 font-bold text-slate-900">{t.lucky_number ? `#${t.lucky_number}` : '-'}</td>
-                        <td className="px-4 py-3">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
-                            t.payment_status === 'paid' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                            t.payment_status === 'rejected' ? 'bg-red-50 text-red-700 border-red-200' :
-                            'bg-amber-50 text-amber-700 border-amber-200'
+                      <tr key={t.id} className="hover:bg-white/5 transition-colors">
+                        <td className="px-4 py-3.5 font-mono font-black text-red-400">{t.order_code}</td>
+                        <td className="px-4 py-3.5 font-bold text-white">{t.full_name}</td>
+                        <td className="px-4 py-3.5 text-slate-400 font-mono text-[11px]">{t.user_email}</td>
+                        <td className="px-4 py-3.5 text-slate-300">{t.organization}</td>
+                        <td className="px-4 py-3.5 font-bold text-amber-400 font-mono">{t.lucky_number ? `#${t.lucky_number}` : '-'}</td>
+                        <td className="px-4 py-3.5">
+                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${
+                            t.payment_status === 'paid' ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/30' :
+                            t.payment_status === 'rejected' ? 'bg-red-950/40 text-red-400 border-red-500/30' :
+                            'bg-amber-950/40 text-amber-400 border-amber-500/30'
                           }`}>
-                            {t.payment_status === 'paid' ? 'Đã thanh toán' :
-                             t.payment_status === 'rejected' ? 'Bị từ chối' : 'Chờ duyệt'}
+                            {t.payment_status === 'paid' ? 'Đã duyệt' :
+                             t.payment_status === 'rejected' ? 'Từ chối' : 'Chờ duyệt'}
                           </span>
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-3.5">
                           <div className="flex items-center gap-1.5">
                             <button
                               onClick={() => { playClickSound(); setSelectedTicket(t) }}
-                              className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+                              className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 transition-colors"
                               title="Xem chi tiết & Biên lai"
                             >
-                              <Eye size={13} />
+                              <Eye size={14} />
                             </button>
                             {t.payment_status === 'pending' && (
                               <>
                                 <button
                                   onClick={() => handleVerify(t.id, 'approve')}
                                   disabled={verifying === t.id}
-                                  className="px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] transition-colors"
+                                  className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] transition-colors"
                                 >
                                   ✓ Duyệt
                                 </button>
                                 <button
                                   onClick={() => handleVerify(t.id, 'reject')}
                                   disabled={verifying === t.id}
-                                  className="px-2 py-1 rounded-lg bg-red-100 hover:bg-red-200 text-red-700 font-bold text-[10px] transition-colors"
+                                  className="px-2.5 py-1 rounded-lg bg-red-950/60 hover:bg-red-900 border border-red-500/30 text-red-300 font-bold text-[11px] transition-colors"
                                 >
                                   ✗ Huỷ
                                 </button>
@@ -507,36 +523,40 @@ export default function AdminDashboard() {
 
       {/* Ticket Detail & Proof Modal */}
       {selectedTicket && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-8">
-            <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+          <div className="w-full max-w-md bg-[#141417] rounded-3xl shadow-2xl border border-white/10 overflow-hidden my-8 text-white">
+            <div className="bg-white/5 px-6 py-4 flex items-center justify-between border-b border-white/10">
               <h3 className="font-bold text-sm">Chi Tiết Vé #{selectedTicket.order_code}</h3>
               <button onClick={() => setSelectedTicket(null)} className="text-slate-400 hover:text-white">
                 <X size={18} />
               </button>
             </div>
             <div className="p-6 space-y-3 text-xs">
-              <div className="flex justify-between py-1 border-b border-slate-100">
+              <div className="flex justify-between py-1 border-b border-white/5">
                 <span className="text-slate-400">Khách hàng:</span>
-                <span className="font-bold text-slate-900">{selectedTicket.full_name}</span>
+                <span className="font-bold text-white">{selectedTicket.full_name}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-100">
+              <div className="flex justify-between py-1 border-b border-white/5">
                 <span className="text-slate-400">Email:</span>
-                <span className="text-slate-800">{selectedTicket.user_email}</span>
+                <span className="text-slate-200 font-mono">{selectedTicket.user_email}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-100">
+              <div className="flex justify-between py-1 border-b border-white/5">
                 <span className="text-slate-400">SĐT:</span>
-                <span className="text-slate-800">{selectedTicket.phone}</span>
+                <span className="text-slate-200">{selectedTicket.phone}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-100">
+              <div className="flex justify-between py-1 border-b border-white/5">
+                <span className="text-slate-400">Trường/Đơn vị:</span>
+                <span className="text-slate-200">{selectedTicket.organization}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-white/5">
                 <span className="text-slate-400">Số may mắn:</span>
-                <span className="font-bold text-red-600">#{selectedTicket.lucky_number || '-'}</span>
+                <span className="font-bold text-red-400 font-mono text-sm">#{selectedTicket.lucky_number || '-'}</span>
               </div>
 
               {selectedTicket.payment_proof_url && (
                 <div className="pt-2">
-                  <div className="font-bold text-slate-700 mb-2">Ảnh biên lai thanh toán:</div>
-                  <div className="p-2 bg-slate-50 border border-slate-200 rounded-2xl text-center">
+                  <div className="font-bold text-slate-300 mb-2">Ảnh biên lai thanh toán:</div>
+                  <div className="p-2 bg-black/50 border border-white/10 rounded-2xl text-center">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={selectedTicket.payment_proof_url} alt="Proof" className="max-h-56 mx-auto rounded-lg object-contain" />
                   </div>
@@ -545,16 +565,16 @@ export default function AdminDashboard() {
             </div>
 
             {selectedTicket.payment_status === 'pending' && (
-              <div className="p-4 bg-slate-50 border-t border-slate-200 flex gap-3">
+              <div className="p-4 bg-white/5 border-t border-white/10 flex gap-3">
                 <button
                   onClick={() => handleVerify(selectedTicket.id, 'approve')}
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs transition-colors"
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-xs transition-colors cursor-pointer"
                 >
                   ✓ Xác Nhận Đã Nhận Tiền
                 </button>
                 <button
                   onClick={() => handleVerify(selectedTicket.id, 'reject')}
-                  className="flex-1 bg-red-100 hover:bg-red-200 text-red-700 font-bold py-2.5 rounded-xl text-xs transition-colors"
+                  className="flex-1 bg-red-950/60 hover:bg-red-900 border border-red-500/30 text-red-300 font-bold py-2.5 rounded-xl text-xs transition-colors cursor-pointer"
                 >
                   ✗ Báo Không Hợp Lệ
                 </button>
@@ -566,21 +586,21 @@ export default function AdminDashboard() {
 
       {/* Lucky Draw Stage Screen Modal */}
       {luckyDrawOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="w-full max-w-lg bg-white rounded-3xl p-8 border-4 border-red-600 text-center shadow-2xl relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+          <div className="w-full max-w-lg card-luxury rounded-3xl p-8 border-2 border-red-500 text-center shadow-2xl relative text-white">
             <button
               onClick={() => { playClickSound(); setLuckyDrawOpen(false) }}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-900"
+              className="absolute top-4 right-4 text-slate-400 hover:text-white"
             >
               <X size={20} />
             </button>
 
             <div className="text-4xl mb-2">🎰</div>
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight">QUAY SỐ TRÚNG THƯỞNG</h2>
-            <p className="text-xs text-slate-500 mb-6 uppercase tracking-wider">Chess Night Lucky Draw Stage</p>
+            <h2 className="text-2xl font-black text-white tracking-tight">QUAY SỐ TRÚNG THƯỞNG</h2>
+            <p className="text-xs text-slate-400 mb-6 uppercase tracking-wider">Chess Night Lucky Draw Stage</p>
 
             {/* Lucky spin counter */}
-            <div className="bg-slate-900 text-white rounded-2xl p-6 mb-6 shadow-inner">
+            <div className="bg-[#0A0A0C] border border-white/10 rounded-2xl p-6 mb-6 shadow-inner">
               <div className="text-6xl font-black text-red-500 font-mono tracking-widest">
                 {currentSpin ? `#${currentSpin}` : '????'}
               </div>
@@ -589,19 +609,19 @@ export default function AdminDashboard() {
             <button
               onClick={handleLuckyDraw}
               disabled={isSpinning}
-              className="w-full bg-red-600 hover:bg-red-700 text-white font-black py-4 rounded-2xl text-lg shadow-xl shadow-red-600/30 transition-all cursor-pointer disabled:opacity-50"
+              className="w-full btn-crimson py-4 rounded-2xl text-lg font-black shadow-xl shadow-red-600/30 transition-all cursor-pointer disabled:opacity-50"
             >
               {isSpinning ? 'Đang quay ngẫu nhiên...' : '🎲 BẮT ĐẦU QUAY SỐ'}
             </button>
 
             {winners.length > 0 && (
-              <div className="mt-6 text-left border-t border-slate-100 pt-4">
-                <h4 className="text-xs font-bold text-slate-700 uppercase mb-2">Danh Sách Trúng Giải:</h4>
+              <div className="mt-6 text-left border-t border-white/10 pt-4">
+                <h4 className="text-xs font-bold text-slate-300 uppercase mb-2">Danh Sách Trúng Giải:</h4>
                 <div className="space-y-1.5 max-h-36 overflow-y-auto">
                   {winners.map((w, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-2 rounded-xl bg-red-50 border border-red-200 text-xs">
-                      <span className="font-bold text-red-600 font-mono">#{w.number}</span>
-                      <span className="font-bold text-slate-800">{w.name}</span>
+                    <div key={idx} className="flex items-center justify-between p-2.5 rounded-xl bg-red-950/30 border border-red-500/20 text-xs">
+                      <span className="font-bold text-red-400 font-mono">#{w.number}</span>
+                      <span className="font-bold text-white">{w.name}</span>
                     </div>
                   ))}
                 </div>

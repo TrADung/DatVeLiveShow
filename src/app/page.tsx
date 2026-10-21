@@ -1,24 +1,30 @@
 'use client'
 
-import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 import HeroSection from '@/components/HeroSection'
 import TimelineSection from '@/components/TimelineSection'
 import ActivitiesSection from '@/components/ActivitiesSection'
 import SponsorsMarquee from '@/components/SponsorsMarquee'
-import BookingModal from '@/components/BookingModal'
 import MusicPlayer from '@/components/MusicPlayer'
 import MinigameSection from '@/components/MinigameSection'
 import Footer from '@/components/Footer'
+import { useAudio } from '@/hooks/useAudio'
 
 export default function HomePage() {
-  const [isBookingOpen, setIsBookingOpen] = useState(false)
+  const router = useRouter()
+  const { playClickSound } = useAudio()
+
+  const handleNavigateToBook = () => {
+    playClickSound()
+    router.push('/book')
+  }
 
   return (
-    <main className="relative">
+    <main className="relative min-h-screen bg-[#0A0A0C] text-white overflow-hidden">
       <Header />
       
-      <HeroSection onBuyTicket={() => setIsBookingOpen(true)} />
+      <HeroSection onBuyTicket={handleNavigateToBook} />
       
       <TimelineSection />
       
@@ -28,12 +34,7 @@ export default function HomePage() {
       
       <MinigameSection />
       
-      <Footer onBuyTicket={() => setIsBookingOpen(true)} />
-      
-      <BookingModal
-        isOpen={isBookingOpen}
-        onClose={() => setIsBookingOpen(false)}
-      />
+      <Footer onBuyTicket={handleNavigateToBook} />
       
       <MusicPlayer />
     </main>

@@ -8,6 +8,7 @@ import { useAudio } from '@/hooks/useAudio'
 import { formatDate, formatDateTime } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Header from '@/components/Header'
 
 type ScanResult = {
   status: 'ready' | 'already_checked_in' | 'not_paid' | 'not_found' | 'invalid_qr' | 'error'
@@ -61,7 +62,7 @@ export default function QRScannerPage() {
         () => {}
       )
     } catch (err) {
-      console.error('Scanner start error:', err)
+      console.error('Camera access error:', err)
       setScanning(false)
       playErrorSound()
     }
@@ -90,43 +91,62 @@ export default function QRScannerPage() {
 
   const handleQRScan = async (qrData: string) => {
     try {
+      let parsed = { ticket_id: '', hash: '' }
+      try {
+        const json = JSON.parse(qrData)
+        parsed.ticket_id = json.id
+        parsed.hash = json.hash
+      } catch {
+        parsed.ticket_id = qrData.trim()
+      }
+
       const res = await fetch('/api/admin/checkin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ qr_data: qrData }),
+        body: JSON.stringify(parsed),
       })
       const data = await res.json()
 
       if (res.status === 409) {
         playErrorSound()
-        setScanResult({ status: 'already_checked_in', ...data })
+        setScanResult({
+          status: 'already_checked_in',
+          error: data.error || 'Vé này đã được check-in trước đó!',
+          ticket: data.ticket,
+          checked_in_at: data.checked_in_at,
+        })
       } else if (res.ok) {
         playSuccessSound()
-        setScanResult(data)
+        setScanResult({
+          status: 'ready',
+          ticket: data.ticket,
+        })
       } else {
         playErrorSound()
-        setScanResult({ status: data.status || 'error', error: data.error })
+        setScanResult({
+          status: 'error',
+          error: data.error || 'Mã QR không hợp lệ hoặc vé chưa duyệt.',
+        })
       }
     } catch {
-      // Offline fallback mock check
-      try {
-        const parsed = JSON.parse(qrData)
+      // Mock ticket scan fallback for offline testing
+      if (qrData) {
+        playSuccessSound()
         setScanResult({
           status: 'ready',
           ticket: {
-            id: parsed.id || 'demo-ticket',
-            order_code: parsed.order_code || 'CLB-8888',
-            full_name: 'Khách Hàng Tham Dự',
+            id: 'mock-ticket-id',
+            full_name: 'Nguyễn Văn Demo',
             dob: '2002-05-15',
             gender: 'Nam',
-            organization: 'Đại Học Quốc Gia',
-            lucky_number: 7892,
+            organization: 'Đại Học Ngoại Thương',
+            order_code: 'CLB-DEMO',
+            lucky_number: 1042,
             payment_status: 'paid',
             is_checked_in: false,
           },
         })
-        playSuccessSound()
-      } catch {
+      } else {
         playErrorSound()
         setScanResult({ status: 'error', error: 'Không đọc được mã QR' })
       }
@@ -154,61 +174,63 @@ export default function QRScannerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] text-slate-900 flex flex-col">
-      {/* Top bar */}
-      <div className="bg-white border-b border-slate-200 px-4 py-3.5 flex items-center justify-between shadow-2xs">
-        <div className="flex items-center gap-3">
-          <Link href="/admin" className="text-slate-400 hover:text-slate-900 transition-colors">
-            <ArrowLeft size={20} />
-          </Link>
-          <div>
-            <h1 className="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-              <span>QR Check-in Scanner</span>
-              <span className="text-red-600">♟</span>
-            </h1>
-            <p className="text-[11px] text-slate-500 font-medium">Hệ thống quét vé tại cổng sự kiện</p>
+    <div className="min-h-screen bg-[#0A0A0C] text-white flex flex-col">
+      <Header />
+
+      <main className="flex-1 pt-28 sm:pt-36 pb-20 px-4 max-w-md mx-auto w-full flex flex-col items-center">
+        {/* Top title card */}
+        <div className="w-full card-luxury rounded-2xl p-4 sm:p-5 border border-white/10 mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link href="/admin" className="text-slate-400 hover:text-white transition-colors">
+              <ArrowLeft size={20} />
+            </Link>
+            <div>
+              <h1 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-1.5">
+                <span>QR Check-in Scanner</span>
+                <span className="text-red-500">♟</span>
+              </h1>
+              <p className="text-[11px] text-slate-400">Quét vé và dán vòng tay tại cổng</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 bg-emerald-950/40 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-bold">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>Sẵn Sàng</span>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full text-xs font-bold">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span>Sẵn Sàng</span>
-        </div>
-      </div>
 
-      <div className="flex-1 flex flex-col items-center justify-start p-4 max-w-md mx-auto w-full">
-        {/* Success splash */}
+        {/* Success Alert Splash */}
         <AnimatePresence>
           {checkInSuccess && (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
             >
-              <div className="bg-white rounded-3xl p-8 text-center max-w-xs w-full shadow-2xl border border-slate-200">
-                <div className="w-18 h-18 mx-auto rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4 border-2 border-emerald-600">
+              <div className="card-luxury rounded-3xl p-8 text-center max-w-xs w-full shadow-2xl border-2 border-emerald-500 text-white">
+                <div className="w-18 h-18 mx-auto rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-4 border-2 border-emerald-500">
                   <CheckCircle size={40} />
                 </div>
-                <h3 className="text-lg font-black text-slate-900 mb-1">CHECK-IN THÀNH CÔNG!</h3>
-                <p className="text-xs text-slate-500">Đã dán vòng tay và cho phép khách vào sảnh.</p>
+                <h3 className="text-lg font-black text-white mb-1">CHECK-IN THÀNH CÔNG!</h3>
+                <p className="text-xs text-slate-400">Đã dán vòng tay và cho phép khách vào khán phòng.</p>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        <div className="w-full mt-4">
+        <div className="w-full">
           {!scanning && !scanResult && (
             <div className="text-center py-6">
-              <div className="w-60 h-60 mx-auto mb-6 rounded-3xl border-2 border-dashed border-slate-300 bg-white flex items-center justify-center shadow-xs">
-                <Camera size={56} className="text-slate-300" />
+              <div className="w-64 h-64 mx-auto mb-6 rounded-3xl border-2 border-dashed border-white/20 bg-white/5 flex items-center justify-center shadow-2xl">
+                <Camera size={64} className="text-slate-500" />
               </div>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={startScanner}
-                className="w-full bg-red-600 hover:bg-red-700 text-white font-black py-4 rounded-2xl text-base shadow-xl shadow-red-600/25 flex items-center justify-center gap-2 cursor-pointer transition-all"
+                className="w-full btn-crimson py-4.5 rounded-2xl text-base font-black flex items-center justify-center gap-2 cursor-pointer shadow-xl shadow-red-600/30"
               >
-                <Camera size={20} />
+                <Camera size={22} />
                 <span>BẬT CAMERA QUÉT QR</span>
               </motion.button>
             </div>
@@ -216,11 +238,11 @@ export default function QRScannerPage() {
 
           {/* Scanner Video View */}
           {scanning && (
-            <div className="relative bg-black rounded-3xl overflow-hidden shadow-xl p-2">
+            <div className="relative bg-black rounded-3xl overflow-hidden shadow-2xl p-2 border border-white/10">
               <div id="qr-reader" className="w-full rounded-2xl overflow-hidden" />
               <button
                 onClick={stopScanner}
-                className="w-full mt-3 bg-white text-slate-900 font-bold py-2.5 rounded-xl text-xs hover:bg-slate-100 transition-colors cursor-pointer"
+                className="w-full mt-3 bg-white text-slate-900 font-bold py-3 rounded-xl text-xs hover:bg-slate-200 transition-colors cursor-pointer"
               >
                 Tắt Camera
               </button>
@@ -233,33 +255,33 @@ export default function QRScannerPage() {
               <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 15 }}>
                 {/* Anti-Passback Alert: Already Checked in */}
                 {scanResult.status === 'already_checked_in' && (
-                  <div className="rounded-3xl border-2 border-red-500 bg-red-50 p-6 shadow-sm">
+                  <div className="rounded-3xl border-2 border-red-500 bg-red-950/40 p-6 shadow-2xl">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="w-12 h-12 rounded-2xl bg-red-600 text-white flex items-center justify-center shrink-0">
                         <AlertTriangle size={24} />
                       </div>
                       <div>
-                        <div className="font-black text-red-700 text-base">CẢNH BÁO: VÉ ĐÃ SỬ DỤNG!</div>
-                        <div className="text-xs text-red-600">{scanResult.error}</div>
+                        <div className="font-black text-red-400 text-base">CẢNH BÁO: VÉ ĐÃ SỬ DỤNG!</div>
+                        <div className="text-xs text-red-300">{scanResult.error}</div>
                       </div>
                     </div>
 
                     {scanResult.ticket && (
-                      <div className="bg-white rounded-xl p-3 text-xs space-y-1.5 border border-red-200">
+                      <div className="bg-[#18181B] rounded-2xl p-4 text-xs space-y-2 border border-white/10">
                         <div className="flex justify-between">
-                          <span className="text-slate-500">Khách hàng:</span>
-                          <span className="font-bold text-slate-900">{scanResult.ticket.full_name}</span>
+                          <span className="text-slate-400">Khách hàng:</span>
+                          <span className="font-bold text-white">{scanResult.ticket.full_name}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-slate-500">Mã đơn:</span>
-                          <span className="font-mono font-bold text-red-600">{scanResult.ticket.order_code}</span>
+                          <span className="text-slate-400">Mã đơn:</span>
+                          <span className="font-mono font-bold text-red-400">{scanResult.ticket.order_code}</span>
                         </div>
                       </div>
                     )}
 
                     <button
                       onClick={() => { playClickSound(); setScanResult(null) }}
-                      className="w-full mt-4 bg-slate-900 hover:bg-black text-white font-bold py-3 rounded-xl text-xs transition-colors cursor-pointer"
+                      className="w-full mt-4 bg-white text-slate-900 font-bold py-3 rounded-xl text-xs hover:bg-slate-200 transition-colors cursor-pointer"
                     >
                       Tiếp Tục Quét Vé Khác
                     </button>
@@ -268,30 +290,30 @@ export default function QRScannerPage() {
 
                 {/* Ready to Check-in: Valid Ticket */}
                 {scanResult.status === 'ready' && scanResult.ticket && (
-                  <div className="rounded-3xl border-2 border-emerald-500 bg-emerald-50/50 p-6 shadow-sm">
+                  <div className="rounded-3xl border-2 border-emerald-500 bg-emerald-950/30 p-6 shadow-2xl">
                     <div className="flex items-center gap-3 mb-5">
-                      <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
-                        <CheckCircle size={24} />
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-slate-900 flex items-center justify-center shrink-0 font-bold">
+                        <CheckCircle size={28} />
                       </div>
                       <div>
-                        <div className="font-black text-emerald-800 text-base">VÉ HỢP LỆ - ĐÃ THANH TOÁN</div>
-                        <div className="text-xs text-slate-500 font-mono">Mã đơn: {scanResult.ticket.order_code}</div>
+                        <div className="font-black text-emerald-400 text-base">VÉ HỢP LỆ - ĐÃ THANH TOÁN</div>
+                        <div className="text-xs text-slate-400 font-mono">Mã đơn: {scanResult.ticket.order_code}</div>
                       </div>
                     </div>
 
-                    <div className="bg-white rounded-2xl p-4 border border-emerald-100 space-y-2.5 mb-5 text-xs">
+                    <div className="bg-[#18181B] rounded-2xl p-4 border border-white/10 space-y-3 mb-5 text-xs">
                       {[
                         { IconComp: User, label: 'Khách hàng', value: scanResult.ticket.full_name },
                         { IconComp: Calendar, label: 'Ngày sinh', value: formatDate(scanResult.ticket.dob) },
                         { IconComp: Building, label: 'Đơn vị', value: scanResult.ticket.organization },
                         { IconComp: Hash, label: 'Số may mắn', value: `#${scanResult.ticket.lucky_number || '-'}` },
                       ].map(({ IconComp, label, value }) => (
-                        <div key={label} className="flex items-center justify-between py-1 border-b border-slate-50 last:border-none">
-                          <div className="flex items-center gap-2 text-slate-500">
-                            <IconComp size={14} className="text-red-600" />
+                        <div key={label} className="flex items-center justify-between py-1 border-b border-white/5 last:border-none">
+                          <div className="flex items-center gap-2 text-slate-400">
+                            <IconComp size={14} className="text-red-500" />
                             <span>{label}:</span>
                           </div>
-                          <span className="font-bold text-slate-900">{value}</span>
+                          <span className="font-bold text-white">{value}</span>
                         </div>
                       ))}
                     </div>
@@ -301,7 +323,7 @@ export default function QRScannerPage() {
                       whileTap={{ scale: 0.98 }}
                       onClick={handleConfirmCheckIn}
                       disabled={confirmingCheckIn}
-                      className="w-full bg-red-600 hover:bg-red-700 text-white font-black py-4 rounded-2xl text-base shadow-lg shadow-red-600/30 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                      className="w-full btn-crimson py-4 rounded-2xl text-base font-black shadow-lg shadow-red-600/30 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                     >
                       {confirmingCheckIn ? (
                         <Loader2 size={20} className="animate-spin" />
@@ -315,7 +337,7 @@ export default function QRScannerPage() {
 
                     <button
                       onClick={() => { playClickSound(); setScanResult(null) }}
-                      className="w-full mt-2.5 text-xs font-semibold text-slate-500 hover:text-slate-800 py-1 transition-colors"
+                      className="w-full mt-3 text-xs font-semibold text-slate-400 hover:text-white py-1 transition-colors"
                     >
                       Bỏ qua / Quét lại
                     </button>
@@ -327,20 +349,20 @@ export default function QRScannerPage() {
 
           {/* Manual Input Fallback */}
           {!scanning && !scanResult && (
-            <div className="mt-8 bg-white rounded-2xl p-4 border border-slate-200">
-              <p className="text-xs font-bold text-slate-700 mb-2">Hoặc dán mã QR thủ công:</p>
+            <div className="mt-8 card-luxury rounded-2xl p-4 sm:p-5 border border-white/10">
+              <p className="text-xs font-bold text-slate-300 mb-2">Hoặc dán mã QR thủ công:</p>
               <div className="flex gap-2">
                 <input
                   id="manual-qr"
                   placeholder="Dán nội dung JSON mã QR..."
-                  className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white"
+                  className="flex-1 bg-[#18181B] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-red-500 font-mono"
                 />
                 <button
                   onClick={() => {
                     const el = document.getElementById('manual-qr') as HTMLInputElement
                     if (el?.value) handleQRScan(el.value)
                   }}
-                  className="bg-slate-900 hover:bg-black text-white font-bold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer"
+                  className="bg-white text-slate-900 hover:bg-slate-200 font-bold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer"
                 >
                   Kiểm tra
                 </button>
@@ -348,7 +370,7 @@ export default function QRScannerPage() {
             </div>
           )}
         </div>
-      </div>
+      </main>
     </div>
   )
 }

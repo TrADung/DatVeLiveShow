@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Crown, Save, CheckCircle, AlertTriangle, Trash2, ArrowLeft, Loader2, RefreshCw } from 'lucide-react'
+import { Crown, Save, CheckCircle, AlertTriangle, ArrowLeft, Loader2, RefreshCw } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useAudio } from '@/hooks/useAudio'
 import { useRouter } from 'next/navigation'
@@ -97,64 +97,64 @@ export default function DevPanel() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] text-slate-900 pb-20">
+    <div className="min-h-screen bg-[#0A0A0C] text-white pb-24">
       <Header />
 
-      <main className="pt-24 px-4 sm:px-6 max-w-4xl mx-auto">
-        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="pt-4 mb-8">
-          <div className="flex items-center justify-between gap-4 mb-4">
+      <main className="pt-28 sm:pt-36 px-4 sm:px-6 max-w-4xl mx-auto">
+        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+          <div className="flex items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-3">
-              <Link href="/admin" className="text-slate-400 hover:text-slate-900 transition-colors">
+              <Link href="/admin" className="text-slate-400 hover:text-white transition-colors">
                 <ArrowLeft size={20} />
               </Link>
-              <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-200">
-                <Crown size={20} />
+              <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20">
+                <Crown size={22} />
               </div>
               <div>
-                <h1 className="text-2xl font-black text-slate-900 tracking-tight">Dev System Config</h1>
-                <p className="text-xs text-slate-500">Cấu hình tham số hệ thống nóng (Hot Reload)</p>
+                <h1 className="text-2xl font-black text-white tracking-tight">Dev System Config</h1>
+                <p className="text-xs text-slate-400">Cấu hình tham số hệ thống nóng (Hot Reload)</p>
               </div>
             </div>
 
             <button
               onClick={() => { playClickSound(); fetchSettings() }}
-              className="flex items-center gap-1.5 bg-white border border-slate-200 text-xs font-bold text-slate-700 px-3.5 py-2 rounded-xl shadow-2xs hover:border-slate-800 transition-all cursor-pointer"
+              className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-slate-300 hover:text-white px-3.5 py-2.5 rounded-xl transition-all cursor-pointer"
             >
               <RefreshCw size={13} />
               <span>Làm mới</span>
             </button>
           </div>
 
-          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 mb-8 flex items-start gap-3">
-            <AlertTriangle size={18} className="text-amber-600 shrink-0 mt-0.5" />
-            <div className="text-xs text-amber-900 leading-relaxed font-medium">
+          <div className="p-4 rounded-2xl bg-amber-950/30 border border-amber-500/30 mb-8 flex items-start gap-3">
+            <AlertTriangle size={18} className="text-amber-400 shrink-0 mt-0.5" />
+            <div className="text-xs text-amber-200 leading-relaxed font-medium">
               <strong>Lưu ý quan trọng:</strong> Các thay đổi về giá vé, số tài khoản VietQR và SMTP sẽ có hiệu lực ngay lập tức với toàn bộ người dùng đang đặt vé trên trang.
             </div>
           </div>
 
           {loading ? (
             <div className="py-20 text-center">
-              <Loader2 size={32} className="animate-spin text-red-600 mx-auto mb-2" />
-              <p className="text-xs text-slate-500">Đang tải cấu hình...</p>
+              <Loader2 size={32} className="animate-spin text-red-500 mx-auto mb-2" />
+              <p className="text-xs text-slate-400">Đang tải cấu hình hệ thống...</p>
             </div>
           ) : (
             <div className="space-y-4">
               {settings.map((setting) => (
                 <div
                   key={setting.key}
-                  className="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs hover:border-slate-400 transition-all"
+                  className="card-luxury rounded-2xl border border-white/10 p-5 transition-all"
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div>
-                      <span className="font-mono text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-md border border-red-100">
+                      <span className="font-mono text-xs font-bold text-red-400 bg-red-950/50 px-2 py-0.5 rounded-md border border-red-500/30">
                         {setting.key}
                       </span>
-                      <p className="text-xs font-bold text-slate-800 mt-1.5">
+                      <p className="text-xs font-bold text-slate-200 mt-1.5">
                         {SETTING_DESCRIPTIONS[setting.key] || setting.description || setting.key}
                       </p>
                     </div>
                     {savedKeys.includes(setting.key) && (
-                      <span className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200">
+                      <span className="flex items-center gap-1 text-xs font-bold text-emerald-400 bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-emerald-500/30">
                         <CheckCircle size={14} />
                         Đã lưu
                       </span>
@@ -166,12 +166,12 @@ export default function DevPanel() {
                       type={SENSITIVE_KEYS.includes(setting.key) ? 'password' : 'text'}
                       value={editedValues[setting.key] || ''}
                       onChange={(e) => setEditedValues((prev) => ({ ...prev, [setting.key]: e.target.value }))}
-                      className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-mono text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all"
+                      className="flex-1 bg-[#18181B] border border-white/10 rounded-xl px-4 py-2.5 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-red-500 transition-all"
                     />
                     <button
                       onClick={() => handleSave(setting.key)}
                       disabled={saving === setting.key}
-                      className="bg-slate-900 hover:bg-black text-white font-bold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shrink-0 disabled:opacity-50"
+                      className="btn-crimson font-bold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shrink-0 disabled:opacity-50"
                     >
                       {saving === setting.key ? (
                         <Loader2 size={13} className="animate-spin" />

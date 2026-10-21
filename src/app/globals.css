@@ -1,15 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --bg-primary: #FFFFFF;
-  --bg-secondary: #F8FAFC;
-  --bg-card: #FFFFFF;
-  --text-primary: #0F172A;
-  --text-secondary: #64748B;
-  --accent-red: #DC2626;
-  --accent-red-hover: #B91C1C;
-  --accent-black: #0F172A;
-  --border-light: #E2E8F0;
+  --bg-primary: #0A0A0C;
+  --bg-secondary: #121214;
+  --bg-card: #18181B;
+  --text-primary: #FFFFFF;
+  --text-secondary: #94A3B8;
+  --accent-red: #EF4444;
+  --accent-red-hover: #DC2626;
+  --border-dark: rgba(255, 255, 255, 0.08);
 }
 
 * {
@@ -20,6 +19,7 @@
 
 html {
   scroll-behavior: smooth;
+  color-scheme: dark;
 }
 
 body {
@@ -29,128 +29,97 @@ body {
   overflow-x: hidden;
 }
 
-/* Subtle clean chessboard grid for tone sang */
-.chess-grid-light {
-  background-size: 48px 48px;
+/* Subtle modern mesh noise & grid */
+.editorial-grid {
+  background-size: 60px 60px;
   background-image: 
-    linear-gradient(to right, rgba(15, 23, 42, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(15, 23, 42, 0.04) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
 }
 
-.chess-pattern-subtle {
-  background-image: repeating-conic-gradient(
-    rgba(15, 23, 42, 0.02) 0% 25%, 
-    transparent 0% 50%
-  );
-  background-size: 64px 64px;
+/* Frosted glass header */
+.glass-nav {
+  background: rgba(10, 10, 12, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Red glow for key CTAs */
-.glow-red {
-  box-shadow: 0 10px 25px -5px rgba(220, 38, 38, 0.35), 0 8px 10px -6px rgba(220, 38, 38, 0.2);
+/* Luxury card surface */
+.card-luxury {
+  background: #141417;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.glow-red-sm {
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+.card-luxury:hover {
+  border-color: rgba(239, 68, 68, 0.5);
+  box-shadow: 0 10px 30px -5px rgba(239, 68, 68, 0.15);
+  transform: translateY(-2px);
 }
 
-/* Crisp light cards with subtle border */
-.card-chess {
-  background: #FFFFFF;
-  border: 1px solid #E2E8F0;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+/* Glowing Crimson CTA */
+.btn-crimson {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  color: #FFFFFF;
+  box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.4);
+  transition: all 0.2s ease;
 }
 
-.card-chess:hover {
-  border-color: #DC2626;
-  box-shadow: 0 10px 20px -5px rgba(15, 23, 42, 0.08);
+.btn-crimson:hover {
+  background: linear-gradient(135deg, #F87171 0%, #EF4444 100%);
+  box-shadow: 0 15px 30px -5px rgba(239, 68, 68, 0.5);
+  transform: translateY(-1px);
 }
 
-/* Glass light header */
-.glass-header {
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid #E2E8F0;
-}
-
-/* Custom scrollbar in red & black */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: #F1F5F9;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #DC2626;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #B91C1C;
-}
-
-/* Marquee animation */
+/* Red Ticker Marquee like BluDays Tour */
 @keyframes marquee {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
 
-.marquee-inner {
-  animation: marquee 35s linear infinite;
+.marquee-track {
+  animation: marquee 30s linear infinite;
   display: flex;
   width: max-content;
 }
 
-.marquee-inner:hover {
+.marquee-track:hover {
   animation-play-state: paused;
 }
 
-/* Status badges */
-.status-pending {
-  background: #FEF3C7;
-  color: #B45309;
-  border: 1px solid #FCD34D;
+/* Custom modern scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
 }
 
-.status-paid {
-  background: #DCFCE7;
-  color: #15803D;
-  border: 1px solid #86EFAC;
+::-webkit-scrollbar-track {
+  background: #0A0A0C;
 }
 
-.status-rejected {
-  background: #FEE2E2;
-  color: #B91C1C;
-  border: 1px solid #FCA5A5;
+::-webkit-scrollbar-thumb {
+  background: #3F3F46;
+  border-radius: 3px;
 }
 
-.status-checked-in {
-  background: #DBEAFE;
-  color: #1D4ED8;
-  border: 1px solid #93C5FD;
+::-webkit-scrollbar-thumb:hover {
+  background: #EF4444;
 }
 
-/* QR scanner target overlay */
-.qr-scanner-overlay {
-  position: absolute;
-  inset: 0;
-  border: 2px solid rgba(220, 38, 38, 0.8);
-  border-radius: 12px;
+/* Section title horizontal lines like Japan Tours */
+.section-heading-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
 }
 
-.qr-corner {
-  position: absolute;
-  width: 24px;
-  height: 24px;
-  border-color: #DC2626;
-  border-style: solid;
+.section-heading-line::before,
+.section-heading-line::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.15), transparent);
 }
-
-.qr-corner-tl { top: 0; left: 0; border-width: 3px 0 0 3px; border-radius: 8px 0 0 0; }
-.qr-corner-tr { top: 0; right: 0; border-width: 3px 3px 0 0; border-radius: 0 8px 0 0; }
-.qr-corner-bl { bottom: 0; left: 0; border-width: 0 0 3px 3px; border-radius: 0 0 0 8px; }
-.qr-corner-br { bottom: 0; right: 0; border-width: 0 3px 3px 0; border-radius: 0 0 8px 0; }
