@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Crown, Save, RefreshCw, Settings, Loader2, CheckCircle, AlertTriangle, Trash2, ArrowLeft } from 'lucide-react'
+import { Crown, Save, CheckCircle, AlertTriangle, Trash2, ArrowLeft, Loader2, RefreshCw } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useAudio } from '@/hooks/useAudio'
 import { useRouter } from 'next/navigation'
@@ -11,20 +11,20 @@ import type { SiteSetting } from '@/types'
 import Header from '@/components/Header'
 
 const SETTING_DESCRIPTIONS: Record<string, string> = {
-  ticket_price: 'Giá vé (VND)',
-  bank_id: 'Mã ngân hàng VietQR (ví dụ: MB, VCB, TCB)',
-  bank_account_no: 'Số tài khoản ngân hàng',
-  bank_account_name: 'Tên chủ tài khoản',
-  event_name: 'Tên sự kiện',
-  event_date: 'Ngày tổ chức (YYYY-MM-DD)',
-  event_venue: 'Địa điểm tổ chức',
-  ticket_sale_open: 'Mở bán vé (true/false)',
-  smtp_host: 'SMTP Host',
-  smtp_port: 'SMTP Port',
-  smtp_user: 'Email SMTP',
-  smtp_pass: 'Mật khẩu SMTP (App Password)',
-  lucky_draw_time: 'Thời gian quay số (ISO)',
-  admin_emails: 'Email admin cách nhau dấu phẩy',
+  ticket_price: 'Giá vé mặc định (VND)',
+  bank_id: 'Mã ngân hàng VietQR (ví dụ: MB, VCB, TCB, ACB)',
+  bank_account_no: 'Số tài khoản ngân hàng thụ hưởng',
+  bank_account_name: 'Tên chủ tài khoản ngân hàng',
+  event_name: 'Tên sự kiện / liveshow',
+  event_date: 'Ngày tổ chức sự kiện (YYYY-MM-DD)',
+  event_venue: 'Địa điểm tổ chức sự kiện',
+  ticket_sale_open: 'Mở bán vé trực tuyến (true / false)',
+  smtp_host: 'Địa chỉ máy chủ SMTP (ví dụ: smtp.gmail.com)',
+  smtp_port: 'Cổng kết nối SMTP (587 hoặc 465)',
+  smtp_user: 'Tài khoản Gmail gửi vé',
+  smtp_pass: 'Mật khẩu ứng dụng (Gmail App Password)',
+  lucky_draw_time: 'Thời gian quay số minigame (ISO string)',
+  admin_emails: 'Danh sách email được cấp quyền Admin (cách nhau dấu phẩy)',
 }
 
 const SENSITIVE_KEYS = ['smtp_pass']
@@ -33,49 +33,47 @@ export default function DevPanel() {
   const { user, userRole, loading: authLoading } = useAuth()
   const { playClickSound, playSuccessSound, playErrorSound } = useAudio()
   const router = useRouter()
-  
+
   const [settings, setSettings] = useState<SiteSetting[]>([])
   const [editedValues, setEditedValues] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState<string | null>(null)
   const [savedKeys, setSavedKeys] = useState<string[]>([])
-  const [systemLogs, setSystemLogs] = useState<unknown[]>([])
-  const [logsLoading, setLogsLoading] = useState(true)
-
-  useEffect(() => {
-    if (!authLoading) {
-      if (!user || userRole !== 'dev') {
-        router.push('/')
-        return
-      }
-      fetchSettings()
-      fetchLogs()
-    }
-  }, [authLoading, user, userRole, router])
 
   const fetchSettings = async () => {
     setLoading(true)
     try {
       const res = await fetch('/api/dev/settings')
       const data = await res.json()
-      setSettings(data || [])
-      const vals: Record<string, string> = {}
-      data?.forEach((s: SiteSetting) => { vals[s.key] = s.value })
-      setEditedValues(vals)
+      if (Array.isArray(data) && data.length > 0) {
+        setSettings(data)
+        const vals: Record<string, string> = {}
+        data.forEach((s: SiteSetting) => { vals[s.key] = s.value })
+        setEditedValues(vals)
+      } else {
+        // Fallback default settings
+        const defaults = Object.keys(SETTING_DESCRIPTIONS).map((key) => ({
+          key,
+          value: key === 'ticket_price' ? '150000' : key === 'bank_id' ? 'MB' : key === 'bank_account_no' ? '1234567890' : key === 'bank_account_name' ? 'CLB AM NHAC' : '',
+          updated_at: new Date().toISOString(),
+        }))
+        setSettings(defaults)
+        const vals: Record<string, string> = {}
+        defaults.forEach((s) => { vals[s.key] = s.value })
+        setEditedValues(vals)
+      }
+    } catch {
+      // Fallback
     } finally {
       setLoading(false)
     }
   }
 
-  const fetchLogs = async () => {
-    setLogsLoading(true)
-    try {
-      // We'll read logs from admin stats area
-      setLogsLoading(false)
-    } finally {
-      setLogsLoading(false)
+  useEffect(() => {
+    if (!authLoading) {
+      fetchSettings()
     }
-  }
+  }, [authLoading])
 
   const handleSave = async (key: string) => {
     playClickSound()
@@ -88,8 +86,8 @@ export default function DevPanel() {
       })
       if (res.ok) {
         playSuccessSound()
-        setSavedKeys(prev => [...prev, key])
-        setTimeout(() => setSavedKeys(prev => prev.filter(k => k !== key)), 2000)
+        setSavedKeys((prev) => [...prev, key])
+        setTimeout(() => setSavedKeys((prev) => prev.filter((k) => k !== key)), 2000)
       } else {
         playErrorSound()
       }
@@ -98,108 +96,96 @@ export default function DevPanel() {
     }
   }
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-[#121212] flex items-center justify-center">
-        <Loader2 size={32} className="text-[#D4AF37] animate-spin" />
-      </div>
-    )
-  }
-
   return (
-    <div className="min-h-screen bg-[#121212]">
+    <div className="min-h-screen bg-[#FAFAFA] text-slate-900 pb-20">
       <Header />
-      <main className="pt-20 pb-12 px-4">
-        <div className="max-w-4xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="pt-8 mb-8">
-            <div className="flex items-center gap-3 mb-2">
-              <Link href="/admin" className="text-[#A8A090] hover:text-[#D4AF37] transition-colors">
+
+      <main className="pt-24 px-4 sm:px-6 max-w-4xl mx-auto">
+        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="pt-4 mb-8">
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <div className="flex items-center gap-3">
+              <Link href="/admin" className="text-slate-400 hover:text-slate-900 transition-colors">
                 <ArrowLeft size={20} />
               </Link>
-              <Crown size={24} className="text-[#D4AF37]" />
-              <h1 className="text-2xl font-black text-[#F5F2EB]">Dev Panel</h1>
+              <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-200">
+                <Crown size={20} />
+              </div>
+              <div>
+                <h1 className="text-2xl font-black text-slate-900 tracking-tight">Dev System Config</h1>
+                <p className="text-xs text-slate-500">Cấu hình tham số hệ thống nóng (Hot Reload)</p>
+              </div>
             </div>
-            <p className="text-sm text-[#A8A090] ml-11">Cấu hình hệ thống nóng - Chỉ dành cho Developer</p>
-          </motion.div>
 
-          {/* Warning */}
-          <div className="p-4 rounded-xl bg-yellow-900/20 border border-yellow-500/30 mb-6 flex items-start gap-3">
-            <AlertTriangle size={18} className="text-yellow-400 mt-0.5 flex-shrink-0" />
-            <p className="text-sm text-yellow-300">
-              ⚠️ Thay đổi cấu hình ở đây sẽ có hiệu lực ngay lập tức. Hãy cẩn thận khi thay đổi các thông tin nhạy cảm như SMTP và thông tin ngân hàng.
-            </p>
+            <button
+              onClick={() => { playClickSound(); fetchSettings() }}
+              className="flex items-center gap-1.5 bg-white border border-slate-200 text-xs font-bold text-slate-700 px-3.5 py-2 rounded-xl shadow-2xs hover:border-slate-800 transition-all cursor-pointer"
+            >
+              <RefreshCw size={13} />
+              <span>Làm mới</span>
+            </button>
           </div>
 
-          {/* Settings Grid */}
+          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 mb-8 flex items-start gap-3">
+            <AlertTriangle size={18} className="text-amber-600 shrink-0 mt-0.5" />
+            <div className="text-xs text-amber-900 leading-relaxed font-medium">
+              <strong>Lưu ý quan trọng:</strong> Các thay đổi về giá vé, số tài khoản VietQR và SMTP sẽ có hiệu lực ngay lập tức với toàn bộ người dùng đang đặt vé trên trang.
+            </div>
+          </div>
+
           {loading ? (
-            <div className="flex justify-center py-12">
-              <Loader2 size={32} className="text-[#D4AF37] animate-spin" />
+            <div className="py-20 text-center">
+              <Loader2 size={32} className="animate-spin text-red-600 mx-auto mb-2" />
+              <p className="text-xs text-slate-500">Đang tải cấu hình...</p>
             </div>
           ) : (
             <div className="space-y-4">
               {settings.map((setting) => (
-                <motion.div
+                <div
                   key={setting.key}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="glass-dark rounded-xl border border-[#D4AF37]/10 p-5"
+                  className="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs hover:border-slate-400 transition-all"
                 >
-                  <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center justify-between mb-2">
                     <div>
-                      <div className="font-mono text-xs text-[#D4AF37] mb-1">{setting.key}</div>
-                      <div className="text-sm font-medium text-[#F5F2EB]">
+                      <span className="font-mono text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-md border border-red-100">
+                        {setting.key}
+                      </span>
+                      <p className="text-xs font-bold text-slate-800 mt-1.5">
                         {SETTING_DESCRIPTIONS[setting.key] || setting.description || setting.key}
-                      </div>
+                      </p>
                     </div>
                     {savedKeys.includes(setting.key) && (
-                      <CheckCircle size={16} className="text-green-400 flex-shrink-0" />
+                      <span className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200">
+                        <CheckCircle size={14} />
+                        Đã lưu
+                      </span>
                     )}
                   </div>
-                  
-                  <div className="flex gap-3">
+
+                  <div className="flex gap-2.5 mt-3">
                     <input
                       type={SENSITIVE_KEYS.includes(setting.key) ? 'password' : 'text'}
                       value={editedValues[setting.key] || ''}
-                      onChange={e => setEditedValues(prev => ({ ...prev, [setting.key]: e.target.value }))}
-                      className="flex-1 bg-[#2A2A2A] border border-[#3A3A3A] rounded-xl px-4 py-2.5 text-sm text-[#F5F2EB] focus:outline-none focus:border-[#D4AF37] font-mono"
+                      onChange={(e) => setEditedValues((prev) => ({ ...prev, [setting.key]: e.target.value }))}
+                      className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-mono text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all"
                     />
                     <button
                       onClick={() => handleSave(setting.key)}
                       disabled={saving === setting.key}
-                      className="flex items-center gap-2 bg-[#D4AF37] text-[#121212] font-bold px-4 py-2.5 rounded-xl text-sm hover:bg-[#e8c845] transition-all disabled:opacity-50"
+                      className="bg-slate-900 hover:bg-black text-white font-bold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shrink-0 disabled:opacity-50"
                     >
-                      {saving === setting.key ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-                      Lưu
+                      {saving === setting.key ? (
+                        <Loader2 size={13} className="animate-spin" />
+                      ) : (
+                        <Save size={13} />
+                      )}
+                      <span>Lưu</span>
                     </button>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           )}
-
-          {/* Danger Zone */}
-          <div className="mt-8 p-6 rounded-2xl border-2 border-red-500/30 bg-red-900/10">
-            <h3 className="text-lg font-bold text-red-400 mb-2 flex items-center gap-2">
-              <Trash2 size={18} /> Danger Zone
-            </h3>
-            <p className="text-sm text-[#A8A090] mb-4">
-              Các thao tác sau đây có thể gây mất dữ liệu. Hãy cận thận!
-            </p>
-            <div className="flex gap-3 flex-wrap">
-              <button
-                onClick={() => {
-                  playClickSound()
-                  if (confirm('Reset tất cả check-in? (Dùng để test hệ thống)')) {
-                    alert('Chức năng này cần thực hiện trực tiếp trên Supabase để an toàn')
-                  }
-                }}
-                className="px-4 py-2.5 rounded-xl border border-red-500/30 text-red-400 text-sm font-semibold hover:bg-red-500/10 transition-colors"
-              >
-                Reset Check-in (Test)
-              </button>
-            </div>
-          </div>
-        </div>
+        </motion.div>
       </main>
     </div>
   )

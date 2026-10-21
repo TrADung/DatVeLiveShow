@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Clock, Music, Mic, Gift, Users, Star } from 'lucide-react'
+import { Clock, Music, Mic, Gift, Users, Star, Sparkles } from 'lucide-react'
 
 interface TimelineEvent {
   time: string
@@ -15,130 +15,134 @@ const timelineEvents: TimelineEvent[] = [
   {
     time: '18:30',
     title: 'Mở Cổng & Đón Khách',
-    description: 'Check-in và nhận vòng tay tại cổng vào, selfie check-in tại photo zone.',
-    icon: <Users size={20} />,
+    description: 'Check-in và nhận vòng tay cờ vua tại cổng vào, chụp ảnh lưu niệm tại Photo Booth.',
+    icon: <Users size={18} />,
   },
   {
     time: '19:00',
     title: 'Khai Mạc Đêm Nhạc',
-    description: 'Nghi lễ khai mạc chính thức, giới thiệu ban nhạc và dàn khách mời đặc biệt.',
-    icon: <Star size={20} />,
+    description: 'Nghi lễ khai mạc chính thức, phát biểu của Chủ nhiệm CLB và giới thiệu dàn nghệ sĩ.',
+    icon: <Star size={18} />,
     highlight: true,
   },
   {
     time: '19:15',
-    title: 'Phần I: Acoustic Journey',
-    description: 'Những bản nhạc acoustic nhẹ nhàng, sâu lắng mở đầu cho đêm nhạc.',
-    icon: <Music size={20} />,
+    title: 'Phần I: Acoustic Opening',
+    description: 'Những bản nhạc acoustic nhẹ nhàng, sâu lắng mở màn với guitar mộc và violin.',
+    icon: <Music size={18} />,
   },
   {
     time: '20:00',
     title: 'Phần II: Live Band Performance',
-    description: 'Ban nhạc CLB trình diễn các ca khúc đặc sắc với âm thanh sống động.',
-    icon: <Mic size={20} />,
+    description: 'Ban nhạc chính CLB trình diễn các ca khúc sôi động và mashup độc quyền.',
+    icon: <Mic size={18} />,
     highlight: true,
   },
   {
     time: '20:45',
-    title: 'Phần III: Guest Artists',
-    description: 'Các nghệ sĩ khách mời đặc biệt mang đến những tiết mục ấn tượng.',
-    icon: <Star size={20} />,
+    title: 'Phần III: Special Guest Artists',
+    description: 'Tiết mục kết hợp đặc sắc giữa ban nhạc và các nghệ sĩ khách mời.',
+    icon: <Sparkles size={18} />,
   },
   {
     time: '21:30',
-    title: 'Tiệc Sinh Nhật & Giao Lưu',
-    description: 'Cắt bánh sinh nhật CLB, giao lưu và thưởng thức tiệc nhẹ cùng ban nhạc.',
-    icon: <Gift size={20} />,
+    title: 'Cắt Bánh Sinh Nhật & Giao Lưu',
+    description: 'Nghi thức thổi nến chúc mừng sinh nhật CLB và tiệc ngọt giao lưu.',
+    icon: <Gift size={18} />,
   },
   {
     time: '21:45',
-    title: '🎰 Quay Số Trúng Thưởng',
-    description: 'Bốc thăm may mắn với những phần quà hấp dẫn dành cho khán giả có mặt.',
-    icon: <Gift size={20} />,
+    title: '🎰 Quay Số Trúng Thưởng (Lucky Draw)',
+    description: 'Bốc thăm trúng thưởng trực tiếp trên sân khấu dành cho tất cả khán giả có mặt.',
+    icon: <Gift size={18} />,
     highlight: true,
   },
   {
     time: '22:15',
-    title: 'Finale & Bế Mạc',
-    description: 'Màn trình diễn kết màn hoành tráng và lời cảm ơn từ CLB.',
-    icon: <Music size={20} />,
+    title: 'Grand Finale & Bế Mạc',
+    description: 'Màn đồng ca tập thể khép lại đêm liveshow và chụp hình kỷ niệm cùng khán giả.',
+    icon: <Music size={18} />,
   },
 ]
 
 export default function TimelineSection() {
   return (
-    <section id="timeline" className="py-20 px-4 relative">
-      <div className="absolute inset-0 chess-bg opacity-20" />
-      
-      <div className="max-w-4xl mx-auto relative z-10">
+    <section id="timeline" className="py-20 px-4 bg-slate-50 border-t border-b border-slate-200">
+      <div className="max-w-4xl mx-auto">
         {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <div className="inline-flex items-center gap-2 text-[#D4AF37] text-sm font-medium mb-4">
-            <Clock size={16} />
-            <span>Lịch Trình</span>
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-1.5 bg-red-50 text-red-600 border border-red-200 text-xs font-bold px-3 py-1 rounded-full mb-3">
+            <Clock size={13} />
+            <span>LỊCH TRÌNH CHÍNH THỨC</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-black text-[#F5F2EB] mb-4">
+          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight mb-3">
             Timeline Sự Kiện
           </h2>
-          <p className="text-[#A8A090]">
-            Hành trình âm nhạc xuyên đêm đặc biệt
+          <p className="text-slate-600 text-sm sm:text-base max-w-lg mx-auto">
+            Hành trình âm nhạc kết nối cảm xúc từ 18:30 đến 22:30
           </p>
-        </motion.div>
+        </div>
 
-        {/* Timeline */}
+        {/* Timeline container */}
         <div className="relative">
-          {/* Vertical line */}
-          <div className="absolute left-[28px] md:left-1/2 top-0 bottom-0 w-0.5 timeline-line md:-translate-x-0.5" />
-          
-          {timelineEvents.map((event, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: '-50px' }}
-              transition={{ delay: index * 0.1 }}
-              className={`relative flex items-start gap-6 mb-8 md:mb-12 ${
-                index % 2 === 0 
-                  ? 'md:flex-row-reverse md:text-right' 
-                  : 'md:flex-row'
-              } pl-16 md:pl-0`}
-            >
-              {/* Timeline dot */}
-              <div className={`absolute left-0 md:left-1/2 md:-translate-x-1/2 flex items-center justify-center
-                              w-14 h-14 rounded-full border-2 z-10 transition-colors
-                              ${event.highlight 
-                                ? 'bg-[#D4AF37] border-[#D4AF37] text-[#121212] glow-gold' 
-                                : 'bg-[#1A1A1A] border-[#6E472B]/50 text-[#D4AF37]'
-                              }`}>
-                {event.icon}
-              </div>
+          {/* Vertical center line */}
+          <div className="absolute left-[24px] md:left-1/2 top-0 bottom-0 w-0.5 bg-slate-200 md:-translate-x-1/2" />
 
-              {/* Content card */}
-              <div className={`flex-1 glass-dark rounded-xl p-4 border
-                              ${event.highlight 
-                                ? 'border-[#D4AF37]/30' 
-                                : 'border-[#6E472B]/20'
-                              } md:max-w-[calc(50%-40px)]`}>
-                <div className={`text-xs font-bold mb-1 ${event.highlight ? 'text-[#D4AF37]' : 'text-[#6E472B]'}`}>
-                  {event.time}
+          <div className="space-y-8 md:space-y-12">
+            {timelineEvents.map((event, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+                className={`relative flex items-start gap-6 ${
+                  index % 2 === 0
+                    ? 'md:flex-row-reverse md:text-right'
+                    : 'md:flex-row'
+                } pl-14 md:pl-0`}
+              >
+                {/* Node icon */}
+                <div
+                  className={`absolute left-0 md:left-1/2 md:-translate-x-1/2 flex items-center justify-center w-12 h-12 rounded-2xl border-2 z-10 transition-transform ${
+                    event.highlight
+                      ? 'bg-red-600 border-red-600 text-white shadow-md shadow-red-600/30'
+                      : 'bg-white border-slate-300 text-slate-700 shadow-xs'
+                  }`}
+                >
+                  {event.icon}
                 </div>
-                <h3 className="text-base font-bold text-[#F5F2EB] mb-1.5">
-                  {event.title}
-                </h3>
-                <p className="text-sm text-[#A8A090] leading-relaxed">
-                  {event.description}
-                </p>
-              </div>
 
-              {/* Empty space for alternating layout */}
-              <div className="hidden md:block flex-1" />
-            </motion.div>
-          ))}
+                {/* Content Card */}
+                <div
+                  className={`flex-1 bg-white rounded-2xl p-5 border transition-all ${
+                    event.highlight
+                      ? 'border-red-300 shadow-md shadow-red-500/5'
+                      : 'border-slate-200 shadow-xs'
+                  } md:max-w-[calc(50%-36px)] hover:border-red-500`}
+                >
+                  <div
+                    className={`inline-block text-xs font-black px-2.5 py-0.5 rounded-md mb-2 ${
+                      event.highlight
+                        ? 'bg-red-600 text-white'
+                        : 'bg-slate-100 text-slate-700'
+                    }`}
+                  >
+                    {event.time}
+                  </div>
+                  <h3 className="text-base font-bold text-slate-900 mb-1.5">
+                    {event.title}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+                    {event.description}
+                  </p>
+                </div>
+
+                {/* Spacer for alternating desktop layout */}
+                <div className="hidden md:block flex-1" />
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

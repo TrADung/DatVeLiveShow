@@ -6,8 +6,8 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Live Show Sinh Nhật CLB - Chess Night",
-  description: "Đặt vé tham dự đêm nhạc sinh nhật câu lạc bộ âm nhạc - Chess Night. Mua vé online nhanh chóng, tiện lợi.",
-  keywords: "live show, âm nhạc, câu lạc bộ, sinh nhật, đặt vé",
+  description: "Đặt vé tham dự đêm nhạc sinh nhật câu lạc bộ âm nhạc - Chess Night. Phong cách Bàn Cờ Vua Trắng - Đỏ - Đen sang trọng và hiện đại.",
+  keywords: "live show, âm nhạc, câu lạc bộ, sinh nhật, đặt vé, chess night",
   openGraph: {
     title: "Live Show Sinh Nhật CLB - Chess Night",
     description: "Đêm nhạc sinh nhật câu lạc bộ âm nhạc - Trải nghiệm âm nhạc đỉnh cao theo phong cách Chess Tournament.",
@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi">
-      <body className={`${inter.className} bg-[#121212] text-white`}>
+      <body className={`${inter.className} bg-[#FAFAFA] text-slate-900 min-h-screen antialiased selection:bg-red-500 selection:text-white`}>
         {children}
       </body>
     </html>

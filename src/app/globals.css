@@ -1,13 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --bg-primary: #121212;
-  --bg-secondary: #1A1A1A;
-  --bg-card: #F5F2EB;
-  --accent-gold: #D4AF37;
-  --accent-walnut: #6E472B;
-  --text-primary: #F5F2EB;
-  --text-secondary: #A8A090;
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F8FAFC;
+  --bg-card: #FFFFFF;
+  --text-primary: #0F172A;
+  --text-secondary: #64748B;
+  --accent-red: #DC2626;
+  --accent-red-hover: #B91C1C;
+  --accent-black: #0F172A;
+  --border-light: #E2E8F0;
 }
 
 * {
@@ -23,66 +25,72 @@ html {
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   overflow-x: hidden;
 }
 
-/* Chess pattern overlay */
-.chess-bg {
+/* Subtle clean chessboard grid for tone sang */
+.chess-grid-light {
+  background-size: 48px 48px;
   background-image: 
-    linear-gradient(rgba(212, 175, 55, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(212, 175, 55, 0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
+    linear-gradient(to right, rgba(15, 23, 42, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(15, 23, 42, 0.04) 1px, transparent 1px);
 }
 
-.chess-pattern {
+.chess-pattern-subtle {
   background-image: repeating-conic-gradient(
-    rgba(212, 175, 55, 0.04) 0% 25%, 
+    rgba(15, 23, 42, 0.02) 0% 25%, 
     transparent 0% 50%
   );
-  background-size: 40px 40px;
+  background-size: 64px 64px;
 }
 
-/* Gold glow effect */
-.glow-gold {
-  box-shadow: 0 0 20px rgba(212, 175, 55, 0.4), 0 0 60px rgba(212, 175, 55, 0.2);
+/* Red glow for key CTAs */
+.glow-red {
+  box-shadow: 0 10px 25px -5px rgba(220, 38, 38, 0.35), 0 8px 10px -6px rgba(220, 38, 38, 0.2);
 }
 
-.glow-gold-sm {
-  box-shadow: 0 0 10px rgba(212, 175, 55, 0.3), 0 0 30px rgba(212, 175, 55, 0.1);
+.glow-red-sm {
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
 }
 
-/* Glassmorphism dark */
-.glass-dark {
-  background: rgba(26, 26, 26, 0.8);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(212, 175, 55, 0.15);
+/* Crisp light cards with subtle border */
+.card-chess {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.glass-light {
-  background: rgba(245, 242, 235, 0.05);
+.card-chess:hover {
+  border-color: #DC2626;
+  box-shadow: 0 10px 20px -5px rgba(15, 23, 42, 0.08);
+}
+
+/* Glass light header */
+.glass-header {
+  background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(245, 242, 235, 0.1);
+  border-bottom: 1px solid #E2E8F0;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar in red & black */
 ::-webkit-scrollbar {
   width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
+  background: #F1F5F9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--accent-gold);
+  background: #DC2626;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #e8c845;
+  background: #B91C1C;
 }
 
 /* Marquee animation */
@@ -92,7 +100,7 @@ body {
 }
 
 .marquee-inner {
-  animation: marquee 30s linear infinite;
+  animation: marquee 35s linear infinite;
   display: flex;
   width: max-content;
 }
@@ -101,61 +109,36 @@ body {
   animation-play-state: paused;
 }
 
-/* Shimmer effect */
-@keyframes shimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-
-.shimmer-gold {
-  background: linear-gradient(
-    90deg,
-    #D4AF37 0%,
-    #F5E17E 25%,
-    #D4AF37 50%,
-    #A8882A 75%,
-    #D4AF37 100%
-  );
-  background-size: 200% auto;
-  animation: shimmer 3s linear infinite;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Button press effect */
-.btn-chess {
-  position: relative;
-  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  transform-style: preserve-3d;
-}
-
-.btn-chess:active {
-  transform: translateY(2px) scale(0.98);
-}
-
 /* Status badges */
 .status-pending {
-  @apply bg-yellow-900/30 text-yellow-400 border border-yellow-500/30;
+  background: #FEF3C7;
+  color: #B45309;
+  border: 1px solid #FCD34D;
 }
 
 .status-paid {
-  @apply bg-green-900/30 text-green-400 border border-green-500/30;
+  background: #DCFCE7;
+  color: #15803D;
+  border: 1px solid #86EFAC;
 }
 
 .status-rejected {
-  @apply bg-red-900/30 text-red-400 border border-red-500/30;
+  background: #FEE2E2;
+  color: #B91C1C;
+  border: 1px solid #FCA5A5;
 }
 
 .status-checked-in {
-  @apply bg-blue-900/30 text-blue-400 border border-blue-500/30;
+  background: #DBEAFE;
+  color: #1D4ED8;
+  border: 1px solid #93C5FD;
 }
 
-/* QR scanner overlay */
+/* QR scanner target overlay */
 .qr-scanner-overlay {
   position: absolute;
   inset: 0;
-  border: 2px solid rgba(212, 175, 55, 0.6);
+  border: 2px solid rgba(220, 38, 38, 0.8);
   border-radius: 12px;
 }
 
@@ -163,7 +146,7 @@ body {
   position: absolute;
   width: 24px;
   height: 24px;
-  border-color: #D4AF37;
+  border-color: #DC2626;
   border-style: solid;
 }
 
@@ -171,45 +154,3 @@ body {
 .qr-corner-tr { top: 0; right: 0; border-width: 3px 3px 0 0; border-radius: 0 8px 0 0; }
 .qr-corner-bl { bottom: 0; left: 0; border-width: 0 0 3px 3px; border-radius: 0 0 0 8px; }
 .qr-corner-br { bottom: 0; right: 0; border-width: 0 3px 3px 0; border-radius: 0 0 8px 0; }
-
-/* Animations */
-@keyframes pulse-gold {
-  0%, 100% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); }
-  50% { box-shadow: 0 0 40px rgba(212, 175, 55, 0.8), 0 0 80px rgba(212, 175, 55, 0.4); }
-}
-
-.pulse-gold {
-  animation: pulse-gold 2s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
-}
-
-.float-anim {
-  animation: float 3s ease-in-out infinite;
-}
-
-/* Timeline */
-.timeline-line {
-  background: linear-gradient(to bottom, transparent, #D4AF37, transparent);
-}
-
-/* Bento grid */
-.bento-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
-}
-
-/* Lucky draw */
-@keyframes lucky-spin {
-  0% { opacity: 1; }
-  50% { opacity: 0.3; }
-  100% { opacity: 1; }
-}
-
-.lucky-spinning {
-  animation: lucky-spin 0.1s linear infinite;
-}

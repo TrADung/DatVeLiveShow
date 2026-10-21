@@ -13,8 +13,8 @@ export default function MusicPlayer() {
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
   useEffect(() => {
-    // Show after 2 seconds
-    const timer = setTimeout(() => setIsVisible(true), 2000)
+    // Show after 1.5 seconds
+    const timer = setTimeout(() => setIsVisible(true), 1500)
     return () => clearTimeout(timer)
   }, [])
 
@@ -22,7 +22,6 @@ export default function MusicPlayer() {
     const handleFirstInteraction = () => {
       if (!hasInteracted) {
         setHasInteracted(true)
-        // Auto-play ambient music on first interaction
         if (audioRef.current && !isMuted) {
           audioRef.current.play().catch(() => {})
         }
@@ -42,7 +41,7 @@ export default function MusicPlayer() {
     const newMuted = !isMuted
     setIsMuted(newMuted)
     toggleAudioMute()
-    
+
     if (audioRef.current) {
       if (newMuted) {
         audioRef.current.pause()
@@ -54,46 +53,28 @@ export default function MusicPlayer() {
 
   return (
     <>
-      {/* Ambient music - using a looping ambient track */}
       <audio
         ref={audioRef}
         loop
         preload="none"
         style={{ display: 'none' }}
       />
-      
+
       <AnimatePresence>
         {isVisible && (
           <motion.button
-            initial={{ opacity: 0, scale: 0.5, y: 20 }}
+            initial={{ opacity: 0, scale: 0.6, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.5 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            exit={{ opacity: 0, scale: 0.6 }}
             onClick={handleToggle}
-            className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full glass-dark 
-                       flex items-center justify-center cursor-pointer 
-                       border border-[#D4AF37]/30 hover:border-[#D4AF37]/60
-                       transition-all duration-300 hover:glow-gold-sm group"
-            title={isMuted ? 'Bật nhạc nền' : 'Tắt nhạc nền'}
+            className="fixed bottom-6 left-6 z-40 w-11 h-11 rounded-full bg-white text-slate-800 shadow-lg border border-slate-200 hover:border-red-600 hover:text-red-600 flex items-center justify-center cursor-pointer transition-all duration-200"
+            title={isMuted ? 'Bật âm thanh & nhạc nền' : 'Tắt âm thanh'}
+            aria-label="Toggle sound"
           >
-            <motion.div
-              animate={{ rotate: isMuted ? 0 : [0, -5, 5, -5, 0] }}
-              transition={{ duration: 0.5, repeat: isMuted ? 0 : Infinity, repeatDelay: 3 }}
-            >
-              {isMuted ? (
-                <VolumeX size={20} className="text-[#A8A090] group-hover:text-[#D4AF37] transition-colors" />
-              ) : (
-                <Volume2 size={20} className="text-[#D4AF37]" />
-              )}
-            </motion.div>
-            
-            {/* Ripple when playing */}
-            {!isMuted && (
-              <motion.span
-                className="absolute inset-0 rounded-full border border-[#D4AF37]/40"
-                animate={{ scale: [1, 1.5, 2], opacity: [0.5, 0.2, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              />
+            {isMuted ? (
+              <VolumeX size={18} className="text-slate-500" />
+            ) : (
+              <Volume2 size={18} className="text-red-600" />
             )}
           </motion.button>
         )}
