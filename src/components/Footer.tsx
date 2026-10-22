@@ -5,7 +5,7 @@ import { Ticket, Mail, Phone, MapPin, Sparkles, ArrowUpRight } from 'lucide-reac
 import { useAudio } from '@/hooks/useAudio'
 
 interface FooterProps {
-  onBuyTicket: () => void
+  onBuyTicket?: () => void
 }
 
 export default function Footer({ onBuyTicket }: FooterProps) {
@@ -108,13 +108,14 @@ export default function Footer({ onBuyTicket }: FooterProps) {
             © 2025 CLB Âm Nhạc • Chess Night Concert. Ngôn ngữ thiết kế Cờ Vua Đen Nhám - Vàng Champagne - Đỏ Nhung.
           </p>
 
-          <button
-            onClick={() => { playClickSound(); onBuyTicket() }}
+          <Link
+            href="/book"
+            onClick={playClickSound}
             className="btn-gold flex items-center gap-2 text-xs font-black px-6 py-3 rounded-xl shadow-lg cursor-pointer"
           >
             <Ticket size={16} />
             <span>ĐẶT VÉ THAM DỰ NGAY</span>
-          </button>
+          </Link>
         </div>
       </div>
     </footer>

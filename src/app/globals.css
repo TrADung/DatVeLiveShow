@@ -14,12 +14,6 @@
   --border-gold: rgba(212, 175, 55, 0.25);
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
 html {
   scroll-behavior: smooth;
   color-scheme: dark;

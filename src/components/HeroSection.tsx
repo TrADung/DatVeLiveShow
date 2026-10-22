@@ -1,12 +1,13 @@
 'use client'
 
 import { useRef } from 'react'
+import Link from 'next/link'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { Ticket, ArrowDown, Music, Calendar, MapPin, Clock, Sparkles } from 'lucide-react'
 import { useAudio } from '@/hooks/useAudio'
 
 interface HeroSectionProps {
-  onBuyTicket: () => void
+  onBuyTicket?: () => void
 }
 
 export default function HeroSection({ onBuyTicket }: HeroSectionProps) {
@@ -26,7 +27,7 @@ export default function HeroSection({ onBuyTicket }: HeroSectionProps) {
 
   const handleBuyClick = () => {
     playClickSound()
-    onBuyTicket()
+    if (onBuyTicket) onBuyTicket()
   }
 
   const handleScrollDown = () => {
@@ -126,14 +127,15 @@ export default function HeroSection({ onBuyTicket }: HeroSectionProps) {
           transition={{ duration: 0.4, delay: 0.4 }}
           className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto"
         >
-          <button
-            onClick={handleBuyClick}
-            className="w-full sm:w-auto btn-gold px-9 py-4.5 rounded-2xl text-base sm:text-lg flex items-center justify-center gap-3 cursor-pointer shadow-xl active:scale-95"
+          <Link
+            href="/book"
+            onClick={playClickSound}
+            className="w-full sm:w-auto btn-gold px-9 py-4.5 rounded-2xl text-base sm:text-lg flex items-center justify-center gap-3 cursor-pointer shadow-xl active:scale-95 transition-transform"
           >
             <Ticket size={20} />
             <span>MUA VÉ NGAY</span>
             <span className="text-xl">→</span>
-          </button>
+          </Link>
 
           <button
             onClick={handleScrollDown}

@@ -84,11 +84,7 @@ export default function Header({ onOpenBooking }: HeaderProps) {
 
   const handleBookingClick = () => {
     playClickSound()
-    if (onOpenBooking) {
-      onOpenBooking()
-    } else {
-      router.push('/book')
-    }
+    router.push('/book')
   }
 
   return (

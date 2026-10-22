@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 import HeroSection from '@/components/HeroSection'
 import TimelineSection from '@/components/TimelineSection'
@@ -9,27 +9,26 @@ import SponsorsMarquee from '@/components/SponsorsMarquee'
 import MusicPlayer from '@/components/MusicPlayer'
 import MinigameSection from '@/components/MinigameSection'
 import Footer from '@/components/Footer'
-import BookingModal from '@/components/BookingModal'
 import { useAudio } from '@/hooks/useAudio'
 
 export default function HomePage() {
-  const [isBookingOpen, setIsBookingOpen] = useState(false)
+  const router = useRouter()
   const { playClickSound } = useAudio()
 
-  const handleOpenBooking = () => {
+  const handleGoToBooking = () => {
     playClickSound()
-    setIsBookingOpen(true)
+    router.push('/book')
   }
 
   return (
     <div className="relative w-full min-h-screen bg-[#0D0D0D] text-white flex flex-col">
       {/* Sticky Header with Backdrop Blur */}
-      <Header onOpenBooking={handleOpenBooking} />
+      <Header onOpenBooking={handleGoToBooking} />
       
       {/* Main Document Flow with Relative Blocks */}
       <main className="relative w-full flex-1 block">
         {/* Hero Section */}
-        <HeroSection onBuyTicket={handleOpenBooking} />
+        <HeroSection onBuyTicket={handleGoToBooking} />
         
         {/* Artistic Zigzag Timeline with Central Axis */}
         <TimelineSection />
@@ -45,13 +44,7 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <Footer onBuyTicket={handleOpenBooking} />
-
-      {/* Independent Booking Modal Portal */}
-      <BookingModal
-        isOpen={isBookingOpen}
-        onClose={() => setIsBookingOpen(false)}
-      />
+      <Footer onBuyTicket={handleGoToBooking} />
 
       {/* Ambient Music Player */}
       <MusicPlayer />
