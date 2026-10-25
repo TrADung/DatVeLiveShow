@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Camera, CheckCircle, XCircle, AlertTriangle, Loader2, X, User, Hash, Building, Calendar, ArrowLeft } from 'lucide-react'
+import { Camera, CheckCircle, XCircle, AlertTriangle, Loader2, X, User, Hash, Building, Calendar, ArrowLeft, Shield } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useAudio } from '@/hooks/useAudio'
 import { formatDate, formatDateTime } from '@/lib/utils'
@@ -38,58 +38,7 @@ export default function QRScannerPage() {
   const [checkInSuccess, setCheckInSuccess] = useState(false)
   const html5QrcodeRef = useRef<any>(null)
 
-  const startScanner = useCallback(async () => {
-    playClickSound()
-    setScanning(true)
-    setScanResult(null)
-    setCheckInSuccess(false)
-
-    try {
-      const { Html5Qrcode } = await import('html5-qrcode')
-      const scanner = new Html5Qrcode('qr-reader')
-      html5QrcodeRef.current = scanner
-
-      await scanner.start(
-        { facingMode: 'environment' },
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        async (decodedText: string) => {
-          try {
-            await scanner.stop()
-          } catch {}
-          setScanning(false)
-          await handleQRScan(decodedText)
-        },
-        () => {}
-      )
-    } catch (err) {
-      console.error('Camera access error:', err)
-      setScanning(false)
-      playErrorSound()
-    }
-  }, [playClickSound, playErrorSound])
-
-  const stopScanner = useCallback(async () => {
-    playClickSound()
-    if (html5QrcodeRef.current) {
-      try {
-        await html5QrcodeRef.current.stop()
-      } catch {}
-      html5QrcodeRef.current = null
-    }
-    setScanning(false)
-  }, [playClickSound])
-
-  useEffect(() => {
-    return () => {
-      if (html5QrcodeRef.current) {
-        try {
-          html5QrcodeRef.current.stop()
-        } catch {}
-      }
-    }
-  }, [])
-
-  const handleQRScan = async (qrData: string) => {
+  const handleQRScan = useCallback(async (qrData: string) => {
     try {
       let parsed = { ticket_id: '', hash: '' }
       try {
@@ -151,7 +100,58 @@ export default function QRScannerPage() {
         setScanResult({ status: 'error', error: 'Không đọc được mã QR' })
       }
     }
-  }
+  }, [playErrorSound, playSuccessSound])
+
+  const startScanner = useCallback(async () => {
+    playClickSound()
+    setScanning(true)
+    setScanResult(null)
+    setCheckInSuccess(false)
+
+    try {
+      const { Html5Qrcode } = await import('html5-qrcode')
+      const scanner = new Html5Qrcode('qr-reader')
+      html5QrcodeRef.current = scanner
+
+      await scanner.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        async (decodedText: string) => {
+          try {
+            await scanner.stop()
+          } catch {}
+          setScanning(false)
+          await handleQRScan(decodedText)
+        },
+        () => {}
+      )
+    } catch (err) {
+      console.error('Camera access error:', err)
+      setScanning(false)
+      playErrorSound()
+    }
+  }, [handleQRScan, playClickSound, playErrorSound])
+
+  const stopScanner = useCallback(async () => {
+    playClickSound()
+    if (html5QrcodeRef.current) {
+      try {
+        await html5QrcodeRef.current.stop()
+      } catch {}
+      html5QrcodeRef.current = null
+    }
+    setScanning(false)
+  }, [playClickSound])
+
+  useEffect(() => {
+    return () => {
+      if (html5QrcodeRef.current) {
+        try {
+          html5QrcodeRef.current.stop()
+        } catch {}
+      }
+    }
+  }, [])
 
   const handleConfirmCheckIn = async () => {
     if (!scanResult?.ticket) return
@@ -171,6 +171,45 @@ export default function QRScannerPage() {
     } finally {
       setConfirmingCheckIn(false)
     }
+  }
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0C] text-white flex flex-col items-center justify-center">
+        <Loader2 size={36} className="animate-spin text-[#D4AF37] mb-4" />
+        <p className="text-xs uppercase tracking-widest text-neutral-400 font-bold">
+          Đang xác thực bảo mật...
+        </p>
+      </div>
+    )
+  }
+
+  const isAuthorized = user && (userRole === 'admin' || userRole === 'dev')
+
+  if (!isAuthorized) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0C] text-white flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="max-w-md w-full bg-[#141416] border border-red-500/30 rounded-3xl p-8 text-center shadow-2xl">
+            <div className="w-16 h-16 rounded-full bg-red-950/50 border border-red-500/40 text-red-500 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-red-500/20">
+              <Shield size={32} />
+            </div>
+            <h2 className="text-xl font-black text-white mb-2">TRUY CẬP BỊ TỪ CHỐI</h2>
+            <p className="text-xs text-neutral-400 leading-relaxed mb-6">
+              Trang soát vé check-in chỉ dành riêng cho Ban Tổ Chức (Admin). Bạn không có quyền truy cập vào khu vực này.
+            </p>
+            <Link
+              href="/"
+              className="btn-gold w-full py-3 rounded-xl text-xs font-bold inline-flex items-center justify-center gap-2"
+            >
+              <ArrowLeft size={15} />
+              <span>Quay Lại Trang Chủ</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

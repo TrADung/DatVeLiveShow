@@ -51,7 +51,8 @@ export default function AdminDashboard() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [sendingEmails, setSendingEmails] = useState(false)
-  const [emailResult, setEmailResult] = useState<string | null>(null)
+  const [sendingSingleEmail, setSendingSingleEmail] = useState(false)
+  const [emailResult, setEmailResult] = useState<{ type: 'success' | 'error' | 'warning'; message: string } | null>(null)
   const [selectedTicket, setSelectedTicket] = useState<TicketType | null>(null)
   const [verifying, setVerifying] = useState<string | null>(null)
 
@@ -98,11 +99,11 @@ export default function AdminDashboard() {
   }
 
   useEffect(() => {
-    if (!authLoading) {
+    if (!authLoading && user && (userRole === 'admin' || userRole === 'dev')) {
       fetchStats()
       fetchTickets()
     }
-  }, [authLoading, statusFilter])
+  }, [authLoading, user, userRole, statusFilter])
 
   const handleVerify = async (ticketId: string, action: 'approve' | 'reject') => {
     playClickSound()
@@ -133,14 +134,82 @@ export default function AdminDashboard() {
     try {
       const res = await fetch('/api/admin/send-emails', { method: 'POST' })
       const data = await res.json()
-      setEmailResult(data.message)
-      playSuccessSound()
+
+      if (!res.ok) {
+        setEmailResult({
+          type: 'error',
+          message: data.error || 'Có lỗi xảy ra khi gọi dịch vụ gửi email.',
+        })
+        playErrorSound()
+        return
+      }
+
+      if (data.sentCount > 0) {
+        setEmailResult({
+          type: 'success',
+          message: `Đã gửi thành công ${data.sentCount}/${data.total} vé qua email!`,
+        })
+        playSuccessSound()
+      } else if (data.errors && data.errors.length > 0) {
+        setEmailResult({
+          type: 'error',
+          message: data.error || `Không thể gửi email: ${data.errors.join(', ')}`,
+        })
+        playErrorSound()
+      } else {
+        setEmailResult({
+          type: 'warning',
+          message: data.message || 'Không có vé nào cần gửi email (các vé đã được gửi hoặc chưa được duyệt).',
+        })
+        playSuccessSound()
+      }
       fetchStats()
+      fetchTickets()
     } catch {
-      setEmailResult('Có lỗi xảy ra khi gửi email')
+      setEmailResult({
+        type: 'error',
+        message: 'Có lỗi xảy ra khi kết nối máy chủ gửi email.',
+      })
       playErrorSound()
     } finally {
       setSendingEmails(false)
+    }
+  }
+
+  const handleSendSingleEmail = async (ticketId: string) => {
+    playClickSound()
+    setSendingSingleEmail(true)
+    setEmailResult(null)
+    try {
+      const res = await fetch('/api/admin/send-emails', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticket_id: ticketId }),
+      })
+      const data = await res.json()
+      if (res.ok && data.sentCount > 0) {
+        setEmailResult({
+          type: 'success',
+          message: 'Đã gửi vé qua email cho khán giả này thành công!',
+        })
+        playSuccessSound()
+      } else {
+        setEmailResult({
+          type: 'error',
+          message: data.error || 'Không thể gửi vé qua email.',
+        })
+        playErrorSound()
+      }
+      fetchStats()
+      fetchTickets()
+    } catch {
+      setEmailResult({
+        type: 'error',
+        message: 'Lỗi kết nối khi gửi email.',
+      })
+      playErrorSound()
+    } finally {
+      setSendingSingleEmail(false)
     }
   }
 
@@ -194,7 +263,7 @@ export default function AdminDashboard() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `chess-night-tickets-${new Date().toISOString().split('T')[0]}.csv`
+    a.download = `sac-i-van-co-tickets-${new Date().toISOString().split('T')[0]}.csv`
     a.click()
   }
 
@@ -204,6 +273,45 @@ export default function AdminDashboard() {
     t.order_code.toLowerCase().includes(searchQuery.toLowerCase()) ||
     t.user_email.toLowerCase().includes(searchQuery.toLowerCase())
   )
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0C] text-white flex flex-col items-center justify-center">
+        <Loader2 size={36} className="animate-spin text-[#D4AF37] mb-4" />
+        <p className="text-xs uppercase tracking-widest text-neutral-400 font-bold">
+          Đang xác thực quyền quản trị...
+        </p>
+      </div>
+    )
+  }
+
+  const isAuthorized = user && (userRole === 'admin' || userRole === 'dev')
+
+  if (!isAuthorized) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0C] text-white flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="max-w-md w-full bg-[#141416] border border-red-500/30 rounded-3xl p-8 text-center shadow-2xl">
+            <div className="w-16 h-16 rounded-full bg-red-950/50 border border-red-500/40 text-red-500 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-red-500/20">
+              <Shield size={32} />
+            </div>
+            <h2 className="text-xl font-black text-white mb-2">TRUY CẬP BỊ TỪ CHỐI</h2>
+            <p className="text-xs text-neutral-400 leading-relaxed mb-6">
+              Trang quản trị này chỉ dành riêng cho Ban Tổ Chức (Admin). Bạn không có quyền truy cập vào khu vực này.
+            </p>
+            <Link
+              href="/"
+              className="btn-gold w-full py-3 rounded-xl text-xs font-bold inline-flex items-center justify-center gap-2"
+            >
+              <ArrowLeft size={15} />
+              <span>Quay Lại Trang Chủ</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-[#0A0A0C] text-white pb-24">
@@ -275,9 +383,33 @@ export default function AdminDashboard() {
           </div>
 
           {emailResult && (
-            <div className="mb-6 p-4 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-xs font-semibold flex items-center gap-2.5">
-              <CheckCircle size={18} className="text-emerald-400 shrink-0" />
-              <span>{emailResult}</span>
+            <div
+              className={`mb-6 p-4 rounded-2xl text-xs font-semibold flex items-center justify-between gap-3 ${
+                emailResult.type === 'success'
+                  ? 'bg-emerald-950/40 border border-emerald-500/30 text-emerald-300'
+                  : emailResult.type === 'error'
+                  ? 'bg-rose-950/40 border border-rose-500/40 text-rose-300'
+                  : 'bg-amber-950/40 border border-amber-500/30 text-amber-300'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                {emailResult.type === 'success' ? (
+                  <CheckCircle size={18} className="text-emerald-400 shrink-0" />
+                ) : (
+                  <AlertTriangle
+                    size={18}
+                    className={emailResult.type === 'error' ? 'text-rose-400 shrink-0' : 'text-amber-400 shrink-0'}
+                  />
+                )}
+                <span>{emailResult.message}</span>
+              </div>
+              <button
+                onClick={() => setEmailResult(null)}
+                className="text-white/60 hover:text-white text-xs cursor-pointer ml-auto"
+                title="Đóng thông báo"
+              >
+                ✕
+              </button>
             </div>
           )}
 
@@ -580,6 +712,19 @@ export default function AdminDashboard() {
                 </button>
               </div>
             )}
+
+            {selectedTicket.payment_status === 'paid' && (
+              <div className="p-4 bg-white/5 border-t border-white/10 flex gap-3">
+                <button
+                  disabled={sendingSingleEmail}
+                  onClick={() => handleSendSingleEmail(selectedTicket.id)}
+                  className="flex-1 bg-[#D4AF37] hover:bg-[#F0CA50] text-[#0D0D0D] font-black py-3 rounded-xl text-xs transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg"
+                >
+                  {sendingSingleEmail ? <Loader2 size={15} className="animate-spin" /> : <Mail size={15} />}
+                  <span>{selectedTicket.is_email_sent ? '🔄 Gửi Lại Vé Qua Email' : '✉️ Gửi Vé Qua Email'}</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -597,7 +742,7 @@ export default function AdminDashboard() {
 
             <div className="text-4xl mb-2">🎰</div>
             <h2 className="text-2xl font-black text-white tracking-tight">QUAY SỐ TRÚNG THƯỞNG</h2>
-            <p className="text-xs text-slate-400 mb-6 uppercase tracking-wider">Chess Night Lucky Draw Stage</p>
+            <p className="text-xs text-slate-400 mb-6 uppercase tracking-wider">SẮC I. VÁN CỜ Stage</p>
 
             {/* Lucky spin counter */}
             <div className="bg-[#0A0A0C] border border-white/10 rounded-2xl p-6 mb-6 shadow-inner">

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Mail, Lock, User, ArrowRight, Shield, Crown, AlertCircle, Loader2 } from 'lucide-react'
+import { X, Mail, Lock, User, ArrowRight, AlertCircle, Loader2 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useAudio } from '@/hooks/useAudio'
 
@@ -11,10 +11,10 @@ interface AuthModalProps {
   onClose: () => void
 }
 
-type AuthTab = 'login' | 'register' | 'quick'
+type AuthTab = 'login' | 'register'
 
 export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
-  const { signInWithGoogle, signInWithEmail, signUpWithEmail, quickDemoLogin } = useAuth()
+  const { signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth()
   const { playClickSound, playSuccessSound, playErrorSound } = useAudio()
 
   const [tab, setTab] = useState<AuthTab>('login')
@@ -23,6 +23,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [fullName, setFullName] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [successMsg, setSuccessMsg] = useState<string | null>(null)
   const [googleNotice, setGoogleNotice] = useState<string | null>(null)
 
   const handleGoogleSignIn = async () => {
@@ -41,7 +42,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         msg.includes('validation_failed')
       ) {
         setGoogleNotice(
-          'Google OAuth chưa được kích hoạt trên Supabase Dashboard. Vui lòng bấm sang tab "⚡ Đăng Nhập Nhanh" hoặc dùng Email bên dưới để trải nghiệm ngay!'
+          'Google OAuth chưa được kích hoạt trên Supabase. Vui lòng sử dụng Đăng nhập bằng Email và Mật khẩu bên dưới.'
         )
       } else {
         setError(msg || 'Không thể đăng nhập bằng Google lúc này.')
@@ -55,6 +56,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     playClickSound()
     setLoading(true)
     setError(null)
+    setSuccessMsg(null)
 
     if (tab === 'login') {
       const { error: err } = await signInWithEmail(email, password)
@@ -74,24 +76,17 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         setLoading(false)
       } else {
         playSuccessSound()
-        onClose()
+        setSuccessMsg('Đăng ký tài khoản thành công! Vui lòng kiểm tra email để xác nhận (nếu Supabase bật email confirmation) hoặc đăng nhập ngay.')
+        setTab('login')
+        setLoading(false)
       }
     }
-  }
-
-  const handleQuickLogin = async (demoEmail: string, role: 'user' | 'admin' | 'dev', name: string) => {
-    playClickSound()
-    setLoading(true)
-    await quickDemoLogin(demoEmail, role, name)
-    playSuccessSound()
-    setLoading(false)
-    onClose()
   }
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm">
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -101,10 +96,10 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             {/* Header with Chess theme */}
             <div className="relative bg-slate-900 px-6 py-5 text-white flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <span className="text-xl text-red-500">♟</span>
+                <span className="text-xl text-[#D4AF37]">♟</span>
                 <div>
-                  <h3 className="text-base font-black tracking-wider uppercase">Đăng Nhập Chess Night</h3>
-                  <p className="text-xs text-slate-300 font-medium">Live Show Sinh Nhật CLB Âm Nhạc</p>
+                  <h3 className="text-base font-black tracking-wider uppercase">Đăng Nhập SẮC I. VÁN CỜ</h3>
+                  <p className="text-xs text-slate-300 font-medium">Live Show Sinh Nhật CLB DTU Acoustic</p>
                 </div>
               </div>
               <button
@@ -121,7 +116,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 <div className="mb-4 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5">
                   <AlertCircle size={16} className="text-amber-600 mt-0.5 shrink-0" />
                   <div className="leading-relaxed">
-                    <p className="font-bold mb-1">Chưa bật Google Provider trên Supabase</p>
+                    <p className="font-bold mb-1">Chưa bật Google Provider</p>
                     <p>{googleNotice}</p>
                   </div>
                 </div>
@@ -131,6 +126,13 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs flex items-center gap-2">
                   <AlertCircle size={15} className="shrink-0" />
                   <span>{error}</span>
+                </div>
+              )}
+
+              {successMsg && (
+                <div className="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2">
+                  <AlertCircle size={15} className="shrink-0 text-emerald-600" />
+                  <span>{successMsg}</span>
                 </div>
               )}
 
@@ -155,7 +157,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   <div className="w-full border-t border-slate-200" />
                 </div>
                 <span className="relative bg-white px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  Hoặc
+                  Hoặc bằng Email
                 </span>
               </div>
 
@@ -166,148 +168,79 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   onClick={() => { playClickSound(); setTab('login'); setError(null) }}
                   className={`flex-1 py-2 rounded-lg transition-all cursor-pointer ${tab === 'login' ? 'bg-white text-slate-900 shadow-xs' : 'hover:text-slate-900'}`}
                 >
-                  Email
+                  Đăng Nhập
                 </button>
                 <button
                   type="button"
                   onClick={() => { playClickSound(); setTab('register'); setError(null) }}
                   className={`flex-1 py-2 rounded-lg transition-all cursor-pointer ${tab === 'register' ? 'bg-white text-slate-900 shadow-xs' : 'hover:text-slate-900'}`}
                 >
-                  Đăng Ký
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { playClickSound(); setTab('quick'); setError(null) }}
-                  className={`flex-1 py-2 rounded-lg transition-all cursor-pointer ${tab === 'quick' ? 'bg-white text-red-600 shadow-xs font-black' : 'hover:text-slate-900'}`}
-                >
-                  ⚡ Đăng Nhập Nhanh
+                  Tạo Tài Khoản
                 </button>
               </div>
 
               {/* Tab: Login / Register with Email */}
-              {(tab === 'login' || tab === 'register') && (
-                <form onSubmit={handleEmailSubmit} className="space-y-3.5">
-                  {tab === 'register' && (
-                    <div>
-                      <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1">
-                        <User size={13} className="text-red-600" />
-                        <span>Họ và tên</span>
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                        placeholder="Nguyễn Văn A"
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all font-medium"
-                      />
-                    </div>
-                  )}
-
+              <form onSubmit={handleEmailSubmit} className="space-y-3.5">
+                {tab === 'register' && (
                   <div>
                     <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1">
-                      <Mail size={13} className="text-red-600" />
-                      <span>Địa chỉ Email</span>
+                      <User size={13} className="text-red-600" />
+                      <span>Họ và tên</span>
                     </label>
                     <input
-                      type="email"
+                      type="text"
                       required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="tenban@gmail.com"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Nguyễn Văn A"
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all font-medium"
                     />
                   </div>
+                )}
 
-                  <div>
-                    <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1">
-                      <Lock size={13} className="text-red-600" />
-                      <span>Mật khẩu</span>
-                    </label>
-                    <input
-                      type="password"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all font-medium"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full mt-2 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl shadow-md shadow-red-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                  >
-                    {loading ? <Loader2 size={16} className="animate-spin" /> : (
-                      <>
-                        <span>{tab === 'login' ? 'Đăng Nhập' : 'Tạo Tài Khoản'}</span>
-                        <ArrowRight size={16} />
-                      </>
-                    )}
-                  </button>
-                </form>
-              )}
-
-              {/* Tab: Quick demo logins */}
-              {tab === 'quick' && (
-                <div className="space-y-2.5">
-                  <p className="text-xs text-slate-500 mb-2 font-medium">
-                    Đăng nhập 1-click không cần mật khẩu để thử nghiệm ngay:
-                  </p>
-
-                  <button
-                    type="button"
-                    onClick={() => handleQuickLogin('khangia@gmail.com', 'user', 'Khán Giả Test')}
-                    className="w-full flex items-center justify-between p-3 rounded-2xl border border-slate-200 hover:border-slate-900 bg-slate-50 hover:bg-white text-left transition-all cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-800 flex items-center justify-center text-sm font-bold">
-                        👤
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-slate-900">Khán Giả (User)</div>
-                        <div className="text-[11px] text-slate-500">khangia@gmail.com - Đặt vé, xem vé QR</div>
-                      </div>
-                    </div>
-                    <span className="text-xs font-bold text-red-600">Vào →</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleQuickLogin('admin@clbamnhac.com', 'admin', 'BTC Chess Night')}
-                    className="w-full flex items-center justify-between p-3 rounded-2xl border border-red-200 hover:border-red-600 bg-red-50/40 hover:bg-red-50 text-left transition-all cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center text-sm">
-                        <Shield size={16} />
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-slate-900">Ban Tổ Chức (Admin)</div>
-                        <div className="text-[11px] text-slate-500">admin@clbamnhac.com - Thống kê, duyệt vé, quét QR</div>
-                      </div>
-                    </div>
-                    <span className="text-xs font-bold text-red-600">Vào →</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleQuickLogin('dev@clbamnhac.com', 'dev', 'Developer Lead')}
-                    className="w-full flex items-center justify-between p-3 rounded-2xl border border-slate-900 bg-slate-900 text-white text-left transition-all cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center text-sm">
-                        <Crown size={16} />
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-white">Developer (Dev Panel)</div>
-                        <div className="text-[11px] text-slate-300">dev@clbamnhac.com - Toàn quyền cấu hình nóng</div>
-                      </div>
-                    </div>
-                    <span className="text-xs font-bold text-amber-400">Vào →</span>
-                  </button>
+                <div>
+                  <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1">
+                    <Mail size={13} className="text-red-600" />
+                    <span>Địa chỉ Email</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="tenban@gmail.com"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all font-medium"
+                  />
                 </div>
-              )}
+
+                <div>
+                  <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1">
+                    <Lock size={13} className="text-red-600" />
+                    <span>Mật khẩu</span>
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-all font-medium"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full mt-2 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl shadow-md shadow-red-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  {loading ? <Loader2 size={16} className="animate-spin" /> : (
+                    <>
+                      <span>{tab === 'login' ? 'Đăng Nhập' : 'Tạo Tài Khoản Mới'}</span>
+                      <ArrowRight size={16} />
+                    </>
+                  )}
+                </button>
+              </form>
             </div>
           </motion.div>
         </div>

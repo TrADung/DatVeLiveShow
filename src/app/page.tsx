@@ -4,9 +4,8 @@ import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 import HeroSection from '@/components/HeroSection'
 import TimelineSection from '@/components/TimelineSection'
+import DressCodeSection from '@/components/DressCodeSection'
 import ActivitiesSection from '@/components/ActivitiesSection'
-import SponsorsMarquee from '@/components/SponsorsMarquee'
-import MusicPlayer from '@/components/MusicPlayer'
 import MinigameSection from '@/components/MinigameSection'
 import Footer from '@/components/Footer'
 import { useAudio } from '@/hooks/useAudio'
@@ -32,22 +31,19 @@ export default function HomePage() {
         
         {/* Artistic Zigzag Timeline with Central Axis */}
         <TimelineSection />
+
+        {/* Dress Code Section */}
+        <DressCodeSection />
         
         {/* Club Activities Bento Grid */}
         <ActivitiesSection />
         
-        {/* Infinite Partners Marquee */}
-        <SponsorsMarquee />
-        
-        {/* Stage Minigame & Countdown Section */}
+        {/* Stage Countdown Section */}
         <MinigameSection />
       </main>
 
       {/* Footer */}
       <Footer onBuyTicket={handleGoToBooking} />
-
-      {/* Ambient Music Player */}
-      <MusicPlayer />
     </div>
   )
 }

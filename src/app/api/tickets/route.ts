@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { generateOrderCode, generateQRHash } from '@/lib/utils'
+
+function getAdminSupabase() {
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!serviceKey || serviceKey.includes('placeholder')) return null
+  return createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    serviceKey,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  )
+}
 
 // In-memory fallback cache in case Supabase schema hasn't been migrated yet
 const localTicketStore: any[] = []
@@ -24,7 +35,7 @@ export async function POST(request: NextRequest) {
     const lucky_number = Math.floor(1000 + Math.random() * 9000)
     const ticket_id = crypto.randomUUID()
     const qr_secret_hash = generateQRHash(ticket_id, order_code)
-    const amount = 150000
+    const amount = 70000
 
     const newTicket = {
       id: ticket_id,
@@ -47,7 +58,26 @@ export async function POST(request: NextRequest) {
       updated_at: new Date().toISOString(),
     }
 
-    // Try saving to Supabase
+    // 1. Try saving with Admin Supabase Client (bypasses RLS safely on server)
+    const adminSupabase = getAdminSupabase()
+    if (adminSupabase) {
+      try {
+        const { data, error } = await adminSupabase
+          .from('tickets')
+          .insert(newTicket)
+          .select()
+          .single()
+
+        if (!error && data) {
+          return NextResponse.json(data, { status: 201 })
+        }
+        if (error) console.error('Admin ticket insert error:', error)
+      } catch (adminErr) {
+        console.warn('Admin insert error:', adminErr)
+      }
+    }
+
+    // 2. Fallback to standard Supabase client
     try {
       const supabase = await createClient()
       const { data, error } = await supabase
@@ -59,8 +89,11 @@ export async function POST(request: NextRequest) {
       if (!error && data) {
         return NextResponse.json(data, { status: 201 })
       }
-    } catch {
-      // Supabase table not created yet or RLS blocked
+      if (error) {
+        console.error('Supabase ticket insert error:', error)
+      }
+    } catch (clientErr) {
+      console.error('Supabase ticket insert exception:', clientErr)
     }
 
     // Fallback store

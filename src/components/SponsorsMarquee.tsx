@@ -1,9 +1,9 @@
 'use client'
 
 const tickerItems = [
-  { text: 'CHESS NIGHT LIVE CONCERT 2025', highlight: true },
+  { text: 'SẮC I. VÁN CỜ LIVE CONCERT 2026', highlight: true },
   { text: 'YAMAHA MUSIC VIETNAM', sub: 'Đồng Hành Âm Thanh' },
-  { text: '31.12.2025 • HÀ NỘI CONCERT HALL', highlight: true },
+  { text: '07.11.2026 • 19:00 - 21:30', highlight: true },
   { text: 'GUITAR PLUS STUDIO', sub: 'Tài Trợ Nhạc Cụ' },
   { text: 'ACOUSTIC & FULL BAND LIVE', highlight: true },
   { text: 'VIETQR AUTOMATION', sub: 'Đối Tác Thanh Toán' },

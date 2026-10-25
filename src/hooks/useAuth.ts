@@ -5,58 +5,40 @@ import { createClient } from '@/lib/supabase/client'
 import { UserRole } from '@/types'
 import type { User } from '@supabase/supabase-js'
 
-export interface DemoUser {
-  id: string
-  email: string
-  user_metadata: {
-    full_name?: string
-    avatar_url?: string
-  }
-}
-
 export function useAuth() {
-  const [user, setUser] = useState<User | DemoUser | null>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [userRole, setUserRole] = useState<UserRole>('user')
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
 
   const fetchUserRole = useCallback(async (email: string): Promise<UserRole> => {
     const cleanEmail = email.toLowerCase().trim()
-    // Owner / Dev master account
-    if (cleanEmail === 'trananhdung11102006@gmail.com' || cleanEmail.includes('dev')) return 'dev'
-    if (cleanEmail.includes('admin') || cleanEmail.includes('btc')) return 'admin'
+    // Master admin account
+    if (cleanEmail === 'trananhdung11102006@gmail.com') return 'dev'
 
     try {
       const { data, error } = await supabase
         .from('users_role')
         .select('role')
-        .eq('email', email)
+        .eq('email', cleanEmail)
         .single()
-      
+
       if (!error && data?.role) {
         return data.role as UserRole
       }
     } catch {
-      // Fallback
+      // In case table or connection is not ready
     }
     return 'user'
   }, [supabase])
 
   useEffect(() => {
-    const initAuth = async () => {
-      // 1. Check local demo user session first
-      const savedDemo = typeof window !== 'undefined' ? localStorage.getItem('demo_user_session') : null
-      if (savedDemo) {
-        try {
-          const parsed = JSON.parse(savedDemo)
-          setUser(parsed.user)
-          setUserRole(parsed.role || 'user')
-          setLoading(false)
-          return
-        } catch {}
-      }
+    // Clear any obsolete demo sessions from localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('demo_user_session')
+    }
 
-      // 2. Check Supabase session
+    const initAuth = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser()
         if (user) {
@@ -65,6 +47,9 @@ export function useAuth() {
             const role = await fetchUserRole(user.email)
             setUserRole(role)
           }
+        } else {
+          setUser(null)
+          setUserRole('user')
         }
       } catch (err) {
         console.warn('Supabase auth check error:', err)
@@ -83,11 +68,8 @@ export function useAuth() {
           setUserRole(role)
         }
       } else {
-        const savedDemo = typeof window !== 'undefined' ? localStorage.getItem('demo_user_session') : null
-        if (!savedDemo) {
-          setUser(null)
-          setUserRole('user')
-        }
+        setUser(null)
+        setUserRole('user')
       }
       setLoading(false)
     })
@@ -98,33 +80,28 @@ export function useAuth() {
   const signInWithGoogle = useCallback(async () => {
     try {
       const origin = typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${origin}/auth/callback`,
         },
       })
-      if (error) {
-        console.error('Google OAuth error:', error.message)
-        return { error }
-      }
-      return { error: null }
+      return { data, error }
     } catch (err) {
-      return { error: err as Error }
+      return { data: null, error: err as Error }
     }
   }, [supabase])
 
-  const signInWithEmail = useCallback(async (email: string, password: string) => {
+  const signInWithEmail = useCallback(async (email: string, pass: string) => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        password,
+        password: pass,
       })
-      if (!error && data.user) {
+      if (!error && data?.user?.email) {
         setUser(data.user)
-        const role = await fetchUserRole(email)
+        const role = await fetchUserRole(data.user.email)
         setUserRole(role)
-        if (typeof window !== 'undefined') localStorage.removeItem('demo_user_session')
       }
       return { data, error }
     } catch (err) {
@@ -132,46 +109,24 @@ export function useAuth() {
     }
   }, [supabase, fetchUserRole])
 
-  const signUpWithEmail = useCallback(async (email: string, password: string, fullName: string) => {
+  const signUpWithEmail = useCallback(async (email: string, pass: string, name: string) => {
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
-        password,
+        password: pass,
         options: {
-          data: { full_name: fullName },
+          data: {
+            full_name: name,
+          },
         },
       })
-      if (!error && data.user) {
-        setUser(data.user)
-        setUserRole('user')
-      }
       return { data, error }
     } catch (err) {
       return { data: null, error: err as Error }
     }
   }, [supabase])
 
-  const quickDemoLogin = useCallback(async (email: string, role: UserRole = 'user', name: string = 'Khán Giả') => {
-    const demoUser: DemoUser = {
-      id: `demo-${Date.now()}`,
-      email,
-      user_metadata: {
-        full_name: name,
-        avatar_url: `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(email)}`,
-      },
-    }
-    setUser(demoUser)
-    setUserRole(role)
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('demo_user_session', JSON.stringify({ user: demoUser, role }))
-    }
-    return { success: true }
-  }, [])
-
   const signOut = useCallback(async () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('demo_user_session')
-    }
     try {
       await supabase.auth.signOut()
     } catch {}
@@ -186,7 +141,6 @@ export function useAuth() {
     signInWithGoogle,
     signInWithEmail,
     signUpWithEmail,
-    quickDemoLogin,
     signOut,
   }
 }

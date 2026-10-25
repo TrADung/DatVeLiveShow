@@ -1,4 +1,4 @@
-# ♟️ CHESS NIGHT - Hệ Thống Đặt Vé & Quản Lý Live Show Sinh Nhật CLB
+# ♟️ SẮC I. VÁN CỜ - Hệ Thống Đặt Vé & Quản Lý Live Show Sinh Nhật CLB DTU Acoustic
 
 Hệ thống web đặt vé và quản lý sự kiện âm nhạc (Live Show Sinh Nhật Câu Lạc Bộ Âm Nhạc) mang phong cách nghệ thuật hiện đại kết hợp ngôn ngữ thiết kế **Concept Cờ Vua Cao Cấp (Premium Tournament Chess)**.
 
@@ -118,10 +118,10 @@ SMTP_PASS=your_gmail_app_password
 EMAIL_FROM=CLB Am Nhac <your_club_email@gmail.com>
 
 # VietQR Payment
-VIETQR_BANK_ID=MB
-VIETQR_ACCOUNT_NO=1234567890
-VIETQR_ACCOUNT_NAME=CLB AM NHAC
-TICKET_PRICE=150000
+VIETQR_BANK_ID=TCB
+VIETQR_ACCOUNT_NO=2611102006
+VIETQR_ACCOUNT_NAME=TRAN ANH DUNG
+TICKET_PRICE=70000
 
 # App Config
 NEXT_PUBLIC_APP_URL=http://localhost:3000
@@ -143,4 +143,4 @@ npm run start
 ---
 
 ## 🔒 Bản Quyền & Giấy Phép
-Dự án được xây dựng phục vụ Đêm nhạc Sinh nhật Câu lạc bộ Âm nhạc - Chess Night. All rights reserved.
+Dự án được xây dựng phục vụ Đêm nhạc Sinh nhật Câu lạc bộ Âm nhạc - SẮC I. VÁN CỜ. All rights reserved.

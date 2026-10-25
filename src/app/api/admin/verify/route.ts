@@ -16,13 +16,12 @@ function getAdminClient() {
 
 async function checkAdminRole(supabase: Awaited<ReturnType<typeof createClient>>) {
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    // Allow local admin testing
-    return { email: 'admin@clbamnhac.com' }
+  if (!user || !user.email) {
+    return null
   }
 
-  const email = (user.email || '').toLowerCase().trim()
-  if (email === 'trananhdung11102006@gmail.com' || email.includes('admin') || email.includes('dev') || email.includes('btc')) {
+  const email = user.email.toLowerCase().trim()
+  if (email === 'trananhdung11102006@gmail.com') {
     return user
   }
 
@@ -30,7 +29,7 @@ async function checkAdminRole(supabase: Awaited<ReturnType<typeof createClient>>
     const { data: roleData } = await supabase
       .from('users_role')
       .select('role')
-      .eq('email', user.email)
+      .eq('email', email)
       .single()
 
     if (roleData && ['admin', 'dev'].includes(roleData.role)) return user

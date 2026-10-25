@@ -1,8 +1,8 @@
 @echo off
-title CHESS NIGHT - Web Dat Ve Live Show
+title SẮC I. VÁN CỜ - Web Dat Ve Live Show
 color 0C
 echo =======================================================
-echo     CHESS NIGHT - LIVE SHOW SINH NHAT CAU LAC BO
+echo     SẮC I. VÁN CỜ - LIVE SHOW SINH NHẬT CLB DTU ACOUSTIC
 echo =======================================================
 echo.
 echo Dang khoi dong may chu xem truoc tren may tinh...

@@ -110,12 +110,12 @@ export default function Header({ onOpenBooking }: HeaderProps) {
               <div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-sm font-black text-white tracking-widest uppercase">
-                    CHESS NIGHT
+                    DTU Acoustic
                   </span>
-                  <span className="text-xs text-[#D4AF37] font-bold">♟</span>
+                  <span className="text-xs text-[#D4AF37] font-bold">🎵</span>
                 </div>
                 <div className="text-[10px] text-neutral-400 font-medium tracking-wide">
-                  Live Show Sinh Nhật CLB
+                  Slogan: Nghe và Cảm
                 </div>
               </div>
             </Link>

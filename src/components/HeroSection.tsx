@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { Ticket, ArrowDown, Music, Calendar, MapPin, Clock, Sparkles } from 'lucide-react'
 import { useAudio } from '@/hooks/useAudio'
+import { EVENT_INFO } from '@/lib/constants'
+import VenueBadge from '@/components/VenueBadge'
 
 interface HeroSectionProps {
   onBuyTicket?: () => void
@@ -75,10 +77,10 @@ export default function HeroSection({ onBuyTicket }: HeroSectionProps) {
           className="inline-flex items-center gap-2.5 bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] rounded-full px-4 py-1.5 mb-6 text-xs sm:text-sm font-bold shadow-lg shadow-[#D4AF37]/10 backdrop-blur-md"
         >
           <Sparkles size={14} className="text-[#D4AF37]" />
-          <span>Live Concert Sinh Nhật Câu Lạc Bộ Âm Nhạc</span>
+          <span>Chúc Mừng <b>11 Năm Thành Lập</b>  DTU Acoustic</span>
           <span className="w-1.5 h-1.5 rounded-full bg-[#E53935] animate-pulse" />
         </motion.div>
-
+ 
         {/* Hero Title */}
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
@@ -86,7 +88,7 @@ export default function HeroSection({ onBuyTicket }: HeroSectionProps) {
           transition={{ duration: 0.45, delay: 0.1 }}
           className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-white tracking-tighter leading-none mb-6"
         >
-          CHESS <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] via-[#F0CA50] to-[#E53935]">NIGHT</span>
+          SẮC I. <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] via-[#F0CA50] to-[#E53935]">VÁN CỜ</span>
         </motion.h1>
 
         {/* Subtitle */}
@@ -96,7 +98,9 @@ export default function HeroSection({ onBuyTicket }: HeroSectionProps) {
           transition={{ duration: 0.4, delay: 0.2 }}
           className="text-sm sm:text-base md:text-lg text-neutral-400 mb-10 max-w-2xl mx-auto leading-relaxed font-normal"
         >
-          Đêm nhạc hội ngộ đặc biệt chào mừng sinh nhật CLB. Không gian nghệ thuật đương đại giao thoa giữa giai điệu Acoustic mộc mạc và tinh thần Bàn Cờ Vua đỉnh cao.
+          Lấy cảm hứng từ bàn cờ vua, liveshow khắc họa hai trường phái yêu: Quân Hậu chủ động theo
+          đuổi, Quân Vua thụ động chờ đợi. Mỗi giai điệu là một nước đi, thể hiện muôn cách yêu trong
+          cuộc chơi cảm xúc.
         </motion.p>
 
         {/* Event Meta Badges */}
@@ -106,18 +110,15 @@ export default function HeroSection({ onBuyTicket }: HeroSectionProps) {
           transition={{ duration: 0.4, delay: 0.3 }}
           className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-4 mb-10 text-xs sm:text-sm text-neutral-300 font-semibold"
         >
-          <div className="flex items-center gap-2 bg-[#1C1C1E] border border-white/10 px-4 py-2.5 rounded-xl shadow-md">
+          <div className="flex items-center gap-2 bg-[#1C1C1E] border border-white/10 px-4 py-2.5 rounded-xl shadow-md h-11">
             <Calendar size={15} className="text-[#D4AF37] shrink-0" />
-            <span>31 Tháng 12, 2025</span>
+            <span>{EVENT_INFO.eventDate}</span>
           </div>
-          <div className="flex items-center gap-2 bg-[#1C1C1E] border border-white/10 px-4 py-2.5 rounded-xl shadow-md">
+          <div className="flex items-center gap-2 bg-[#1C1C1E] border border-white/10 px-4 py-2.5 rounded-xl shadow-md h-11">
             <Clock size={15} className="text-[#D4AF37] shrink-0" />
-            <span>19:00 - 22:30</span>
+            <span>{EVENT_INFO.eventTime}</span>
           </div>
-          <div className="flex items-center gap-2 bg-[#1C1C1E] border border-white/10 px-4 py-2.5 rounded-xl shadow-md">
-            <MapPin size={15} className="text-[#E53935] shrink-0" />
-            <span>Hà Nội Concert Hall</span>
-          </div>
+          <VenueBadge showLabel={false} className="h-11" />
         </motion.div>
 
         {/* Primary CTA Buttons */}
@@ -153,7 +154,7 @@ export default function HeroSection({ onBuyTicket }: HeroSectionProps) {
           transition={{ delay: 0.5 }}
           className="mt-4 text-xs sm:text-sm text-neutral-400 font-medium"
         >
-          Giá vé: <span className="text-[#D4AF37] font-black text-base font-mono">150.000đ</span> / vé • Bao gồm đồ uống & quà Minigame
+          Giá vé: <span className="text-[#D4AF37] font-black text-base font-mono">70.000đ</span> / vé • Đã bao gồm đồ uống
         </motion.div>
       </div>
     </section>

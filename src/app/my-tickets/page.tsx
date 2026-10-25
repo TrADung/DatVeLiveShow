@@ -11,7 +11,6 @@ import QRCode from 'qrcode'
 import Link from 'next/link'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import MusicPlayer from '@/components/MusicPlayer'
 
 const statusConfig: Record<string, { label: string; icon: React.ReactNode; badge: string }> = {
   pending: {
@@ -140,6 +139,15 @@ export default function MyTicketsPage() {
             </form>
           </div>
 
+          {/* Email Spam Notice */}
+          <div className="mb-8 p-4 rounded-2xl bg-amber-950/20 border border-amber-500/30 text-amber-200/90 text-xs flex items-start gap-3 shadow-lg">
+            <span className="text-base shrink-0">📬</span>
+            <div className="leading-relaxed">
+              <strong className="text-amber-300 font-bold block mb-0.5">Lưu ý về email vé điện tử:</strong>
+              Nếu bạn không thấy email vé gửi về Hộp thư đến (Inbox), vui lòng kiểm tra tại mục <strong>Thư rác (Spam)</strong> hoặc tab <strong>Quảng cáo / Cập nhật</strong> trong hòm thư của bạn nhé! Bạn cũng có thể xem và lưu mã QR check-in trực tiếp ngay tại trang này.
+            </div>
+          </div>
+
           {/* Ticket Listing */}
           {loading ? (
             <div className="py-20 text-center">
@@ -151,7 +159,7 @@ export default function MyTicketsPage() {
               <div className="text-5xl mb-4">🎟️</div>
               <h3 className="text-xl font-black text-white mb-2">Chưa Tìm Thấy Vé</h3>
               <p className="text-xs sm:text-sm text-slate-400 max-w-sm mx-auto mb-6">
-                Chưa có đơn vé nào được ghi nhận cho email này. Hãy nhanh tay sở hữu tấm vé tham dự Chess Night ngay hôm nay!
+                Chưa có đơn vé nào được ghi nhận cho email này. Hãy nhanh tay sở hữu tấm vé tham dự SẮC I. VÁN CỜ ngay hôm nay!
               </p>
               <Link
                 href="/book"
@@ -267,7 +275,6 @@ export default function MyTicketsPage() {
       </main>
 
       <Footer onBuyTicket={() => {}} />
-      <MusicPlayer />
     </div>
   )
 }

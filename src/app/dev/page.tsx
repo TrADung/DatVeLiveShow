@@ -15,14 +15,16 @@ const SETTING_DESCRIPTIONS: Record<string, string> = {
   bank_id: 'Mã ngân hàng VietQR (ví dụ: MB, VCB, TCB, ACB)',
   bank_account_no: 'Số tài khoản ngân hàng thụ hưởng',
   bank_account_name: 'Tên chủ tài khoản ngân hàng',
-  event_name: 'Tên sự kiện / liveshow',
-  event_date: 'Ngày tổ chức sự kiện (YYYY-MM-DD)',
-  event_venue: 'Địa điểm tổ chức sự kiện',
+  event_name: 'Tên sự kiện / liveshow (Mặc định: SẮC I. VÁN CỜ)',
+  event_date: 'Ngày tổ chức sự kiện (ví dụ: 07 Tháng 11, 2026)',
+  event_time: 'Khung giờ diễn ra sự kiện (ví dụ: 19:00 - 21:30)',
+  event_venue: 'Địa điểm tổ chức sự kiện (để trống nếu chưa công bố)',
+  event_venue_maps_url: 'Link Google Maps địa điểm (người dùng bấm vào sẽ mở Google Maps)',
   ticket_sale_open: 'Mở bán vé trực tuyến (true / false)',
   smtp_host: 'Địa chỉ máy chủ SMTP (ví dụ: smtp.gmail.com)',
   smtp_port: 'Cổng kết nối SMTP (587 hoặc 465)',
-  smtp_user: 'Tài khoản Gmail gửi vé',
-  smtp_pass: 'Mật khẩu ứng dụng (Gmail App Password)',
+  smtp_user: 'Tài khoản Gmail CLB gửi vé (ví dụ: dtuacousticclub@gmail.com)',
+  smtp_pass: 'Mật khẩu ứng dụng 16 ký tự của Gmail (App Password)',
   lucky_draw_time: 'Thời gian quay số minigame (ISO string)',
   admin_emails: 'Danh sách email được cấp quyền Admin (cách nhau dấu phẩy)',
 }
@@ -54,7 +56,7 @@ export default function DevPanel() {
         // Fallback default settings
         const defaults = Object.keys(SETTING_DESCRIPTIONS).map((key) => ({
           key,
-          value: key === 'ticket_price' ? '150000' : key === 'bank_id' ? 'MB' : key === 'bank_account_no' ? '1234567890' : key === 'bank_account_name' ? 'CLB AM NHAC' : '',
+          value: key === 'ticket_price' ? '70000' : key === 'bank_id' ? 'TCB' : key === 'bank_account_no' ? '2611102006' : key === 'bank_account_name' ? 'TRAN ANH DUNG' : '',
           updated_at: new Date().toISOString(),
         }))
         setSettings(defaults)
@@ -94,6 +96,45 @@ export default function DevPanel() {
     } finally {
       setSaving(null)
     }
+  }
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0C] text-white flex flex-col items-center justify-center">
+        <Loader2 size={36} className="animate-spin text-[#D4AF37] mb-4" />
+        <p className="text-xs uppercase tracking-widest text-neutral-400 font-bold">
+          Đang xác thực bảo mật Dev...
+        </p>
+      </div>
+    )
+  }
+
+  const isDev = user && userRole === 'dev'
+
+  if (!isDev) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0C] text-white flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="max-w-md w-full bg-[#141416] border border-amber-500/30 rounded-3xl p-8 text-center shadow-2xl">
+            <div className="w-16 h-16 rounded-full bg-amber-950/50 border border-amber-500/40 text-amber-500 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-amber-500/20">
+              <Crown size={32} />
+            </div>
+            <h2 className="text-xl font-black text-white mb-2">DEV PANEL HẠN CHẾ</h2>
+            <p className="text-xs text-neutral-400 leading-relaxed mb-6">
+              Khu vực cấu hình hệ thống chuyên sâu này chỉ dành cho tài khoản Developer Master.
+            </p>
+            <Link
+              href="/"
+              className="btn-gold w-full py-3 rounded-xl text-xs font-bold inline-flex items-center justify-center gap-2"
+            >
+              <ArrowLeft size={15} />
+              <span>Quay Lại Trang Chủ</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

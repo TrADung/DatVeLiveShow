@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
+import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   X,
@@ -69,10 +70,10 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
     feedback: '',
   })
 
-  const TICKET_PRICE = 150000
-  const BANK_ID = process.env.NEXT_PUBLIC_VIETQR_BANK_ID || 'MB'
-  const ACCOUNT_NO = process.env.NEXT_PUBLIC_VIETQR_ACCOUNT_NO || '1234567890'
-  const ACCOUNT_NAME = process.env.NEXT_PUBLIC_VIETQR_ACCOUNT_NAME || 'CLB AM NHAC'
+  const TICKET_PRICE = 70000
+  const BANK_ID = process.env.NEXT_PUBLIC_VIETQR_BANK_ID || 'TCB'
+  const ACCOUNT_NO = process.env.NEXT_PUBLIC_VIETQR_ACCOUNT_NO || '2611102006'
+  const ACCOUNT_NAME = process.env.NEXT_PUBLIC_VIETQR_ACCOUNT_NAME || 'TRAN ANH DUNG'
 
   useEffect(() => {
     setMounted(true)
@@ -264,7 +265,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                     {step === 'payment' && 'THANH TOÁN VIETQR'}
                     {step === 'success' && 'ĐẶT VÉ THÀNH CÔNG'}
                   </h3>
-                  <p className="text-[11px] text-[#D4AF37] font-medium">Chess Night • 31/12/2025</p>
+                  <p className="text-[11px] text-[#D4AF37] font-medium">SẮC I. VÁN CỜ • 07/11/2026</p>
                 </div>
               </div>
               <button
@@ -358,7 +359,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                         type="date"
                         value={form.dob}
                         onChange={(e) => setForm((f) => ({ ...f, dob: e.target.value }))}
-                        max="2025-12-31"
+                        max="2026-12-31"
                         className="w-full bg-[#141414] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-all"
                       />
                     </div>
@@ -454,7 +455,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                   {/* Price Box */}
                   <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/30">
                     <span className="text-xs font-bold text-neutral-300">Tổng thanh toán (1 vé):</span>
-                    <span className="text-xl font-black text-[#D4AF37] font-mono">150.000đ</span>
+                    <span className="text-xl font-black text-[#D4AF37] font-mono">70.000đ</span>
                   </div>
 
                   <button
@@ -499,7 +500,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                       alt="VietQR Code"
                       className="w-48 h-48 object-contain mx-auto"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`Thanh toan 150000 VND cho ${ACCOUNT_NAME} - ${orderCode}`)}`
+                        (e.target as HTMLImageElement).src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`Thanh toan 70000 VND cho ${ACCOUNT_NAME} - ${orderCode}`)}`
                       }}
                     />
                     <div className="mt-1.5 text-[10px] font-bold text-slate-800 uppercase tracking-wider">
@@ -528,7 +529,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-neutral-400">Số tiền:</span>
-                      <span className="font-black text-[#D4AF37] font-mono">150.000đ</span>
+                      <span className="font-black text-[#D4AF37] font-mono">70.000đ</span>
                     </div>
                     <div className="flex justify-between pt-1 border-t border-white/10">
                       <span className="text-neutral-400">Nội dung chuyển khoản:</span>
@@ -617,13 +618,22 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                     </div>
                   </div>
 
+                  <div className="p-3 rounded-xl bg-amber-950/30 border border-amber-500/40 text-amber-200/90 text-xs text-left flex items-start gap-2.5">
+                    <span className="text-sm shrink-0">📬</span>
+                    <div className="leading-snug text-[11px]">
+                      <strong className="text-amber-300 font-bold block mb-0.5">Lưu ý kiểm tra hộp thư:</strong>
+                      Nếu không thấy email vé gửi về Hộp thư đến, bạn vui lòng kiểm tra tại mục <strong>Thư rác (Spam)</strong> nhé!
+                    </div>
+                  </div>
+
                   <div className="flex gap-3 pt-2">
-                    <button
-                      onClick={() => { playClickSound(); window.location.href = '/my-tickets' }}
-                      className="flex-1 bg-white text-black font-bold py-3 rounded-xl text-xs hover:bg-neutral-200 transition-colors cursor-pointer"
+                    <Link
+                      href="/my-tickets"
+                      onClick={() => { playClickSound(); onClose() }}
+                      className="flex-1 bg-white text-black font-bold py-3 rounded-xl text-xs hover:bg-neutral-200 transition-colors text-center"
                     >
                       Xem Vé Của Tôi
-                    </button>
+                    </Link>
                     <button
                       onClick={() => { playClickSound(); onClose() }}
                       className="flex-1 btn-gold py-3 rounded-xl text-xs transition-colors cursor-pointer"

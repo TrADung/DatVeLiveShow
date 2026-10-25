@@ -3,6 +3,8 @@
 import { useRef } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { Clock, Music, Mic, Gift, Users, Star, Sparkles, MapPin, Calendar } from 'lucide-react'
+import { EVENT_INFO } from '@/lib/constants'
+import VenueBadge from '@/components/VenueBadge'
 
 interface TimelineStage {
   id: string
@@ -23,41 +25,42 @@ const timelineStages: TimelineStage[] = [
   {
     id: 'stage-1',
     phase: 'Chặng 01',
-    timeRange: '18:30 – 19:15',
-    title: 'Đón Khách & Khai Mạc',
-    subtitle: 'Đón tiếp khán giả, quét vé điện tử QR siêu tốc, nhận vòng tay dạ quang cờ vua và chụp hình tại sảnh Photo Booth.',
+    timeRange: '18:30 – 19:00',
+    title: 'Khai cuộc - Đón quân',
+    subtitle: 'Đón tiếp khán giả, check-in và nhận vòng tay.',
     subEvents: [
-      { time: '18:30', name: 'Mở Cổng & Check-in Photo Wall' },
-      { time: '19:00', name: 'Khai Mạc Đêm Nhạc & Nghi Thức Cờ Vua' },
+      { time: '18:30', name: 'Mở Cổng & Check-in Nhận Vòng Tay' },
+      { time: '19:00', name: 'Khai Mạc Đêm Nhạc' },
     ],
     side: 'left',
     photos: [
       {
-        url: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&q=80',
+        url: '/images/Timeline/KhaiQuan.jpg',
+        alt: 'Khai Quân',
+        caption: 'Khai Quân',
+      },
+      
+      {
+        url: '/images/Timeline/AcousticLiveShow.jpg',
+        alt: 'Acoustic Performance',
+        caption: 'Acoustic Live Show',
+      },
+      {
+        url: '/images/Timeline/Checkin.jpg',
         alt: 'Sảnh đón khách và check-in',
         caption: 'Sảnh Đón Khách',
-      },
-      {
-        url: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&q=80',
-        alt: 'Photo Booth cờ vua',
-        caption: 'Photo Booth',
-      },
-      {
-        url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&q=80',
-        alt: 'Không gian chào mừng',
-        caption: 'Welcome Vibe',
       },
     ],
   },
   {
     id: 'stage-2',
     phase: 'Chặng 02',
-    timeRange: '19:15 – 20:00',
-    title: 'Acoustic Journey',
-    subtitle: 'Những bản tình ca mộc mạc lắng đọng, hòa quyện giữa tiếng guitar mộc, cajon nhịp nhàng và âm sắc violin da diết.',
+    timeRange: '19:00 – 21:15',
+    title: 'Thế cờ cảm xúc',
+    subtitle: 'Những âm vang mộc mạc lắng đọng của câu lạc bộ. Xen kẻ đó là các giọng ca khách mời đáng mong đợi',
     subEvents: [
-      { time: '19:15', name: 'Acoustic Melodies Mộc Mạc' },
-      { time: '19:40', name: 'Hòa Tấu Guitar & Violin Cảm Xúc' },
+      { time: '19:00', name: 'Acoustic Mộc Mạc' },
+      { time: '20:40', name: 'Giọng Ca Khách Mời' },
     ],
     side: 'right',
     photos: [
@@ -67,58 +70,33 @@ const timelineStages: TimelineStage[] = [
         caption: 'Guitar Mộc',
       },
       {
-        url: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=600&q=80',
-        alt: 'Sân khấu Acoustic ấm áp',
-        caption: 'Acoustic Set',
+        url: '/images/Timeline/VanCo.jpeg',
+        alt: 'Ván cờ',
+        caption: 'chessboard',
       },
     ],
   },
   {
     id: 'stage-3',
     phase: 'Chặng 03',
-    timeRange: '20:00 – 21:30',
-    title: 'Live Band & Khách Mời',
-    subtitle: 'Dàn nhạc sống CLB thăng hoa với loạt ca khúc Rock & Pop sôi động, kết hợp màn song ca cùng Special Guest Artists bí mật.',
+    timeRange: '21:15 – 21:30',
+    title: 'Lưu dấu ván cờ',
+    subtitle: 'Ai sẽ là quân cờ may mắn ? Thời khắc ghi lại dấu ấn!',
     subEvents: [
-      { time: '20:00', name: 'Phần II: Live Band Trình Diễn Bùng Nổ' },
-      { time: '20:45', name: 'Phần III: Màn Kết Hợp Cùng Special Guest' },
+      { time: '21:15', name: 'Bốc Thăm Trúng Thưởng' },
+      { time: '21:30', name: 'Chụp Hình Lưu Niệm' },
     ],
     side: 'left',
     photos: [
       {
-        url: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&q=80',
-        alt: 'Live band biểu diễn',
-        caption: 'Live Band CLB',
+        url: '/images/Timeline/luuniem.jpg',
+        alt: 'Chụp hình lưu niệm',
+        caption: 'take a photo',
       },
       {
-        url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&q=80',
-        alt: 'Special Guest Artists',
-        caption: 'Special Guest',
-      },
-    ],
-  },
-  {
-    id: 'stage-4',
-    phase: 'Chặng 04',
-    timeRange: '21:30 – 22:30',
-    title: 'Sinh Nhật & Lucky Draw',
-    subtitle: 'Nghi thức thổi nến mừng CLB tròn tuổi mới, bốc thăm may mắn trao giải cây đàn Guitar Epiphone và chụp ảnh kỷ niệm.',
-    subEvents: [
-      { time: '21:30', name: 'Thổi Nến Sinh Nhật & Giao Lưu Khán Phòng' },
-      { time: '21:45', name: 'Quay Số May Mắn Trực Tiếp (Lucky Draw LED)' },
-      { time: '22:15', name: 'Grand Finale & Chụp Ảnh Toàn Thể' },
-    ],
-    side: 'right',
-    photos: [
-      {
-        url: 'https://images.unsplash.com/photo-1468359601543-843bfaef291a?w=600&q=80',
-        alt: 'Bánh kem sinh nhật ánh nến',
-        caption: 'Thổi Nến Sinh Nhật',
-      },
-      {
-        url: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&q=80',
-        alt: 'Grand Finale toàn khán phòng',
-        caption: 'Grand Finale',
+        url: '/images/Timeline/Lucky.webp',
+        alt: 'Vòng quay may mắn',
+        caption: 'Lucky Draw',
       },
     ],
   },
@@ -162,7 +140,7 @@ export default function TimelineSection() {
           <div className="text-center shrink-0">
             <div className="text-[10px] sm:text-xs font-black uppercase tracking-[0.3em] text-[#D4AF37] mb-1.5 flex items-center justify-center gap-1.5">
               <Clock size={12} />
-              <span>ABOUT THE SHOW</span>
+              <span>Timeline</span>
             </div>
             <h2 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-widest uppercase font-sans">
               Lịch Trình Đêm Nhạc
@@ -177,39 +155,27 @@ export default function TimelineSection() {
           <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-28">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-[#D4AF37]">
               <Sparkles size={13} className="text-[#D4AF37]" />
-              <span>Hành Trình Âm Nhạc 4 Tiếng Liền Mạch</span>
+              <span>Hành Trình Âm Nhạc 19:00 - 21:30</span>
             </div>
 
-            <p className="text-sm sm:text-base text-neutral-300 leading-relaxed font-normal">
-              Chúng tôi đã lên kế hoạch cho một lịch trình nghệ thuật tiện nghi và trọn vẹn gồm{' '}
-              <strong className="text-white font-bold">4 chặng cảm xúc</strong> cho đêm nhạc{' '}
-              <strong className="text-[#D4AF37] font-bold">Chess Night</strong>. Bạn sẽ đi qua:{' '}
-              <span className="text-[#D4AF37] font-semibold">Đón Khách Check-in</span>,{' '}
-              <span className="text-white font-semibold">Acoustic Journey</span>,{' '}
-              <span className="text-[#E53935] font-semibold">Live Band & Khách Mời</span>, và{' '}
-              <span className="text-[#D4AF37] font-semibold">Quay Số Lucky Draw</span>.
-            </p>
+            
 
             <p className="text-sm sm:text-base text-neutral-400 leading-relaxed font-normal">
-              Không cần lo lắng về việc sắp xếp thời gian hay bỏ lỡ tiết mục yêu thích — toàn bộ đêm diễn đã được dàn dựng khoa học. Chúng tôi sẽ mang đến âm thanh chân thực, ánh sáng sân khấu thị giác và không gian acoustic ấm cúng, để bạn chỉ việc{' '}
-              <span className="text-[#D4AF37] font-semibold italic">hòa mình và tận hưởng trọn vẹn hành trình.</span>
+              Lịch trình sự kiện gồm {' '}
+              <span className="text-[#D4AF37] font-semibold italic"> 3 mốc.</span>
             </p>
 
             {/* Quick Specs Pill Box */}
-            <div className="pt-4 border-t border-white/10 grid grid-cols-2 gap-4 text-xs">
-              <div className="space-y-1">
+            <div className="pt-4 border-t border-white/10 flex flex-col sm:flex-row gap-3 text-xs">
+              <div className="space-y-1 bg-[#1C1C1E] border border-white/10 p-3 rounded-xl flex-1">
                 <span className="text-neutral-500 font-bold uppercase tracking-wider block text-[10px]">Thời Gian</span>
                 <span className="text-white font-semibold flex items-center gap-1.5">
                   <Calendar size={13} className="text-[#D4AF37]" />
-                  31.12.2025 • 18:30
+                  {EVENT_INFO.eventDateShort} • {EVENT_INFO.eventTime}
                 </span>
               </div>
-              <div className="space-y-1">
-                <span className="text-neutral-500 font-bold uppercase tracking-wider block text-[10px]">Địa Điểm</span>
-                <span className="text-white font-semibold flex items-center gap-1.5 truncate">
-                  <MapPin size={13} className="text-[#E53935]" />
-                  Hà Nội Concert Hall
-                </span>
+              <div className="flex-1">
+                <VenueBadge className="w-full h-full" />
               </div>
             </div>
 

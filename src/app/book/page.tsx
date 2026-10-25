@@ -27,11 +27,12 @@ import {
 } from 'lucide-react'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import MusicPlayer from '@/components/MusicPlayer'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { useAudio } from '@/hooks/useAudio'
 import { generateVietQRUrl, formatCurrency } from '@/lib/utils'
+import { EVENT_INFO } from '@/lib/constants'
+import VenueBadge from '@/components/VenueBadge'
 import type { BookingFormData, Gender } from '@/types'
 
 type Step = 'form' | 'payment' | 'success'
@@ -72,10 +73,10 @@ export default function BookPage() {
     feedback: '',
   })
 
-  const TICKET_PRICE = 150000
-  const BANK_ID = process.env.NEXT_PUBLIC_VIETQR_BANK_ID || 'MB'
-  const ACCOUNT_NO = process.env.NEXT_PUBLIC_VIETQR_ACCOUNT_NO || '1234567890'
-  const ACCOUNT_NAME = process.env.NEXT_PUBLIC_VIETQR_ACCOUNT_NAME || 'CLB AM NHAC'
+  const TICKET_PRICE = 70000
+  const BANK_ID = process.env.NEXT_PUBLIC_VIETQR_BANK_ID || 'TCB'
+  const ACCOUNT_NO = process.env.NEXT_PUBLIC_VIETQR_ACCOUNT_NO || '2611102006'
+  const ACCOUNT_NAME = process.env.NEXT_PUBLIC_VIETQR_ACCOUNT_NAME || 'TRAN ANH DUNG'
 
   // Autofill user details when logged in
   useEffect(() => {
@@ -233,7 +234,7 @@ export default function BookPage() {
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-xl text-[#D4AF37]">♟</span>
                 <span className="text-xs font-black tracking-widest text-[#D4AF37] uppercase">
-                  CHESS NIGHT 2025
+                  SẮC I. VÁN CỜ
                 </span>
                 <span className="w-1.5 h-1.5 rounded-full bg-[#E53935] animate-pulse ml-auto" />
               </div>
@@ -254,18 +255,12 @@ export default function BookPage() {
                   </div>
                   <div>
                     <div className="text-neutral-400 text-[11px] uppercase font-bold tracking-wider">Thời gian</div>
-                    <div className="font-bold text-white">31 Tháng 12, 2025 • 19:00 - 22:30</div>
+                    <div className="font-bold text-white">{EVENT_INFO.eventDate} • {EVENT_INFO.eventTime}</div>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-[#D4AF37]">
-                    <MapPin size={16} />
-                  </div>
-                  <div>
-                    <div className="text-neutral-400 text-[11px] uppercase font-bold tracking-wider">Địa điểm</div>
-                    <div className="font-bold text-white">Hà Nội Concert Hall (Phố Nghệ Thuật)</div>
-                  </div>
+                <div className="pt-1">
+                  <VenueBadge className="w-full" />
                 </div>
 
                 <div className="flex items-start gap-3">
@@ -292,11 +287,11 @@ export default function BookPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle2 size={14} className="text-[#D4AF37] shrink-0" />
-                    <span>01 Vòng tay dạ quang lưu niệm Chess Night</span>
+                    <span>01 Vòng tay dạ quang lưu niệm SẮC I. VÁN CỜ</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle2 size={14} className="text-[#D4AF37] shrink-0" />
-                    <span>01 Mã số may mắn tham gia Lucky Draw sân khấu</span>
+                    <span>Tham gia trọn vẹn các tiết mục âm nhạc & giao lưu</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle2 size={14} className="text-[#D4AF37] shrink-0" />
@@ -312,7 +307,7 @@ export default function BookPage() {
                   <div className="text-xs text-neutral-300 font-medium">Bao gồm toàn bộ quyền lợi</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-black text-[#D4AF37] font-mono">150.000đ</div>
+                  <div className="text-2xl font-black text-[#D4AF37] font-mono">70.000đ</div>
                   <div className="text-[10px] text-neutral-400">1 vé / người</div>
                 </div>
               </div>
@@ -323,7 +318,7 @@ export default function BookPage() {
               <ShieldCheck size={24} className="text-emerald-400 shrink-0" />
               <div>
                 <span className="text-white font-bold block">Bảo đảm & Hỗ trợ đặt vé</span>
-                <span>Cần hỗ trợ thanh toán? Liên hệ hotline CLB: <strong className="text-white">0912 345 678</strong></span>
+                <span>Cần hỗ trợ thanh toán? Liên hệ hotline CLB: <a href="tel:0362161480" className="text-white font-bold hover:text-[#D4AF37] underline transition-colors">0362161480 (Bích Ngọc - Chủ Nhiệm)</a></span>
               </div>
             </div>
           </div>
@@ -423,7 +418,7 @@ export default function BookPage() {
                         type="date"
                         value={form.dob}
                         onChange={(e) => setForm((f) => ({ ...f, dob: e.target.value }))}
-                        max="2025-12-31"
+                        max="2026-12-31"
                         className="w-full bg-[#141414] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all"
                       />
                     </div>
@@ -577,7 +572,7 @@ export default function BookPage() {
                         alt="VietQR Code"
                         className="w-56 h-56 object-contain mx-auto"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`Thanh toan 150000 VND cho ${ACCOUNT_NAME} - ${orderCode}`)}`
+                          (e.target as HTMLImageElement).src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`Thanh toan 70000 VND cho ${ACCOUNT_NAME} - ${orderCode}`)}`
                         }}
                       />
                       <div className="mt-2 text-[11px] font-bold text-slate-800 tracking-wider">
@@ -611,7 +606,7 @@ export default function BookPage() {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-neutral-400">Số tiền:</span>
-                      <span className="font-black text-[#D4AF37] font-mono text-base">150.000đ</span>
+                      <span className="font-black text-[#D4AF37] font-mono text-base">70.000đ</span>
                     </div>
                     <div className="flex justify-between items-center pt-2 border-t border-white/10">
                       <span className="text-neutral-400">Nội dung chuyển khoản:</span>
@@ -685,7 +680,7 @@ export default function BookPage() {
                       ĐẶT VÉ THÀNH CÔNG!
                     </h2>
                     <p className="text-xs sm:text-sm text-neutral-400 max-w-md mx-auto leading-relaxed">
-                      Cảm ơn bạn đã đồng hành cùng <strong className="text-white">Chess Night</strong>. Ban tổ chức đang đối chiếu giao dịch và sẽ phát hành vé điện tử có mã QR về email của bạn.
+                      Cảm ơn bạn đã đồng hành cùng <strong className="text-white">SẮC I. VÁN CỜ</strong>. Ban tổ chức đang đối chiếu giao dịch và sẽ phát hành vé điện tử có mã QR về email của bạn.
                     </p>
                   </div>
 
@@ -718,6 +713,15 @@ export default function BookPage() {
                     </div>
                   </div>
 
+                  {/* Spam folder notice */}
+                  <div className="p-4 rounded-2xl bg-amber-950/30 border border-amber-500/40 text-amber-200/90 text-xs text-left flex items-start gap-3 shadow-md">
+                    <span className="text-base shrink-0">📬</span>
+                    <div className="leading-relaxed">
+                      <strong className="text-amber-300 font-bold block mb-0.5">Lưu ý kiểm tra hộp thư:</strong>
+                      Nếu không thấy email vé gửi về Hộp thư đến (Inbox), bạn vui lòng kiểm tra tại mục <strong>Thư rác (Spam)</strong> hoặc tab <strong>Quảng cáo</strong> nhé!
+                    </div>
+                  </div>
+
                   {/* Actions */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
                     <Link
@@ -745,7 +749,6 @@ export default function BookPage() {
       </main>
 
       <Footer onBuyTicket={() => {}} />
-      <MusicPlayer />
     </div>
   )
 }
