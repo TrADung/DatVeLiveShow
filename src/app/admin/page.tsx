@@ -9,8 +9,10 @@ import {
 import {
   Users, Ticket, TrendingUp, CheckCircle, Mail, DollarSign,
   RefreshCw, Send, Shield, Download, Search, Eye,
-  X, Loader2, Sparkles, AlertTriangle, ArrowLeft, Camera, ExternalLink
+  X, Loader2, Sparkles, AlertTriangle, ArrowLeft, Camera, ExternalLink,
+  FileSpreadsheet
 } from 'lucide-react'
+import * as XLSX from 'xlsx'
 import { useAuth } from '@/hooks/useAuth'
 import { useAudio } from '@/hooks/useAudio'
 import { formatCurrency, formatDateTime, formatDate } from '@/lib/utils'
@@ -61,6 +63,7 @@ export default function AdminDashboard() {
   const [isSpinning, setIsSpinning] = useState(false)
   const [winners, setWinners] = useState<{ number: number; name: string }[]>([])
   const [currentSpin, setCurrentSpin] = useState<number | null>(null)
+  const [checkingInId, setCheckingInId] = useState<string | null>(null)
 
   const fetchStats = async () => {
     setStatsLoading(true)
@@ -102,8 +105,42 @@ export default function AdminDashboard() {
     if (!authLoading && user && (userRole === 'admin' || userRole === 'dev')) {
       fetchStats()
       fetchTickets()
+
+      // Auto poll every 5s so when staff check-in from phone, it updates live
+      const interval = setInterval(() => {
+        fetchStats()
+        fetchTickets()
+      }, 5000)
+
+      return () => clearInterval(interval)
     }
   }, [authLoading, user, userRole, statusFilter])
+
+  const handleManualCheckIn = async (ticketId: string, action: 'checkin' | 'uncheck') => {
+    playClickSound()
+    setCheckingInId(ticketId)
+    try {
+      const res = await fetch('/api/admin/checkin', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticket_id: ticketId, action }),
+      })
+      if (res.ok) {
+        playSuccessSound()
+        fetchStats()
+        fetchTickets()
+      } else {
+        const d = await res.json()
+        playErrorSound()
+        alert(d.error || 'Thao tác thất bại')
+      }
+    } catch {
+      playErrorSound()
+      alert('Lỗi kết nối máy chủ')
+    } finally {
+      setCheckingInId(null)
+    }
+  }
 
   const handleVerify = async (ticketId: string, action: 'approve' | 'reject') => {
     playClickSound()
@@ -241,30 +278,131 @@ export default function AdminDashboard() {
     }, 3000)
   }
 
-  const exportCSV = () => {
+  const exportExcel = () => {
     playClickSound()
-    const headers = ['Order Code', 'Email', 'Full Name', 'DOB', 'Gender', 'Phone', 'Organization', 'Referral', 'Status', 'Lucky Number', 'Checked In', 'Created At']
-    const rows = tickets.map((t) => [
-      t.order_code,
-      t.user_email,
-      t.full_name,
-      t.dob,
-      t.gender,
-      t.phone,
-      t.organization,
-      t.referral_source,
-      t.payment_status,
-      t.lucky_number || '',
-      t.is_checked_in ? 'Yes' : 'No',
-      t.created_at,
-    ])
-    const csv = [headers, ...rows].map((r) => r.map((v) => `"${v}"`).join(',')).join('\n')
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `sac-i-van-co-tickets-${new Date().toISOString().split('T')[0]}.csv`
-    a.click()
+
+    // Sheet 1: Số bốc thăm (In cắt phiếu A4 bỏ vào thùng bốc thăm)
+    // Ưu tiên lấy vé đã thanh toán có số may mắn. Nếu chưa có vé paid thì lấy tất cả vé có số may mắn để test.
+    const eligibleTickets = tickets.filter(
+      (t) => t.lucky_number && (t.payment_status === 'paid' || !tickets.some((x) => x.payment_status === 'paid'))
+    )
+    const drawRows = eligibleTickets.map((t, idx) => ({
+      'STT': idx + 1,
+      'Họ và Tên': t.full_name,
+      'Ngày Sinh': formatDate(t.dob),
+      'Đơn Vị': t.organization,
+      'Số May Mắn (Bốc Thăm)': t.lucky_number,
+      'Mã Đơn Vé': t.order_code,
+    }))
+
+    // Sheet 2: Danh sách vé chi tiết
+    const allRows = tickets.map((t, idx) => ({
+      'STT': idx + 1,
+      'Mã Đơn': t.order_code,
+      'Họ và Tên': t.full_name,
+      'Email': t.user_email,
+      'Số Điện Thoại': t.phone,
+      'Ngày Sinh': formatDate(t.dob),
+      'Giới Tính': t.gender,
+      'Đơn Vị / Trường': t.organization,
+      'Nguồn Biết Đến': t.referral_source,
+      'Số Tiền (VND)': t.amount || 70000,
+      'Trạng Thái':
+        t.payment_status === 'paid'
+          ? 'Đã Thanh Toán'
+          : t.payment_status === 'pending'
+          ? 'Chờ Duyệt'
+          : 'Bị Từ Chối',
+      'Số May Mắn': t.lucky_number || '-',
+      'Đã Gửi Email': t.is_email_sent ? 'Đã Gửi' : 'Chưa Gửi',
+      'Check-in': t.is_checked_in ? 'Đã Check-in' : 'Chưa Check-in',
+      'Thời Gian Check-in': t.checked_in_at ? formatDateTime(t.checked_in_at) : '-',
+      'Thời Gian Đặt': formatDateTime(t.created_at),
+      'Người Duyệt': t.verified_by || '-',
+    }))
+
+    // Sheet 3: Báo cáo thống kê
+    const summaryRows = [
+      { 'Chỉ Số Báo Cáo': 'Tên sự kiện', 'Chi Tiết': 'Live Show SẮC I. VÁN CỜ' },
+      { 'Chỉ Số Báo Cáo': 'Thời gian tổ chức', 'Chi Tiết': '19:00 - 21:30 ngày 07/11/2026' },
+      { 'Chỉ Số Báo Cáo': 'Tổng số lượt đặt vé', 'Chi Tiết': stats?.kpi.total || tickets.length },
+      {
+        'Chỉ Số Báo Cáo': 'Vé đã xác nhận (Hợp lệ)',
+        'Chi Tiết': stats?.kpi.paid || tickets.filter((t) => t.payment_status === 'paid').length,
+      },
+      {
+        'Chỉ Số Báo Cáo': 'Vé đang chờ duyệt',
+        'Chi Tiết': stats?.kpi.pending || tickets.filter((t) => t.payment_status === 'pending').length,
+      },
+      {
+        'Chỉ Số Báo Cáo': 'Khách đã check-in',
+        'Chi Tiết': stats?.kpi.checkedIn || tickets.filter((t) => t.is_checked_in).length,
+      },
+      {
+        'Chỉ Số Báo Cáo': 'Vé đã gửi email xác nhận',
+        'Chi Tiết': stats?.kpi.emailSent || tickets.filter((t) => t.is_email_sent).length,
+      },
+      {
+        'Chỉ Số Báo Cáo': 'Tổng doanh thu',
+        'Chi Tiết': formatCurrency(
+          stats?.kpi.revenue ||
+            tickets
+              .filter((t) => t.payment_status === 'paid')
+              .reduce((s, t) => s + (t.amount || 70000), 0)
+        ),
+      },
+      { 'Chỉ Số Báo Cáo': 'Thời điểm xuất dữ liệu', 'Chi Tiết': new Date().toLocaleString('vi-VN') },
+    ]
+
+    const wb = XLSX.utils.book_new()
+
+    // 1. Append Sheet: Số Bốc Thăm
+    const wsDraw = XLSX.utils.json_to_sheet(
+      drawRows.length > 0 ? drawRows : [{ 'Thông báo': 'Chưa có vé nào hợp lệ để bốc thăm' }]
+    )
+    wsDraw['!cols'] = [
+      { wch: 6 },
+      { wch: 26 },
+      { wch: 14 },
+      { wch: 25 },
+      { wch: 22 },
+      { wch: 16 },
+    ]
+    XLSX.utils.book_append_sheet(wb, wsDraw, 'Số Bốc Thăm')
+
+    // 2. Append Sheet: Danh Sách Vé Chi Tiết
+    const wsAll = XLSX.utils.json_to_sheet(
+      allRows.length > 0 ? allRows : [{ 'Thông báo': 'Chưa có đơn vé nào' }]
+    )
+    wsAll['!cols'] = [
+      { wch: 6 },
+      { wch: 16 },
+      { wch: 24 },
+      { wch: 28 },
+      { wch: 14 },
+      { wch: 14 },
+      { wch: 10 },
+      { wch: 22 },
+      { wch: 18 },
+      { wch: 14 },
+      { wch: 16 },
+      { wch: 14 },
+      { wch: 14 },
+      { wch: 14 },
+      { wch: 20 },
+      { wch: 20 },
+      { wch: 28 },
+    ]
+    XLSX.utils.book_append_sheet(wb, wsAll, 'Danh Sách Vé')
+
+    // 3. Append Sheet: Báo Cáo Tổng Quan
+    const wsSummary = XLSX.utils.json_to_sheet(summaryRows)
+    wsSummary['!cols'] = [{ wch: 30 }, { wch: 35 }]
+    XLSX.utils.book_append_sheet(wb, wsSummary, 'Báo Cáo Thống Kê')
+
+    // Download file .xlsx
+    XLSX.writeFile(wb, `SAC_I_VAN_CO_DanhSachVe_${new Date().toISOString().split('T')[0]}.xlsx`)
+    playSuccessSound()
   }
 
   const filteredTickets = tickets.filter((t) =>
@@ -347,11 +485,12 @@ export default function AdminDashboard() {
               </button>
 
               <button
-                onClick={exportCSV}
-                className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white text-xs font-bold px-3.5 py-2.5 rounded-xl transition-all cursor-pointer"
+                onClick={exportExcel}
+                className="flex items-center gap-1.5 bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-500/30 hover:border-emerald-500/60 text-emerald-300 text-xs font-bold px-3.5 py-2.5 rounded-xl transition-all cursor-pointer shadow-md"
+                title="Xuất file Excel gồm nhiều Sheet (kèm sheet Số bốc thăm để in)"
               >
-                <Download size={14} />
-                <span>Xuất CSV</span>
+                <FileSpreadsheet size={15} className="text-emerald-400" />
+                <span>Xuất File Excel</span>
               </button>
 
               <button
@@ -574,10 +713,10 @@ export default function AdminDashboard() {
             </div>
 
             <div className="overflow-x-auto w-full">
-              <table className="w-full min-w-[700px] text-left text-xs">
+              <table className="w-full min-w-[750px] text-left text-xs">
                 <thead>
                   <tr className="bg-white/5 border-b border-white/10 text-slate-400 font-bold uppercase tracking-wider">
-                    {['Mã Đơn', 'Họ Tên', 'Email', 'Trường / Đơn Vị', 'Số May Mắn', 'Trạng Thái', 'Thao Tác'].map((h) => (
+                    {['Mã Đơn', 'Họ Tên', 'Email', 'Trường / Đơn Vị', 'Số May Mắn', 'Trạng Thái', 'Check-in', 'Thao Tác'].map((h) => (
                       <th key={h} className="px-4 py-3.5">{h}</th>
                     ))}
                   </tr>
@@ -585,14 +724,14 @@ export default function AdminDashboard() {
                 <tbody className="divide-y divide-white/5">
                   {ticketsLoading ? (
                     <tr>
-                      <td colSpan={7} className="py-10 text-center text-slate-400">
+                      <td colSpan={8} className="py-10 text-center text-slate-400">
                         <Loader2 className="animate-spin mx-auto mb-2 text-red-500" size={24} />
                         Đang tải danh sách vé...
                       </td>
                     </tr>
                   ) : filteredTickets.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="py-10 text-center text-slate-500 font-medium">
+                      <td colSpan={8} className="py-10 text-center text-slate-500 font-medium">
                         Không có dữ liệu vé phù hợp
                       </td>
                     </tr>
@@ -613,6 +752,18 @@ export default function AdminDashboard() {
                             {t.payment_status === 'paid' ? 'Đã duyệt' :
                              t.payment_status === 'rejected' ? 'Từ chối' : 'Chờ duyệt'}
                           </span>
+                        </td>
+                        <td className="px-4 py-3.5">
+                          {t.is_checked_in ? (
+                            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-950/50 text-blue-400 border border-blue-500/30 inline-flex items-center gap-1.5 shadow-sm">
+                              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+                              <span>Đã Check-in</span>
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/5 text-slate-400 border border-white/10">
+                              Chưa
+                            </span>
+                          )}
                         </td>
                         <td className="px-4 py-3.5">
                           <div className="flex items-center gap-1.5">
@@ -640,6 +791,28 @@ export default function AdminDashboard() {
                                   ✗ Huỷ
                                 </button>
                               </>
+                            )}
+                            {t.payment_status === 'paid' && (
+                              t.is_checked_in ? (
+                                <button
+                                  onClick={() => handleManualCheckIn(t.id, 'uncheck')}
+                                  disabled={checkingInId === t.id}
+                                  className="px-2 py-1 rounded-lg bg-white/5 hover:bg-red-950/60 text-slate-400 hover:text-red-400 border border-white/10 hover:border-red-500/30 text-[10px] font-bold transition-colors cursor-pointer"
+                                  title="Hủy trạng thái check-in"
+                                >
+                                  Hủy
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => handleManualCheckIn(t.id, 'checkin')}
+                                  disabled={checkingInId === t.id}
+                                  className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] transition-colors cursor-pointer flex items-center gap-1"
+                                  title="Check-in ngay vé này"
+                                >
+                                  <Camera size={12} />
+                                  <span>Check-in</span>
+                                </button>
+                              )
                             )}
                           </div>
                         </td>
@@ -684,6 +857,12 @@ export default function AdminDashboard() {
                 <span className="text-slate-400">Số may mắn:</span>
                 <span className="font-bold text-red-400 font-mono text-sm">#{selectedTicket.lucky_number || '-'}</span>
               </div>
+              <div className="flex justify-between py-1 border-b border-white/5">
+                <span className="text-slate-400">Trạng thái Check-in:</span>
+                <span className={`font-bold ${selectedTicket.is_checked_in ? 'text-blue-400' : 'text-slate-400'}`}>
+                  {selectedTicket.is_checked_in ? `✓ Đã Check-in (${selectedTicket.checked_in_at ? formatDateTime(selectedTicket.checked_in_at) : ''})` : 'Chưa Check-in'}
+                </span>
+              </div>
 
               {selectedTicket.payment_proof_url && (
                 <div className="pt-2">
@@ -714,15 +893,40 @@ export default function AdminDashboard() {
             )}
 
             {selectedTicket.payment_status === 'paid' && (
-              <div className="p-4 bg-white/5 border-t border-white/10 flex gap-3">
+              <div className="p-4 bg-white/5 border-t border-white/10 flex gap-2.5">
                 <button
                   disabled={sendingSingleEmail}
                   onClick={() => handleSendSingleEmail(selectedTicket.id)}
-                  className="flex-1 bg-[#D4AF37] hover:bg-[#F0CA50] text-[#0D0D0D] font-black py-3 rounded-xl text-xs transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg"
+                  className="flex-1 bg-[#D4AF37] hover:bg-[#F0CA50] text-[#0D0D0D] font-black py-2.5 rounded-xl text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50 shadow-md"
                 >
-                  {sendingSingleEmail ? <Loader2 size={15} className="animate-spin" /> : <Mail size={15} />}
-                  <span>{selectedTicket.is_email_sent ? '🔄 Gửi Lại Vé Qua Email' : '✉️ Gửi Vé Qua Email'}</span>
+                  {sendingSingleEmail ? <Loader2 size={14} className="animate-spin" /> : <Mail size={14} />}
+                  <span>{selectedTicket.is_email_sent ? 'Gửi Lại Vé Email' : 'Gửi Vé Email'}</span>
                 </button>
+
+                {selectedTicket.is_checked_in ? (
+                  <button
+                    disabled={checkingInId === selectedTicket.id}
+                    onClick={async () => {
+                      await handleManualCheckIn(selectedTicket.id, 'uncheck')
+                      setSelectedTicket((prev: any) => prev ? { ...prev, is_checked_in: false, checked_in_at: null } : null)
+                    }}
+                    className="px-3.5 py-2.5 rounded-xl bg-white/5 hover:bg-red-950/60 text-slate-300 hover:text-red-400 border border-white/10 hover:border-red-500/30 font-bold text-xs transition-colors cursor-pointer"
+                  >
+                    Hủy Check-in
+                  </button>
+                ) : (
+                  <button
+                    disabled={checkingInId === selectedTicket.id}
+                    onClick={async () => {
+                      await handleManualCheckIn(selectedTicket.id, 'checkin')
+                      setSelectedTicket((prev: any) => prev ? { ...prev, is_checked_in: true, checked_in_at: new Date().toISOString() } : null)
+                    }}
+                    className="px-3.5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-colors cursor-pointer flex items-center gap-1.5 shadow-md"
+                  >
+                    <CheckCircle size={14} />
+                    <span>Check-in Vé</span>
+                  </button>
+                )}
               </div>
             )}
           </div>
