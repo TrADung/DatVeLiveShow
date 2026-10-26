@@ -20,7 +20,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="relative w-full min-h-screen bg-[#0D0D0D] text-white flex flex-col">
+    <div className="theme-page-bg relative w-full min-h-screen text-slate-900 dark:text-white flex flex-col transition-colors duration-200">
       {/* Sticky Header with Backdrop Blur */}
       <Header onOpenBooking={handleGoToBooking} />
       

@@ -154,7 +154,7 @@ export default function HeroSection({ onBuyTicket }: HeroSectionProps) {
           transition={{ delay: 0.5 }}
           className="mt-4 text-xs sm:text-sm text-neutral-400 font-medium"
         >
-          Giá vé: <span className="text-[#D4AF37] font-black text-base font-mono">70.000đ</span> / vé • Đã bao gồm đồ uống
+          Giá vé: <span className="text-[#D4AF37] font-black text-base font-mono">89.000 VND</span> - đã bao gồm nước
         </motion.div>
       </div>
     </section>

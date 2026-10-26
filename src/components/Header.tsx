@@ -24,6 +24,7 @@ import {
 import { useAuth } from '@/hooks/useAuth'
 import { useAudio } from '@/hooks/useAudio'
 import AuthModal from '@/components/AuthModal'
+import ThemeToggle from '@/components/ThemeToggle'
 
 interface HeaderProps {
   onOpenBooking?: () => void
@@ -33,7 +34,7 @@ const navLinks = [
   { label: 'Trang Chủ', href: '/#hero' },
   { label: 'Timeline Sự Kiện', href: '/#timeline' },
   { label: 'Hoạt Động CLB', href: '/#activities' },
-  { label: 'Minigame', href: '/#minigame' },
+  { label: 'Vé Của Tôi', href: '/my-tickets' },
 ]
 
 const roleIcon = {
@@ -185,21 +186,30 @@ export default function Header({ onOpenBooking }: HeaderProps) {
             ) : (
               /* Normal Desktop Navigation */
               <nav className="hidden lg:flex items-center gap-8">
-                {navLinks.map((link) => (
-                  <button
-                    key={link.href}
-                    onClick={() => handleNavClick(link.href)}
-                    className="text-xs sm:text-sm font-semibold text-neutral-300 hover:text-[#D4AF37] transition-colors duration-200 relative group py-1 cursor-pointer"
-                  >
-                    {link.label}
-                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#D4AF37] group-hover:w-full transition-all duration-200" />
-                  </button>
-                ))}
+                {navLinks.map((link) => {
+                  const isActive = pathname === link.href || (pathname === '/' && link.href === '/#hero')
+                  return (
+                    <button
+                      key={link.href}
+                      onClick={() => handleNavClick(link.href)}
+                      className={`text-xs sm:text-sm font-semibold transition-colors duration-200 relative group py-1 cursor-pointer ${
+                        isActive ? 'text-[#D4AF37] active-nav-link' : 'text-neutral-300 hover:text-[#D4AF37]'
+                      }`}
+                    >
+                      {link.label}
+                      <span className={`absolute bottom-0 left-0 h-0.5 bg-[#D4AF37] transition-all duration-200 ${
+                        isActive ? 'w-full' : 'w-0 group-hover:w-full'
+                      }`} />
+                    </button>
+                  )
+                })}
               </nav>
             )}
 
             {/* Right Action Section */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Light / Dark Mode Toggle */}
+              <ThemeToggle />
               {/* "MUA VÉ NGAY" CTA button - non-admin pages */}
               {!isAdminSection && (
                 <button
@@ -403,15 +413,22 @@ export default function Header({ onOpenBooking }: HeaderProps) {
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">
-                  {navLinks.map((link) => (
-                    <button
-                      key={link.href}
-                      onClick={() => handleNavClick(link.href)}
-                      className="text-left px-3 py-2.5 rounded-xl text-neutral-300 hover:text-white hover:bg-white/10 text-sm font-semibold transition-all"
-                    >
-                      {link.label}
-                    </button>
-                  ))}
+                  {navLinks.map((link) => {
+                    const isActive = pathname === link.href || (pathname === '/' && link.href === '/#hero')
+                    return (
+                      <button
+                        key={link.href}
+                        onClick={() => handleNavClick(link.href)}
+                        className={`text-left px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                          isActive
+                            ? 'bg-[#D4AF37]/15 text-[#D4AF37] font-bold active-nav-link'
+                            : 'text-neutral-300 hover:text-white hover:bg-white/10'
+                        }`}
+                      >
+                        {link.label}
+                      </button>
+                    )
+                  })}
                   <div className="border-t border-white/10 my-2" />
                   <button
                     onClick={() => { setMobileOpen(false); handleBookingClick() }}

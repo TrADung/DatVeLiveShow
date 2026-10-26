@@ -215,7 +215,7 @@ export default function QRScannerPage() {
         }
       }
     } catch (err: any) {
-      console.error('Camera access error:', err)
+      console.warn('Camera access notice:', err?.message || err)
       setScanning(false)
       playErrorSound()
 
@@ -224,8 +224,8 @@ export default function QRScannerPage() {
         msg = 'Trình duyệt chưa được cấp quyền Camera. Hãy bấm vào biểu tượng Ổ Khóa hoặc Camera trên thanh địa chỉ URL và chọn "Cho phép" (Allow).'
       } else if (err?.name === 'NotFoundError' || err?.message?.toLowerCase().includes('not found')) {
         msg = 'Không tìm thấy thiết bị camera trên máy này. Bạn có thể tải ảnh chụp QR hoặc nhập mã vé trực tiếp bên dưới.'
-      } else if (err?.name === 'NotReadableError') {
-        msg = 'Camera đang bị ứng dụng khác (Zalo, Zoom, Teams, v.v.) chiếm dụng. Hãy tắt ứng dụng đó rồi bấm BẬT CAMERA lại.'
+      } else if (err?.name === 'NotReadableError' || err?.message?.includes('NotReadableError') || err?.message?.includes('Could not start video source')) {
+        msg = 'Camera đang bị ứng dụng khác (Zalo, Zoom, Teams, v.v.) chiếm dụng hoặc chưa tắt kết nối. Bạn hãy tắt ứng dụng đó rồi bấm BẬT CAMERA lại, hoặc sử dụng tính năng tải ảnh QR / nhập mã vé bên dưới.'
       } else if (err?.message) {
         msg = `Lỗi: ${err.message}`
       }
@@ -258,7 +258,7 @@ export default function QRScannerPage() {
       await scanner.clear()
       await handleQRScan(decodedText)
     } catch (err: any) {
-      console.error('File scan error:', err)
+      console.warn('File scan notice:', err?.message || err)
       playErrorSound()
       setScanResult({
         status: 'error',
@@ -321,7 +321,7 @@ export default function QRScannerPage() {
   // Auth gate check
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-[#0A0A0C] text-white flex flex-col items-center justify-center">
+      <div className="theme-page-bg min-h-screen text-slate-900 dark:text-white flex flex-col items-center justify-center">
         <Loader2 size={36} className="animate-spin text-[#D4AF37] mb-4" />
         <p className="text-xs uppercase tracking-widest text-neutral-400 font-bold">
           Đang xác thực bảo mật...
@@ -334,7 +334,7 @@ export default function QRScannerPage() {
 
   if (!isAuthorized) {
     return (
-      <div className="min-h-screen bg-[#0A0A0C] text-white flex flex-col">
+      <div className="theme-page-bg min-h-screen text-slate-900 dark:text-white flex flex-col">
         <Header />
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="max-w-md w-full bg-[#141416] border border-red-500/30 rounded-3xl p-8 text-center shadow-2xl">
@@ -359,7 +359,7 @@ export default function QRScannerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0C] text-white flex flex-col">
+    <div className="theme-page-bg min-h-screen text-slate-900 dark:text-white flex flex-col">
       <Header />
 
       <main className="flex-1 pt-28 sm:pt-36 pb-20 px-4 max-w-md mx-auto w-full flex flex-col items-center">

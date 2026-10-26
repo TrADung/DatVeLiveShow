@@ -56,7 +56,7 @@ export default function DevPanel() {
         // Fallback default settings
         const defaults = Object.keys(SETTING_DESCRIPTIONS).map((key) => ({
           key,
-          value: key === 'ticket_price' ? '70000' : key === 'bank_id' ? 'TCB' : key === 'bank_account_no' ? '2611102006' : key === 'bank_account_name' ? 'TRAN ANH DUNG' : '',
+          value: key === 'ticket_price' ? '89000' : key === 'bank_id' ? 'TCB' : key === 'bank_account_no' ? '2611102006' : key === 'bank_account_name' ? 'TRAN ANH DUNG' : '',
           updated_at: new Date().toISOString(),
         }))
         setSettings(defaults)
@@ -100,7 +100,7 @@ export default function DevPanel() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-[#0A0A0C] text-white flex flex-col items-center justify-center">
+      <div className="theme-page-bg min-h-screen text-slate-900 dark:text-white flex flex-col items-center justify-center">
         <Loader2 size={36} className="animate-spin text-[#D4AF37] mb-4" />
         <p className="text-xs uppercase tracking-widest text-neutral-400 font-bold">
           Đang xác thực bảo mật Dev...
@@ -113,7 +113,7 @@ export default function DevPanel() {
 
   if (!isDev) {
     return (
-      <div className="min-h-screen bg-[#0A0A0C] text-white flex flex-col">
+      <div className="theme-page-bg min-h-screen text-slate-900 dark:text-white flex flex-col">
         <Header />
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="max-w-md w-full bg-[#141416] border border-amber-500/30 rounded-3xl p-8 text-center shadow-2xl">
@@ -138,7 +138,7 @@ export default function DevPanel() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0C] text-white pb-24">
+    <div className="theme-page-bg min-h-screen text-slate-900 dark:text-white pb-24">
       <Header />
 
       <main className="pt-28 sm:pt-36 px-4 sm:px-6 max-w-4xl mx-auto">

@@ -64,9 +64,10 @@ export default function AdminDashboard() {
   const [winners, setWinners] = useState<{ number: number; name: string }[]>([])
   const [currentSpin, setCurrentSpin] = useState<number | null>(null)
   const [checkingInId, setCheckingInId] = useState<string | null>(null)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
-  const fetchStats = async () => {
-    setStatsLoading(true)
+  const fetchStats = async (silent = false) => {
+    if (!silent && !stats) setStatsLoading(true)
     try {
       const res = await fetch('/api/admin/stats')
       const data = await res.json()
@@ -87,17 +88,19 @@ export default function AdminDashboard() {
     }
   }
 
-  const fetchTickets = async () => {
-    setTicketsLoading(true)
+  const fetchTickets = async (silent = false) => {
+    if (!silent && tickets.length === 0) setTicketsLoading(true)
+    if (silent) setIsRefreshing(true)
     try {
       const url = statusFilter !== 'all' ? `/api/admin/verify?status=${statusFilter}&limit=100` : '/api/admin/verify?limit=100'
       const res = await fetch(url)
       const data = await res.json()
       setTickets(data.tickets || [])
     } catch {
-      setTickets([])
+      if (tickets.length === 0) setTickets([])
     } finally {
       setTicketsLoading(false)
+      setIsRefreshing(false)
     }
   }
 
@@ -105,14 +108,6 @@ export default function AdminDashboard() {
     if (!authLoading && user && (userRole === 'admin' || userRole === 'dev')) {
       fetchStats()
       fetchTickets()
-
-      // Auto poll every 5s so when staff check-in from phone, it updates live
-      const interval = setInterval(() => {
-        fetchStats()
-        fetchTickets()
-      }, 5000)
-
-      return () => clearInterval(interval)
     }
   }, [authLoading, user, userRole, statusFilter])
 
@@ -306,7 +301,7 @@ export default function AdminDashboard() {
       'Giới Tính': t.gender,
       'Đơn Vị / Trường': t.organization,
       'Nguồn Biết Đến': t.referral_source,
-      'Số Tiền (VND)': t.amount || 70000,
+      'Số Tiền (VND)': t.amount || 89000,
       'Trạng Thái':
         t.payment_status === 'paid'
           ? 'Đã Thanh Toán'
@@ -348,7 +343,7 @@ export default function AdminDashboard() {
           stats?.kpi.revenue ||
             tickets
               .filter((t) => t.payment_status === 'paid')
-              .reduce((s, t) => s + (t.amount || 70000), 0)
+              .reduce((s, t) => s + (t.amount || 89000), 0)
         ),
       },
       { 'Chỉ Số Báo Cáo': 'Thời điểm xuất dữ liệu', 'Chi Tiết': new Date().toLocaleString('vi-VN') },
@@ -414,7 +409,7 @@ export default function AdminDashboard() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-[#0A0A0C] text-white flex flex-col items-center justify-center">
+      <div className="theme-page-bg min-h-screen text-slate-900 dark:text-white flex flex-col items-center justify-center">
         <Loader2 size={36} className="animate-spin text-[#D4AF37] mb-4" />
         <p className="text-xs uppercase tracking-widest text-neutral-400 font-bold">
           Đang xác thực quyền quản trị...
@@ -427,7 +422,7 @@ export default function AdminDashboard() {
 
   if (!isAuthorized) {
     return (
-      <div className="min-h-screen bg-[#0A0A0C] text-white flex flex-col">
+      <div className="theme-page-bg min-h-screen text-slate-900 dark:text-white flex flex-col">
         <Header />
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="max-w-md w-full bg-[#141416] border border-red-500/30 rounded-3xl p-8 text-center shadow-2xl">
@@ -452,7 +447,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0C] text-white pb-24">
+    <div className="theme-page-bg min-h-screen text-slate-900 dark:text-white pb-24">
       <Header />
 
       {/* Main content wrapped in full-width responsive container */}
@@ -689,7 +684,17 @@ export default function AdminDashboard() {
                 <p className="text-xs text-slate-400 mt-0.5">Đối chiếu biên lai ngân hàng và xác nhận duyệt vé</p>
               </div>
 
-              <div className="flex gap-2.5 flex-wrap">
+              <div className="flex gap-2.5 flex-wrap items-center">
+                <button
+                  type="button"
+                  onClick={() => { playClickSound(); fetchTickets(true); fetchStats(true); }}
+                  disabled={isRefreshing}
+                  className="flex items-center gap-1.5 bg-[#18181B] hover:bg-[#27272A] border border-white/10 hover:border-[#D4AF37]/50 rounded-xl px-3 py-2 text-xs text-white font-medium transition-all cursor-pointer shadow-sm disabled:opacity-60 shrink-0"
+                  title="Bấm để tải lại danh sách vé mới nhất"
+                >
+                  <RefreshCw size={13} className={`text-[#D4AF37] ${isRefreshing ? 'animate-spin' : ''}`} />
+                  <span>{isRefreshing ? 'Đang tải...' : 'Làm mới'}</span>
+                </button>
                 <div className="relative">
                   <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input

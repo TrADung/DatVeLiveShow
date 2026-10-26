@@ -65,7 +65,7 @@ export default function MyTicketsPage() {
       }
       setQrUrls(qrs)
     } catch (error) {
-      console.error(error)
+      console.warn('Lookup notice:', error)
     } finally {
       setLoading(false)
     }
@@ -86,7 +86,7 @@ export default function MyTicketsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0C] text-white flex flex-col">
+    <div className="theme-page-bg min-h-screen text-slate-900 dark:text-white flex flex-col">
       <Header />
 
       <main className="flex-1 pt-28 sm:pt-36 pb-20 px-4 sm:px-6 max-w-4xl mx-auto w-full">

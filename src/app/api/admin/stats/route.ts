@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
     const rejected = tickets.filter(t => t.payment_status === 'rejected').length
     const checkedIn = tickets.filter(t => t.is_checked_in).length
     const emailSent = tickets.filter(t => t.is_email_sent).length
-    const revenue = tickets.filter(t => t.payment_status === 'paid').reduce((s, t) => s + (t.amount || 70000), 0)
+    const revenue = tickets.filter(t => t.payment_status === 'paid').reduce((s, t) => s + (t.amount || 89000), 0)
 
     const orgMap: Record<string, number> = {}
     tickets.forEach(t => {

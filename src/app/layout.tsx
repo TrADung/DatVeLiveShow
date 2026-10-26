@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import MusicPlayer from "@/components/MusicPlayer";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,10 +23,28 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi">
-      <body className={`${inter.className} bg-[#0D0D0D] text-white min-h-screen antialiased selection:bg-[#E53935] selection:text-white`}>
-        {children}
-        <MusicPlayer />
+    <html lang="vi" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var savedTheme = localStorage.getItem('dtu_theme') || 'light';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                document.documentElement.classList.add(savedTheme);
+              } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'light');
+                document.documentElement.classList.add('light');
+              }
+            `,
+          }}
+        />
+      </head>
+      <body className={`${inter.className} min-h-screen antialiased selection:bg-[#E53935] selection:text-white transition-colors duration-200`}>
+        <ThemeProvider>
+          {children}
+          <MusicPlayer />
+        </ThemeProvider>
       </body>
     </html>
   );

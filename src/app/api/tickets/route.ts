@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     const lucky_number = Math.floor(1000 + Math.random() * 9000)
     const ticket_id = crypto.randomUUID()
     const qr_secret_hash = generateQRHash(ticket_id, order_code)
-    const amount = 70000
+    const amount = 89000
 
     const newTicket = {
       id: ticket_id,

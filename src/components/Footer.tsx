@@ -70,6 +70,13 @@ export default function Footer({ onBuyTicket }: FooterProps) {
               </button>
               
               <Link
+                href="/my-tickets"
+                onClick={playClickSound}
+                className="text-left hover:text-[#D4AF37] transition-colors flex items-center gap-1 font-medium"
+              >
+                <span>Tra Cứu Vé Của Tôi</span>
+              </Link>
+              <Link
                 href="/book"
                 onClick={playClickSound}
                 className="text-left text-[#D4AF37] hover:text-[#F0CA50] transition-colors flex items-center gap-1 font-bold"

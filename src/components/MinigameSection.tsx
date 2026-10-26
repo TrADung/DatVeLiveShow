@@ -114,7 +114,7 @@ export default function MinigameSection() {
             className="btn-gold px-8 py-3.5 rounded-2xl text-sm sm:text-base font-bold flex items-center gap-2.5 shadow-xl hover:scale-105 active:scale-95 transition-all"
           >
             <Ticket size={18} />
-            <span>ĐẶT VÉ THAM DỰ CHỈ 70.000đ</span>
+            <span>ĐẶT VÉ THAM DỰ CHỈ 89.000 VND - ĐÃ BAO GỒM NƯỚC</span>
           </Link>
         </motion.div>
       </div>

@@ -11,7 +11,7 @@ const dressColors = [
     border: 'border-white/30',
     textColor: 'text-white',
     badge: 'Chủ đạo',
-    badgeStyle: 'bg-white/10 text-neutral-300 border-white/20',
+    badgeStyle: 'dress-badge-black bg-white/10 text-neutral-300 border-white/20',
   },
   {
     name: 'TRẮNG',
@@ -20,7 +20,7 @@ const dressColors = [
     border: 'border-black/20',
     textColor: 'text-black',
     badge: 'Chủ đạo',
-    badgeStyle: 'bg-neutral-800 text-white border-neutral-700',
+    badgeStyle: 'dress-badge-white bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border-neutral-300 dark:border-neutral-700',
   },
   {
     name: 'ĐỎ',
@@ -29,7 +29,7 @@ const dressColors = [
     border: 'border-red-400/40',
     textColor: 'text-white',
     badge: 'Chủ đạo',
-    badgeStyle: 'bg-red-950/60 text-red-300 border-red-500/40',
+    badgeStyle: 'dress-badge-red bg-red-950/60 text-red-300 border-red-500/40',
   },
   {
     name: 'VÀNG',
@@ -38,13 +38,13 @@ const dressColors = [
     border: 'border-[#D4AF37]/60 shadow-[0_0_15px_rgba(212,175,55,0.3)]',
     textColor: 'text-neutral-900',
     badge: 'Điểm nhấn',
-    badgeStyle: 'bg-[#D4AF37]/20 text-[#D4AF37] border-[#D4AF37]/50',
+    badgeStyle: 'dress-badge-gold bg-[#D4AF37]/20 text-[#D4AF37] border-[#D4AF37]/50',
   },
 ]
 
 export default function DressCodeSection() {
   return (
-    <section className="relative w-full block py-10 md:py-14 bg-[#111113] border-y border-white/10 overflow-hidden">
+    <section id="dress-code" className="relative w-full block py-10 md:py-14 bg-[#111113] border-y border-white/10 overflow-hidden">
       {/* Ambient background glow */}
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-32 bg-[#D4AF37]/5 rounded-full blur-3xl pointer-events-none" />
 

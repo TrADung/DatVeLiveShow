@@ -8,7 +8,7 @@ export const EVENT_INFO = {
   eventVenue: '',
   // Đường link Google Maps (khi có sẽ gắn vào đây hoặc sửa trong Dev Panel)
   eventVenueMapsUrl: '',
-  ticketPrice: 70000,
+  ticketPrice: 89000,
   bankId: 'TCB',
   bankAccountNo: '2611102006',
   bankAccountName: 'TRAN ANH DUNG',

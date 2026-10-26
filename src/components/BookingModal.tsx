@@ -70,7 +70,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
     feedback: '',
   })
 
-  const TICKET_PRICE = 70000
+  const TICKET_PRICE = 89000
   const BANK_ID = process.env.NEXT_PUBLIC_VIETQR_BANK_ID || 'TCB'
   const ACCOUNT_NO = process.env.NEXT_PUBLIC_VIETQR_ACCOUNT_NO || '2611102006'
   const ACCOUNT_NAME = process.env.NEXT_PUBLIC_VIETQR_ACCOUNT_NAME || 'TRAN ANH DUNG'
@@ -196,6 +196,11 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
   const handleProofUpload = async () => {
     if (!ticketId) return
     playClickSound()
+    if (!proofFile && !proofPreview) {
+      setError('Vui lòng tải lên ảnh chụp biên lai/bill chuyển khoản để hoàn tất đặt vé!')
+      playErrorSound()
+      return
+    }
     setProofUploading(true)
     setError('')
 
@@ -455,7 +460,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                   {/* Price Box */}
                   <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/30">
                     <span className="text-xs font-bold text-neutral-300">Tổng thanh toán (1 vé):</span>
-                    <span className="text-xl font-black text-[#D4AF37] font-mono">70.000đ</span>
+                    <span className="text-xl font-black text-[#D4AF37] font-mono">89.000 VND</span>
                   </div>
 
                   <button
@@ -500,7 +505,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                       alt="VietQR Code"
                       className="w-48 h-48 object-contain mx-auto"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`Thanh toan 70000 VND cho ${ACCOUNT_NAME} - ${orderCode}`)}`
+                        (e.target as HTMLImageElement).src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`Thanh toan 89000 VND cho ${ACCOUNT_NAME} - ${orderCode}`)}`
                       }}
                     />
                     <div className="mt-1.5 text-[10px] font-bold text-slate-800 uppercase tracking-wider">
@@ -529,7 +534,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-neutral-400">Số tiền:</span>
-                      <span className="font-black text-[#D4AF37] font-mono">70.000đ</span>
+                      <span className="font-black text-[#D4AF37] font-mono">89.000 VND</span>
                     </div>
                     <div className="flex justify-between pt-1 border-t border-white/10">
                       <span className="text-neutral-400">Nội dung chuyển khoản:</span>
@@ -539,13 +544,22 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                     </div>
                   </div>
 
-                  {/* Proof upload */}
+                  {/* Proof upload (BẮT BUỘC) */}
                   <div className="text-left">
-                    <label className="block text-xs font-bold text-neutral-300 mb-1.5">
-                      Ảnh chụp màn hình chuyển khoản:
-                    </label>
-                    <label className="block border-2 border-dashed border-white/20 hover:border-[#D4AF37] rounded-xl p-3.5 text-center cursor-pointer bg-white/5 hover:bg-[#D4AF37]/5 transition-all">
-                      <Upload size={20} className="mx-auto mb-1 text-neutral-400" />
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="block text-xs font-bold text-neutral-300">
+                        Ảnh chụp màn hình chuyển khoản:
+                      </label>
+                      <span className="text-[10px] font-black uppercase text-red-500 bg-red-950/30 px-2 py-0.5 rounded border border-red-500/30">
+                        * Bắt buộc
+                      </span>
+                    </div>
+                    <label className={`block border-2 border-dashed rounded-xl p-3.5 text-center cursor-pointer transition-all ${
+                      proofFile || proofPreview
+                        ? 'border-emerald-500 bg-emerald-950/15'
+                        : 'border-white/20 hover:border-[#D4AF37] bg-white/5 hover:bg-[#D4AF37]/5'
+                    }`}>
+                      <Upload size={20} className={`mx-auto mb-1 ${proofFile || proofPreview ? 'text-emerald-400' : 'text-neutral-400'}`} />
                       <span className="text-xs text-neutral-300 font-semibold block">
                         {proofFile ? proofFile.name : 'Tải ảnh biên lai chuyển khoản'}
                       </span>
@@ -568,8 +582,8 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                   <button
                     type="button"
                     onClick={handleProofUpload}
-                    disabled={proofUploading}
-                    className="w-full btn-velvet py-3.5 rounded-xl font-black text-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    disabled={proofUploading || (!proofFile && !proofPreview)}
+                    className="w-full btn-velvet py-3.5 rounded-xl font-black text-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {proofUploading ? (
                       <Loader2 size={18} className="animate-spin" />

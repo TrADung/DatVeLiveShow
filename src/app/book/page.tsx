@@ -73,7 +73,7 @@ export default function BookPage() {
     feedback: '',
   })
 
-  const TICKET_PRICE = 70000
+  const TICKET_PRICE = EVENT_INFO.ticketPrice || 89000
   const BANK_ID = process.env.NEXT_PUBLIC_VIETQR_BANK_ID || 'TCB'
   const ACCOUNT_NO = process.env.NEXT_PUBLIC_VIETQR_ACCOUNT_NO || '2611102006'
   const ACCOUNT_NAME = process.env.NEXT_PUBLIC_VIETQR_ACCOUNT_NAME || 'TRAN ANH DUNG'
@@ -157,6 +157,11 @@ export default function BookPage() {
   const handleProofUpload = async () => {
     if (!ticketId) return
     playClickSound()
+    if (!proofFile && !proofPreview) {
+      setError('Vui lòng tải lên ảnh chụp biên lai/bill chuyển khoản để hoàn tất đặt vé!')
+      playErrorSound()
+      return
+    }
     setProofUploading(true)
     setError('')
 
@@ -207,7 +212,7 @@ export default function BookPage() {
     : ''
 
   return (
-    <div className="relative w-full min-h-screen bg-[#0D0D0D] text-white flex flex-col">
+    <div className="theme-page-bg relative w-full min-h-screen text-slate-900 dark:text-white flex flex-col">
       <Header />
 
       <main className="relative w-full flex-1 block pt-8 sm:pt-12 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
@@ -274,41 +279,15 @@ export default function BookPage() {
                 </div>
               </div>
 
-              {/* Perks List */}
-              <div className="mt-6 pt-6 border-t border-white/10">
-                <div className="text-xs font-black uppercase tracking-wider text-neutral-300 mb-3 flex items-center gap-1.5">
-                  <Sparkles size={14} className="text-[#D4AF37]" />
-                  <span>Đặc Quyền Kèm Theo Mỗi Vé</span>
-                </div>
-                <div className="space-y-2 text-xs text-neutral-300">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 size={14} className="text-[#D4AF37] shrink-0" />
-                    <span>01 Đồ uống welcome drink & snack cao cấp</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 size={14} className="text-[#D4AF37] shrink-0" />
-                    <span>01 Vòng tay dạ quang lưu niệm SẮC I. VÁN CỜ</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 size={14} className="text-[#D4AF37] shrink-0" />
-                    <span>Tham gia trọn vẹn các tiết mục âm nhạc & giao lưu</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 size={14} className="text-[#D4AF37] shrink-0" />
-                    <span>Vé điện tử QR Check-in siêu tốc tại cửa</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Price Box */}
-              <div className="mt-6 p-4 rounded-2xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-between">
+              {/* Price Box Only (Perks List removed per request) */}
+              <div className="mt-6 p-4.5 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/40 flex items-center justify-between shadow-sm">
                 <div>
-                  <div className="text-[11px] font-bold text-neutral-400 uppercase">Giá niêm yết</div>
-                  <div className="text-xs text-neutral-300 font-medium">Bao gồm toàn bộ quyền lợi</div>
+                  <div className="text-xs font-bold text-neutral-400 uppercase tracking-wider">Giá Vé</div>
+                  <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">Đã bao gồm nước</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-black text-[#D4AF37] font-mono">70.000đ</div>
-                  <div className="text-[10px] text-neutral-400">1 vé / người</div>
+                  <div className="text-2xl sm:text-3xl font-black text-[#8A6508] dark:text-[#D4AF37] font-mono">89.000 VND</div>
+                  <div className="text-[11px] text-neutral-500 dark:text-neutral-400 font-medium">1 vé / người • Đã bao gồm nước</div>
                 </div>
               </div>
             </div>
@@ -572,7 +551,7 @@ export default function BookPage() {
                         alt="VietQR Code"
                         className="w-56 h-56 object-contain mx-auto"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`Thanh toan 70000 VND cho ${ACCOUNT_NAME} - ${orderCode}`)}`
+                          (e.target as HTMLImageElement).src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`Thanh toan 89000 VND cho ${ACCOUNT_NAME} - ${orderCode}`)}`
                         }}
                       />
                       <div className="mt-2 text-[11px] font-bold text-slate-800 tracking-wider">
@@ -606,7 +585,7 @@ export default function BookPage() {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-neutral-400">Số tiền:</span>
-                      <span className="font-black text-[#D4AF37] font-mono text-base">70.000đ</span>
+                      <span className="font-black text-[#D4AF37] font-mono text-base">89.000 VND</span>
                     </div>
                     <div className="flex justify-between items-center pt-2 border-t border-white/10">
                       <span className="text-neutral-400">Nội dung chuyển khoản:</span>
@@ -616,18 +595,27 @@ export default function BookPage() {
                     </div>
                   </div>
 
-                  {/* Proof Upload Area */}
+                  {/* Proof Upload Area (BẮT BUỘC) */}
                   <div>
-                    <label className="block text-xs font-bold text-neutral-300 mb-2">
-                      Tải lên ảnh chụp màn hình biên lai chuyển khoản:
-                    </label>
-                    <label className="block border-2 border-dashed border-white/20 hover:border-[#D4AF37] rounded-2xl p-6 text-center cursor-pointer bg-white/5 hover:bg-[#D4AF37]/5 transition-all">
-                      <Upload size={24} className="mx-auto mb-2 text-neutral-400" />
-                      <span className="text-xs sm:text-sm text-neutral-300 font-bold block">
-                        {proofFile ? proofFile.name : 'Bấm vào đây để chọn ảnh chụp màn hình'}
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-xs font-bold text-neutral-300">
+                        Ảnh chụp màn hình biên lai chuyển khoản:
+                      </label>
+                      <span className="text-[10px] font-black uppercase text-red-500 bg-red-950/30 px-2 py-0.5 rounded border border-red-500/30">
+                        * Bắt buộc
                       </span>
-                      <span className="text-[11px] text-neutral-500 block mt-1">
-                        Hỗ trợ PNG, JPG, JPEG (Tối đa 10MB)
+                    </div>
+                    <label className={`block border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all ${
+                      proofFile || proofPreview
+                        ? 'border-emerald-500 bg-emerald-950/15'
+                        : 'border-white/20 hover:border-[#D4AF37] bg-white/5 hover:bg-[#D4AF37]/5'
+                    }`}>
+                      <Upload size={24} className={`mx-auto mb-2 ${proofFile || proofPreview ? 'text-emerald-400' : 'text-neutral-400'}`} />
+                      <span className="text-xs sm:text-sm text-neutral-300 font-bold block">
+                        {proofFile ? proofFile.name : 'Bấm vào đây để chọn ảnh chụp màn hình biên lai'}
+                      </span>
+                      <span className="text-[11px] text-neutral-400 block mt-1">
+                        Hỗ trợ PNG, JPG, JPEG (Tối đa 10MB) • Bắt buộc tải ảnh để hoàn tất đặt vé
                       </span>
                       <input
                         type="file"
@@ -653,18 +641,23 @@ export default function BookPage() {
                   <button
                     type="button"
                     onClick={handleProofUpload}
-                    disabled={proofUploading}
-                    className="w-full btn-velvet py-4 rounded-2xl font-black text-base flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    disabled={proofUploading || (!proofFile && !proofPreview)}
+                    className="w-full btn-velvet py-4 rounded-2xl font-black text-base flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-xl"
                   >
                     {proofUploading ? (
                       <Loader2 size={20} className="animate-spin" />
                     ) : (
                       <>
                         <Check size={18} />
-                        <span>TÔI ĐÃ CHUYỂN KHOẢN XONG</span>
+                        <span>XÁC NHẬN ĐÃ CHUYỂN KHOẢN</span>
                       </>
                     )}
                   </button>
+                  {!proofFile && !proofPreview && (
+                    <p className="text-center text-[11px] text-amber-500 font-medium -mt-2">
+                      ⚠️ Bạn cần tải lên ảnh biên lai chuyển khoản trước khi bấm xác nhận.
+                    </p>
+                  )}
                 </div>
               )}
 
