@@ -533,7 +533,7 @@ html.light body,
 }
 
 /* 16. Mobile Menu & Modals */
-[data-theme="light"] .lg\:hidden,
+[data-theme="light"] header div.lg\:hidden,
 [data-theme="light"] .z-50.bg-\[\#1C1C1E\],
 [data-theme="light"] .z-50.bg-\[\#383A44\],
 [data-theme="light"] .z-50.bg-\[\#121212\] {
@@ -543,8 +543,8 @@ html.light body,
   box-shadow: 0 16px 40px -4px rgba(60, 45, 20, 0.15) !important;
 }
 
-[data-theme="light"] .lg\:hidden a,
-[data-theme="light"] .lg\:hidden button {
+[data-theme="light"] header div.lg\:hidden a,
+[data-theme="light"] header div.lg\:hidden button {
   color: #111827 !important;
 }
 
@@ -570,4 +570,51 @@ html.light body,
 
 [data-theme="light"] ::-webkit-scrollbar-thumb:hover {
   background: #8A6508;
+}
+
+/* 19. Mobile Specific UX & Bottom Bar */
+@media (max-width: 640px) {
+  /* Prevent iOS Safari 16px auto-zoom on form input focus */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+  
+  /* Ensure footer has clearance above sticky mobile bottom bar */
+  footer {
+    padding-bottom: 96px !important;
+  }
+}
+
+/* Mobile Bottom Bar Styling */
+.mobile-bottom-bar {
+  background-color: rgba(18, 18, 18, 0.96) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="light"] .mobile-bottom-bar {
+  background-color: rgba(250, 247, 242, 0.96) !important;
+  border-top: 1px solid rgba(180, 150, 100, 0.25) !important;
+  box-shadow: 0 -8px 30px rgba(60, 45, 20, 0.1) !important;
+}
+
+[data-theme="light"] .mobile-bottom-bar .text-neutral-400 {
+  color: #6B7280 !important;
+}
+
+/* 20. Rock-Solid Timeline Transparency Reset */
+#timeline,
+#timeline .space-y-16,
+#timeline .space-y-16 > div,
+#timeline [class*="lg:hidden"],
+[data-theme="light"] #timeline [class*="lg:hidden"],
+[data-theme="light"] #timeline .relative.w-full,
+[data-theme="light"] #timeline .lg\:hidden {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+
+[data-theme="light"] #timeline .p-4.rounded-2xl {
+  background-color: rgba(255, 255, 255, 0.4) !important;
+  border: 1px solid rgba(180, 150, 100, 0.2) !important;
 }

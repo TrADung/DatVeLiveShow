@@ -207,7 +207,7 @@ export default function TimelineSection() {
                     <div className="absolute left-5 sm:left-6 lg:left-[44%] -translate-x-1/2 top-1.5 z-20 flex items-center justify-center pointer-events-none">
                       <div className="relative flex items-center justify-center">
                         <span className="absolute w-5 h-5 rounded-full bg-[#D4AF37]/30 animate-ping" />
-                        <div className="w-3.5 h-3.5 rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,0.9)] ring-4 ring-[#0D0D0D]" />
+                        <div className="w-3.5 h-3.5 rounded-full bg-[#D4AF37] shadow-[0_0_12px_rgba(212,175,55,0.8)] ring-4 ring-[#EEE5D8] dark:ring-[#0D0D0D] border-2 border-white" />
                       </div>
                     </div>
 
@@ -235,7 +235,7 @@ export default function TimelineSection() {
 
                               {/* Overlapping Secondary Photo (Japan Tour style) */}
                               {stage.photos[1] && (
-                                <div className="absolute -bottom-6 -left-8 w-36 h-24 rounded-xl overflow-hidden shadow-2xl border-2 border-[#0D0D0D] bg-neutral-900 z-10 group">
+                                <div className="absolute -bottom-6 -left-8 w-36 h-24 rounded-xl overflow-hidden shadow-2xl border-2 border-[#EEE5D8] dark:border-[#0D0D0D] bg-neutral-900 z-10 group">
                                   {/* eslint-disable-next-line @next/next/no-img-element */}
                                   <img
                                     src={stage.photos[1].url}
@@ -399,7 +399,7 @@ export default function TimelineSection() {
                           <div
                             key={pIdx}
                             className={`shrink-0 rounded-xl overflow-hidden border border-white/10 shadow-lg ${
-                              pIdx === 0 ? 'w-48 h-32' : 'w-36 h-28 -ml-4 z-10 border-2 border-[#0D0D0D]'
+                              pIdx === 0 ? 'w-44 h-28 sm:w-48 sm:h-32' : 'w-32 h-24 sm:w-36 sm:h-28 -ml-3 sm:-ml-4 z-10 border-2 border-[#EEE5D8] dark:border-[#0D0D0D]'
                             }`}
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}

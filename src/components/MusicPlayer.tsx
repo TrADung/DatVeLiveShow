@@ -90,7 +90,7 @@ export default function MusicPlayer() {
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="fixed bottom-6 left-6 z-50 flex items-center gap-2"
+            className="fixed bottom-20 left-3 sm:bottom-6 sm:left-6 z-30 flex items-center gap-2"
           >
             <button
               onClick={handleToggle}

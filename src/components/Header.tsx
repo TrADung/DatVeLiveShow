@@ -64,6 +64,11 @@ export default function Header({ onOpenBooking }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [avatarError, setAvatarError] = useState(false)
+
+  useEffect(() => {
+    setAvatarError(false)
+  }, [user])
 
   const isAdminSection = pathname.startsWith('/admin') || pathname.startsWith('/dev')
 
@@ -99,7 +104,7 @@ export default function Header({ onOpenBooking }: HeaderProps) {
               onClick={playClickSound}
               className="flex items-center gap-3 cursor-pointer select-none group"
             >
-              <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden border-2 border-[#D4AF37]/50 group-hover:border-[#D4AF37] transition-colors shadow-md shadow-[#D4AF37]/20">
+              <div className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden border-2 border-[#D4AF37]/50 group-hover:border-[#D4AF37] transition-colors shadow-md shadow-[#D4AF37]/20 shrink-0">
                 <Image
                   src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTNDDsODtmbzNQkjXH-fH55xoqkVtsz2f7F-9AQQufjw&s=10"
                   alt="CLB Logo"
@@ -110,12 +115,12 @@ export default function Header({ onOpenBooking }: HeaderProps) {
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-black text-white tracking-widest uppercase">
+                  <span className="text-xs sm:text-sm font-black text-white tracking-wider sm:tracking-widest uppercase">
                     DTU Acoustic
                   </span>
-                  <span className="text-xs text-[#D4AF37] font-bold">🎵</span>
+                  <span className="hidden sm:inline-block text-xs text-[#D4AF37] font-bold">🎵</span>
                 </div>
-                <div className="text-[10px] text-neutral-400 font-medium tracking-wide">
+                <div className="hidden sm:block text-[10px] text-neutral-400 font-medium tracking-wide">
                   Slogan: Nghe và Cảm
                 </div>
               </div>
@@ -230,18 +235,20 @@ export default function Header({ onOpenBooking }: HeaderProps) {
                         onClick={() => { playClickSound(); setProfileOpen(!profileOpen) }}
                         className="flex items-center gap-2.5 bg-white/5 hover:bg-white/10 rounded-full pl-2 pr-3 py-1.5 border border-white/10 hover:border-white/20 transition-all cursor-pointer"
                       >
-                        {user.user_metadata?.avatar_url ? (
-                          <Image
+                        {user.user_metadata?.avatar_url && !avatarError ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
                             src={user.user_metadata.avatar_url}
-                            alt="Avatar"
+                            alt=""
                             width={26}
                             height={26}
-                            className="rounded-full bg-white/10"
-                            unoptimized
+                            referrerPolicy="no-referrer"
+                            onError={() => setAvatarError(true)}
+                            className="w-6 h-6 sm:w-6.5 sm:h-6.5 rounded-full object-cover shrink-0 border border-white/20 shadow-sm"
                           />
                         ) : (
-                          <div className="w-6 h-6 rounded-full bg-[#E53935] text-white flex items-center justify-center text-xs font-bold">
-                            {user.email?.[0].toUpperCase() || 'U'}
+                          <div className="w-6 h-6 sm:w-6.5 sm:h-6.5 rounded-full bg-gradient-to-tr from-[#D4AF37] to-[#E53935] text-white flex items-center justify-center text-xs font-black shrink-0 shadow-sm border border-white/20 select-none">
+                            {(user.user_metadata?.full_name || user.email || 'U')[0].toUpperCase()}
                           </div>
                         )}
                         <span className="hidden sm:block text-xs font-bold text-white max-w-[110px] truncate">
@@ -261,14 +268,34 @@ export default function Header({ onOpenBooking }: HeaderProps) {
                             exit={{ opacity: 0, y: -8, scale: 0.95 }}
                             className="absolute right-0 top-full mt-2 w-60 bg-[#1C1C1E] rounded-2xl border border-white/10 shadow-2xl overflow-hidden z-50 text-white"
                           >
-                            <div className="p-3.5 bg-white/5 border-b border-white/10">
-                              <div className="text-[11px] text-neutral-400 font-medium">Tài khoản Google</div>
-                              <div className="text-xs font-bold text-white truncate">{user.email}</div>
-                              <div className="flex items-center gap-1.5 mt-1.5">
-                                {roleIcon[userRole]}
-                                <span className="text-xs font-semibold text-neutral-300">
-                                  Vai trò: <strong className="text-white">{roleLabel[userRole]}</strong>
-                                </span>
+                            <div className="p-3.5 bg-white/5 border-b border-white/10 flex items-center gap-3">
+                              {user.user_metadata?.avatar_url && !avatarError ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={user.user_metadata.avatar_url}
+                                  alt=""
+                                  width={36}
+                                  height={36}
+                                  referrerPolicy="no-referrer"
+                                  onError={() => setAvatarError(true)}
+                                  className="w-9 h-9 rounded-full object-cover shrink-0 border border-white/20 shadow-md"
+                                />
+                              ) : (
+                                <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#D4AF37] to-[#E53935] text-white flex items-center justify-center text-sm font-black shrink-0 shadow-md border border-white/20 select-none">
+                                  {(user.user_metadata?.full_name || user.email || 'U')[0].toUpperCase()}
+                                </div>
+                              )}
+                              <div className="min-w-0 flex-1">
+                                <div className="text-xs font-bold text-white truncate">
+                                  {user.user_metadata?.full_name || user.email?.split('@')[0]}
+                                </div>
+                                <div className="text-[11px] text-neutral-400 truncate">{user.email}</div>
+                                <div className="flex items-center gap-1.5 mt-1">
+                                  {roleIcon[userRole]}
+                                  <span className="text-[10px] font-semibold text-neutral-300">
+                                    Vai trò: <strong className="text-white">{roleLabel[userRole]}</strong>
+                                  </span>
+                                </div>
                               </div>
                             </div>
 
@@ -332,7 +359,7 @@ export default function Header({ onOpenBooking }: HeaderProps) {
                       whileHover={{ scale: 1.03 }}
                       whileTap={{ scale: 0.97 }}
                       onClick={() => { playClickSound(); setAuthModalOpen(true) }}
-                      className="flex items-center gap-2 bg-white text-black hover:bg-neutral-200 font-bold text-xs sm:text-sm px-4 py-2 sm:px-5 sm:py-2.5 rounded-full shadow-lg transition-all cursor-pointer"
+                      className="flex items-center gap-1.5 bg-white text-black hover:bg-neutral-200 font-bold text-xs px-2.5 py-1.5 sm:px-4 sm:py-2 sm:text-sm rounded-full shadow-md transition-all cursor-pointer whitespace-nowrap"
                     >
                       <LogIn size={15} />
                       <span>Đăng nhập</span>

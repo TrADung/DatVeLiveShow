@@ -336,19 +336,22 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                     />
                   </div>
 
-                  {/* Email */}
+                  {/* Email (Khóa theo tài khoản Google đã đăng nhập) */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-xs font-bold text-neutral-300 mb-1.5">
-                      <Mail size={13} className="text-[#D4AF37]" />
-                      <span>Email nhận vé điện tử <span className="text-[#E53935]">*</span></span>
-                    </label>
+                    <div className="flex items-center justify-between mb-1.5 flex-wrap gap-1">
+                      <label className="flex items-center gap-1.5 text-xs font-bold text-neutral-300">
+                        <Mail size={13} className="text-[#D4AF37]" />
+                        <span>Email nhận vé điện tử <span className="text-[#E53935]">*</span></span>
+                      </label>
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                        ✓ Google đã xác thực
+                      </span>
+                    </div>
                     <input
-                      required
                       type="email"
-                      value={emailInput}
-                      onChange={(e) => setEmailInput(e.target.value)}
-                      placeholder="tenban@gmail.com"
-                      className="w-full bg-[#141414] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-all font-mono"
+                      value={user?.email || ''}
+                      readOnly
+                      className="w-full bg-[#18181B] opacity-90 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none transition-all font-mono cursor-not-allowed select-all"
                     />
                   </div>
 

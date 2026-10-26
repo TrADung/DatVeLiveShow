@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import MusicPlayer from "@/components/MusicPlayer";
+import MobileBottomBar from "@/components/MobileBottomBar";
 import { ThemeProvider } from "@/context/ThemeContext";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -44,6 +45,7 @@ export default function RootLayout({
         <ThemeProvider>
           {children}
           <MusicPlayer />
+          <MobileBottomBar />
         </ThemeProvider>
       </body>
     </html>
