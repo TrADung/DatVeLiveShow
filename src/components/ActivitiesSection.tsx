@@ -9,7 +9,7 @@ interface ActivityItem {
   date: string
   venue: string
   attendees: string
-  type: 'acoustic' | 'liveshow' | 'workshop'
+  type: 'offline' | 'liveshow' | 'reward' | 'other'
   imageUrl: string
   description: string
   tags: string[]
@@ -18,82 +18,84 @@ interface ActivityItem {
 const activities: ActivityItem[] = [
   {
     id: 1,
-    title: 'Acoustic Night Vol.1 - Những Mùa Nhớ',
-    date: 'Tháng 3, 2024',
-    venue: 'Hà Nội City',
-    attendees: '80+ Khán giả',
-    type: 'acoustic',
-    imageUrl: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80',
-    description: 'Đêm acoustic mộc mạc khởi đầu của CLB với những giai điệu guitar và hòa thanh sâu lắng trong không gian ấm cúng.',
-    tags: ['Acoustic', 'Intimate', 'Coffee Show'],
+    title: 'LiveShow - Giao Lộ Âm Thanh',
+    date: 'Tháng 5, 2026',
+    venue: 'Miên Cafe - Đà Nẵng',
+    attendees: '70+ Khán giả',
+    type: 'liveshow',
+    imageUrl: 'images/Activity/GiaoLoAmThanh.jpg',
+    description: 'Nơi những cảm xúc giao nhau, nơi bạn có thể dừng lại giữa nhịp sống vội vã và lắng nghe chính mình.',
+    tags: ['Acoustic', 'Full Band', 'MiniShow'],
   },
   {
     id: 2,
-    title: 'Live Concert Mùa Hè Rực Rỡ',
-    date: 'Tháng 6, 2024',
-    venue: 'Nhà Hát Tuổi Trẻ, Hà Nội',
-    attendees: '250+ Khán giả',
-    type: 'liveshow',
-    imageUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=80',
-    description: 'Đêm nhạc bùng nổ với dàn nhạc sống kết hợp hiệu ứng visual sân khấu và hệ thống âm thanh ánh sáng chuyên nghiệp.',
-    tags: ['Full Band', 'Visual Stage', 'Sold Out'],
+    title: 'Giải A - Sắc Âm Tuổi Trẻ 2025',
+    date: 'Tháng 12, 2025',
+    venue: 'Liên Hoan Band P.Hòa Khánh Mở Rộng - Đà Nẵng',
+    attendees: '5 Thành viên band nhạc',
+    type: 'reward',
+    imageUrl: '/images/Activity/LienHoanBand.jpg',
+    description: 'Buổi chia sẻ kỹ thuật đệm hát acoustic, hòa âm guitar và làm chủ sự tự tin khi biểu diễn trên sân khấu lớn.',
+    tags: ['Vocal & Live Performance', 'Band Battle'],
   },
   {
     id: 3,
-    title: 'Workshop: Đệm Hát & Kỹ Năng Sân Khấu',
-    date: 'Tháng 8, 2024',
-    venue: 'Studio CLB Âm Nhạc',
-    attendees: '60 Thành viên',
-    type: 'workshop',
-    imageUrl: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=800&q=80',
-    description: 'Buổi chia sẻ kỹ thuật đệm hát acoustic, hòa âm guitar và làm chủ sự tự tin khi biểu diễn trên sân khấu lớn.',
-    tags: ['Masterclass', 'Vocal & Guitar'],
+    title: 'LiveShow - Chạm Ngõ Hạ Sang',
+    date: 'Tháng 4, 2024',
+    venue: 'Miên Cafe - Đà Nẵng',
+    attendees: '60+ Khán giả',
+    type: 'liveshow',
+    imageUrl: 'images/Activity/HaSang.jpg',
+    description: 'Hãy để âm nhạc như những cánh hoa phượng rơi, tỏa hương trong gió, mang theo những kỷ niệm tươi đẹp của tuổi trẻ.',
+    tags: ['Acoustic','Full Band', 'Visual Stage',],
   },
   {
     id: 4,
-    title: 'Acoustic Night Vol.2 - Giai Điệu Mùa Thu',
-    date: 'Tháng 9, 2024',
-    venue: 'The Rooftop Sky Hall, Hà Nội',
-    attendees: '150+ Khán giả',
-    type: 'acoustic',
-    imageUrl: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&q=80',
-    description: 'Trở lại với không gian lãng mạn trên tầng cao, ngắm trọn hoàng hôn Hà Nội và đắm mình trong những bản tình ca bất hủ.',
-    tags: ['Rooftop', 'Sunset Show'],
+    title: 'Chào Đón TSV Viện Nam Khuê',
+    date: 'Tháng 3, 2024',
+    venue: 'Cung Thể thao Tiên Sơn - Đà Nẵng',
+    attendees: '60+ Khán giả',
+    type: 'offline',
+    imageUrl: 'images/Activity/khac.jpg',
+    description: 'CLB vinh dự đã được Viện Nam Khuê ngỏ lời mời biểu diễn cho sự kiện chào đón TSV khóa mới.',
+    tags: ['Collab', 'Live Performance', 'Acoustic'],
   },
   {
     id: 5,
-    title: 'Gala Âm Nhạc Cuối Năm - Tái Ngộ',
-    date: 'Tháng 12, 2024',
-    venue: 'Trung Tâm Nghệ Thuật Hà Nội',
-    attendees: '300+ Khán giả',
-    type: 'liveshow',
-    imageUrl: 'https://images.unsplash.com/photo-1468359601543-843bfaef291a?w=800&q=80',
-    description: 'Đêm nhạc tổng kết năm với các tiết mục đặc sắc chào đón năm mới và tri ân các thế hệ thành viên CLB.',
-    tags: ['Year End Gala', 'Anniversary'],
+    title: 'Offline hằng tuần',
+    date: 'Tháng 2, 2024',
+    venue: 'Dưới Chân Cầu Rồng - Đà Nẵng',
+    attendees: 'Tị tị tị Người',
+    type: 'offline',
+    imageUrl: 'images/Activity/OffCauRong.jpg',
+    description: 'Chủ nhật hằng tuần chúng minh sẽ offline đàn hát, dù bạn là ai cũng có thể tham gia - hãy theo dõi page nhé!',
+    tags: ['Offline', 'Dragon Bridge', 'Acoustic'],
   },
   {
     id: 6,
-    title: 'Offline Giao Lưu & Jam Session Mở',
-    date: 'Tháng 10, 2024',
-    venue: 'Cơ sở sinh hoạt CLB',
-    attendees: '90 Thành viên',
-    type: 'acoustic',
-    imageUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&q=80',
-    description: 'Buổi giao lưu thân mật giữa các thế hệ cựu thành viên và khóa mới với sân khấu acoustic mở tự do thể hiện tài năng.',
-    tags: ['Jam Session', 'Networking'],
+    title: 'LiveShow - Sinh Nhật 8 Tuổi',
+    date: 'Tháng 7, 2023',
+    venue: 'Miên Cafe - Đà Nẵng',
+    attendees: '60+ Khán giả',
+    type: 'liveshow',
+    imageUrl: 'images/activity/SN8Tuoi.jpg',
+    description: 'Live show nhân dịp sinh nhật 8 tuổi của CLB.',
+    tags: ['Birthday','Anniversary', 'Acoustic'],
   },
 ]
 
 const typeBadge = {
-  acoustic: 'bg-[#D4AF37]/15 text-[#D4AF37] border-[#D4AF37]/30',
+  offline: 'bg-emerald-500/10 text-emerald-800 border-emerald-500/30',
   liveshow: 'bg-[#E53935]/15 text-[#E53935] border-[#E53935]/30',
-  workshop: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
+  reward: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
+  other : 'bg-amber-500/15 text-amber-900 border-amber-500/30',
 }
 
 const typeLabel = {
-  acoustic: 'Acoustic Live',
-  liveshow: 'Live Concert',
-  workshop: 'Masterclass',
+  offline: 'Offline',
+  liveshow: 'Live Show',
+  reward: 'Giải Thưởng',
+  other : 'Khác',
 }
 
 export default function ActivitiesSection() {
@@ -117,7 +119,7 @@ export default function ActivitiesSection() {
           </h2>
 
           <p className="text-sm md:text-base text-neutral-400 max-w-2xl mx-auto leading-relaxed">
-            Dấu ấn âm nhạc của CLB qua những đêm acoustic ấm cúng, live concert hoành tráng và các buổi workshop chuyên sâu.
+            Ngoài những liveshow hoành tráng thì chúng mình còn có những khoảnh khắc mộc mạc qua những buổi offline và sự góp mặt trong nhiều sự kiện.
           </p>
         </div>
 

@@ -222,14 +222,14 @@ export default function MyTicketsPage() {
                         </div>
 
                         {/* Lucky Number Card */}
-                        {ticket.lucky_number && (
+                        {ticket.lucky_number !== undefined && ticket.lucky_number !== null && (
                           <div className="mt-4 p-4 rounded-2xl bg-red-950/30 border border-red-500/30 text-center">
                             <div className="flex items-center justify-center gap-1.5 text-slate-300 text-xs font-bold mb-1">
                               <Sparkles size={14} className="text-red-400" />
                               <span>SỐ MAY MẮN DỰ THƯỞNG MINIGAME</span>
                             </div>
                             <div className="text-3xl font-black text-red-400 font-mono tracking-widest my-1">
-                              #{ticket.lucky_number}
+                              #{String(ticket.lucky_number).padStart(3, '0')}
                             </div>
                             <div className="text-[11px] text-slate-400">
                               Dùng để đối chiếu khi bốc thăm trúng đàn Guitar tại sân khấu

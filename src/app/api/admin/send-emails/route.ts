@@ -4,6 +4,8 @@ import { createClient as createAdminClient } from '@supabase/supabase-js'
 import nodemailer from 'nodemailer'
 import QRCode from 'qrcode'
 import { EVENT_INFO } from '@/lib/constants'
+import { DEFAULT_EMAIL_SUBJECT, DEFAULT_EMAIL_TEMPLATE, compileEmailSubject, compileEmailTemplate } from '@/lib/emailTemplate'
+import { formatLuckyNumber, formatCurrency } from '@/lib/utils'
 
 function getAdminSupabase() {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -181,6 +183,8 @@ export async function POST(request: NextRequest) {
       'event_time',
       'event_venue',
       'event_venue_maps_url',
+      'ticket_email_subject',
+      'ticket_email_template',
     ])
 
   const settingsMap = Object.fromEntries(settings?.map(s => [s.key, s.value]) || [])
@@ -251,22 +255,37 @@ export async function POST(request: NextRequest) {
         color: { dark: '#121212', light: '#FFFFFF' },
       })
 
+      // Compile dynamic placeholders
+      const customSubject = settingsMap.ticket_email_subject || DEFAULT_EMAIL_SUBJECT
+      const customTemplate = settingsMap.ticket_email_template || DEFAULT_EMAIL_TEMPLATE
+      const formattedLucky = formatLuckyNumber(ticket.lucky_number)
+
+      const ticketPlaceholders: Record<string, string> = {
+        full_name: ticket.full_name,
+        order_code: ticket.order_code,
+        lucky_number: formattedLucky,
+        qr_code: '<img src="cid:ticketqrcode" alt="Mã QR Vé" class="qr-img" />',
+        event_name: eventName,
+        event_date: eventDate,
+        event_time: eventTime,
+        event_venue: eventVenue,
+        event_venue_maps_url: eventVenueMapsUrl,
+        user_email: ticket.user_email,
+        phone: ticket.phone,
+        organization: ticket.organization,
+        amount: formatCurrency(ticket.amount || 89000),
+        hotline: `${EVENT_INFO.hotline} (${EVENT_INFO.hotlineName})`,
+      }
+
+      const emailSubject = compileEmailSubject(customSubject, ticketPlaceholders)
+      const emailHtml = compileEmailTemplate(customTemplate, ticketPlaceholders)
+
       // Send email with embedded CID attachment
       await transporter.sendMail({
         from: `CLB DTU Acoustic <${smtpUser}>`,
         to: ticket.user_email,
-        subject: `[Vé Điện Tử] ${eventName} | Mã vé: ${ticket.order_code}`,
-        html: generateTicketEmailHTML({
-          full_name: ticket.full_name,
-          order_code: ticket.order_code,
-          lucky_number: ticket.lucky_number,
-          qr_cid: 'cid:ticketqrcode',
-          event_name: eventName,
-          event_date: eventDate,
-          event_time: eventTime,
-          event_venue: eventVenue,
-          event_venue_maps_url: eventVenueMapsUrl,
-        }),
+        subject: emailSubject,
+        html: emailHtml,
         attachments: [
           {
             filename: `ticket-${ticket.order_code}.png`,

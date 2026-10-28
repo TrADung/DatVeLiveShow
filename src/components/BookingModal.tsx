@@ -618,13 +618,13 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                       <span className="text-neutral-400">Mã đơn hàng:</span>
                       <span className="font-mono font-black text-[#D4AF37]">{orderCode}</span>
                     </div>
-                    {luckyNumber && (
+                    {luckyNumber !== null && luckyNumber !== undefined && (
                       <div className="flex justify-between items-center bg-[#D4AF37]/10 p-2.5 rounded-lg border border-[#D4AF37]/30">
                         <span className="font-bold text-white flex items-center gap-1.5">
                           <Sparkles size={14} className="text-[#D4AF37]" />
                           <span>Số May Mắn Minigame:</span>
                         </span>
-                        <span className="font-mono font-black text-[#D4AF37] text-base">#{luckyNumber}</span>
+                        <span className="font-mono font-black text-[#D4AF37] text-base">#{String(luckyNumber).padStart(3, '0')}</span>
                       </div>
                     )}
                     <div className="flex justify-between">

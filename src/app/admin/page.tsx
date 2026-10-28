@@ -10,12 +10,12 @@ import {
   Users, Ticket, TrendingUp, CheckCircle, Mail, DollarSign,
   RefreshCw, Send, Shield, Download, Search, Eye,
   X, Loader2, Sparkles, AlertTriangle, ArrowLeft, Camera, ExternalLink,
-  FileSpreadsheet
+  FileSpreadsheet, FileEdit
 } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { useAuth } from '@/hooks/useAuth'
 import { useAudio } from '@/hooks/useAudio'
-import { formatCurrency, formatDateTime, formatDate } from '@/lib/utils'
+import { formatCurrency, formatDateTime, formatDate, formatLuckyNumber } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 import type { Ticket as TicketType } from '@/types'
 import Header from '@/components/Header'
@@ -250,12 +250,13 @@ export default function AdminDashboard() {
     setIsSpinning(true)
     setCurrentSpin(null)
 
-    const pool = tickets.length > 0 ? tickets : [
-      { lucky_number: 1042, full_name: 'Nguyễn Tuấn Anh' },
-      { lucky_number: 2891, full_name: 'Trần Mai Linh' },
-      { lucky_number: 3740, full_name: 'Lê Hoàng Nam' },
-      { lucky_number: 5821, full_name: 'Phạm Thu Trang' },
-      { lucky_number: 6912, full_name: 'Đỗ Đức Thắng' },
+    const validTickets = tickets.filter((t) => t.lucky_number !== undefined && t.lucky_number !== null)
+    const pool = validTickets.length > 0 ? validTickets : [
+      { lucky_number: 9, full_name: 'Khán giả May Mắn (009)' },
+      { lucky_number: 24, full_name: 'Khán giả Đặc Biệt (024)' },
+      { lucky_number: 108, full_name: 'Nguyễn Tuấn Anh' },
+      { lucky_number: 289, full_name: 'Trần Mai Linh' },
+      { lucky_number: 374, full_name: 'Lê Hoàng Nam' },
     ]
 
     const interval = setInterval(() => {
@@ -286,7 +287,7 @@ export default function AdminDashboard() {
       'Họ và Tên': t.full_name,
       'Ngày Sinh': formatDate(t.dob),
       'Đơn Vị': t.organization,
-      'Số May Mắn (Bốc Thăm)': t.lucky_number,
+      'Số May Mắn (Bốc Thăm)': formatLuckyNumber(t.lucky_number),
       'Mã Đơn Vé': t.order_code,
     }))
 
@@ -308,7 +309,7 @@ export default function AdminDashboard() {
           : t.payment_status === 'pending'
           ? 'Chờ Duyệt'
           : 'Bị Từ Chối',
-      'Số May Mắn': t.lucky_number || '-',
+      'Số May Mắn': formatLuckyNumber(t.lucky_number),
       'Đã Gửi Email': t.is_email_sent ? 'Đã Gửi' : 'Chưa Gửi',
       'Check-in': t.is_checked_in ? 'Đã Check-in' : 'Chưa Check-in',
       'Thời Gian Check-in': t.checked_in_at ? formatDateTime(t.checked_in_at) : '-',
@@ -496,6 +497,16 @@ export default function AdminDashboard() {
                 {sendingEmails ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
                 <span>Gửi Vé Email</span>
               </button>
+
+              <Link
+                href="/admin/mail-template"
+                onClick={playClickSound}
+                className="flex items-center gap-1.5 bg-gradient-to-r from-purple-700 to-indigo-600 hover:from-purple-600 hover:to-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-purple-900/30 transition-all cursor-pointer border border-purple-400/30"
+                title="Tùy chỉnh nội dung form gửi mail và xem trước mẫu email gửi khán giả"
+              >
+                <FileEdit size={14} />
+                <span>Form gửi mail</span>
+              </Link>
 
               <button
                 onClick={() => { playClickSound(); setLuckyDrawOpen(true) }}
@@ -747,7 +758,7 @@ export default function AdminDashboard() {
                         <td className="px-4 py-3.5 font-bold text-white">{t.full_name}</td>
                         <td className="px-4 py-3.5 text-slate-400 font-mono text-[11px]">{t.user_email}</td>
                         <td className="px-4 py-3.5 text-slate-300">{t.organization}</td>
-                        <td className="px-4 py-3.5 font-bold text-amber-400 font-mono">{t.lucky_number ? `#${t.lucky_number}` : '-'}</td>
+                        <td className="px-4 py-3.5 font-bold text-amber-400 font-mono">{t.lucky_number !== undefined && t.lucky_number !== null ? `#${formatLuckyNumber(t.lucky_number)}` : '-'}</td>
                         <td className="px-4 py-3.5">
                           <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${
                             t.payment_status === 'paid' ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/30' :
@@ -860,7 +871,7 @@ export default function AdminDashboard() {
               </div>
               <div className="flex justify-between py-1 border-b border-white/5">
                 <span className="text-slate-400">Số may mắn:</span>
-                <span className="font-bold text-red-400 font-mono text-sm">#{selectedTicket.lucky_number || '-'}</span>
+                <span className="font-bold text-red-400 font-mono text-sm">#{selectedTicket.lucky_number !== undefined && selectedTicket.lucky_number !== null ? formatLuckyNumber(selectedTicket.lucky_number) : '-'}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-white/5">
                 <span className="text-slate-400">Trạng thái Check-in:</span>
@@ -956,7 +967,7 @@ export default function AdminDashboard() {
             {/* Lucky spin counter */}
             <div className="bg-[#0A0A0C] border border-white/10 rounded-2xl p-6 mb-6 shadow-inner">
               <div className="text-6xl font-black text-red-500 font-mono tracking-widest">
-                {currentSpin ? `#${currentSpin}` : '????'}
+                {currentSpin !== null && currentSpin !== undefined ? `#${formatLuckyNumber(currentSpin)}` : '???'}
               </div>
             </div>
 
@@ -974,7 +985,7 @@ export default function AdminDashboard() {
                 <div className="space-y-1.5 max-h-36 overflow-y-auto">
                   {winners.map((w, idx) => (
                     <div key={idx} className="flex items-center justify-between p-2.5 rounded-xl bg-red-950/30 border border-red-500/20 text-xs">
-                      <span className="font-bold text-red-400 font-mono">#{w.number}</span>
+                      <span className="font-bold text-red-400 font-mono">#{formatLuckyNumber(w.number)}</span>
                       <span className="font-bold text-white">{w.name}</span>
                     </div>
                   ))}

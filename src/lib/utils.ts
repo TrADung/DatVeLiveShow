@@ -6,12 +6,34 @@ export function generateOrderCode(): string {
   return `CLB-${timestamp.slice(-4)}${random}`
 }
 
-export function generateLuckyNumber(existingNumbers: number[]): number {
-  let num: number
-  do {
-    num = Math.floor(1000 + Math.random() * 9000) // 4-digit number
-  } while (existingNumbers.includes(num))
-  return num
+export function formatLuckyNumber(num: number | string | null | undefined): string {
+  if (num === null || num === undefined || num === '') return '---'
+  const parsed = parseInt(String(num), 10)
+  if (isNaN(parsed)) return '---'
+  return String(parsed).padStart(3, '0')
+}
+
+export function generateLuckyNumber(existingNumbers: number[] = []): number {
+  const existingSet = new Set(existingNumbers)
+  // Ưu tiên đảm bảo chắc chắn khách hàng có 2 số đặc biệt: 09 (9) và 24 (24)
+  if (!existingSet.has(9)) return 9
+  if (!existingSet.has(24)) return 24
+
+  // Sau khi cả 9 và 24 đều đã có, cấp số ngẫu nhiên 3 chữ số từ 0 đến 999 chưa được sử dụng
+  const available: number[] = []
+  for (let i = 0; i <= 999; i++) {
+    if (!existingSet.has(i)) {
+      available.push(i)
+    }
+  }
+
+  if (available.length > 0) {
+    const randomIndex = Math.floor(Math.random() * available.length)
+    return available[randomIndex]
+  }
+
+  // Fallback nếu vượt quá 1000 vé
+  return Math.floor(Math.random() * 1000)
 }
 
 export function generateQRHash(ticketId: string, orderCode: string): string {

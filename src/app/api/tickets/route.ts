@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { generateOrderCode, generateQRHash } from '@/lib/utils'
+import { generateOrderCode, generateQRHash, generateLuckyNumber } from '@/lib/utils'
 
 function getAdminSupabase() {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -32,10 +32,28 @@ export async function POST(request: NextRequest) {
     }
 
     const order_code = generateOrderCode()
-    const lucky_number = Math.floor(1000 + Math.random() * 9000)
     const ticket_id = crypto.randomUUID()
     const qr_secret_hash = generateQRHash(ticket_id, order_code)
     const amount = 89000
+
+    // Cấp phát số may mắn 3 chữ số (000-999), đảm bảo ưu tiên có số 09 (9) và 24 (24)
+    let existingLuckyNumbers: number[] = []
+    const adminSupabase = getAdminSupabase()
+    if (adminSupabase) {
+      try {
+        const { data: existingTickets } = await adminSupabase
+          .from('tickets')
+          .select('lucky_number')
+        if (existingTickets) {
+          existingLuckyNumbers = existingTickets
+            .map((t) => t.lucky_number)
+            .filter((n): n is number => typeof n === 'number' && !isNaN(n))
+        }
+      } catch (err) {
+        console.warn('Error querying lucky numbers:', err)
+      }
+    }
+    const lucky_number = generateLuckyNumber(existingLuckyNumbers)
 
     const newTicket = {
       id: ticket_id,
@@ -59,7 +77,6 @@ export async function POST(request: NextRequest) {
     }
 
     // 1. Try saving with Admin Supabase Client (bypasses RLS safely on server)
-    const adminSupabase = getAdminSupabase()
     if (adminSupabase) {
       try {
         const { data, error } = await adminSupabase

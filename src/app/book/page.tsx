@@ -778,14 +778,14 @@ export default function BookPage() {
                       <span className="text-neutral-400">Mã đơn hàng:</span>
                       <span className="font-mono font-black text-[#D4AF37] text-base">{orderCode}</span>
                     </div>
-                    {luckyNumber && (
+                    {luckyNumber !== null && luckyNumber !== undefined && (
                       <div className="flex justify-between items-center bg-[#D4AF37]/10 p-3 rounded-xl border border-[#D4AF37]/30">
                         <span className="font-bold text-white flex items-center gap-1.5">
                           <Sparkles size={16} className="text-[#D4AF37]" />
                           <span>Số May Mắn Dự Thưởng:</span>
                         </span>
                         <span className="font-mono font-black text-[#D4AF37] text-lg">
-                          #{luckyNumber}
+                          #{String(luckyNumber).padStart(3, '0')}
                         </span>
                       </div>
                     )}

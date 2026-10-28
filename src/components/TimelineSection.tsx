@@ -41,12 +41,12 @@ const timelineStages: TimelineStage[] = [
       },
       
       {
-        url: '/images/Timeline/AcousticLiveShow.jpg',
+        url: '/images/Timeline/checkin.jpg',
         alt: 'Acoustic Performance',
         caption: 'Acoustic Live Show',
       },
       {
-        url: '/images/Timeline/Checkin.jpg',
+        url: '/images/Timeline/AcousticLiveShow.jpg',
         alt: 'Sảnh đón khách và check-in',
         caption: 'Sảnh Đón Khách',
       },
@@ -59,13 +59,12 @@ const timelineStages: TimelineStage[] = [
     title: 'Thế cờ cảm xúc',
     subtitle: 'Những âm vang mộc mạc lắng đọng của câu lạc bộ. Xen kẻ đó là các giọng ca khách mời đáng mong đợi',
     subEvents: [
-      { time: '19:00', name: 'Acoustic Mộc Mạc' },
-      { time: '20:40', name: 'Giọng Ca Khách Mời' },
+      { time: '', name: 'Bốc thăm trúng thưởng' },
     ],
     side: 'right',
     photos: [
       {
-        url: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=600&q=80',
+        url: '/images/Timeline/DanhDan.jpg',
         alt: 'Tiết mục Guitar Acoustic',
         caption: 'Guitar Mộc',
       },
@@ -81,10 +80,9 @@ const timelineStages: TimelineStage[] = [
     phase: 'Chặng 03',
     timeRange: '21:15 – 21:30',
     title: 'Lưu dấu ván cờ',
-    subtitle: 'Ai sẽ là quân cờ may mắn ? Thời khắc ghi lại dấu ấn!',
+    subtitle: 'Chụp hình lưu niệm',
     subEvents: [
-      { time: '21:15', name: 'Bốc Thăm Trúng Thưởng' },
-      { time: '21:30', name: 'Chụp Hình Lưu Niệm' },
+      
     ],
     side: 'left',
     photos: [
@@ -94,7 +92,7 @@ const timelineStages: TimelineStage[] = [
         caption: 'take a photo',
       },
       {
-        url: '/images/Timeline/Lucky.webp',
+        url: '/images/Timeline/ChupHinhLuuNiem.jpg',
         alt: 'Vòng quay may mắn',
         caption: 'Lucky Draw',
       },

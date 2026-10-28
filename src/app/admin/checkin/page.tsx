@@ -568,7 +568,7 @@ export default function QRScannerPage() {
                         { IconComp: Hash, label: 'Mã vé', value: scanResult.ticket.order_code },
                         { IconComp: Calendar, label: 'Ngày sinh', value: formatDate(scanResult.ticket.dob) },
                         { IconComp: Building, label: 'Đơn vị', value: scanResult.ticket.organization || 'Khách vãng lai' },
-                        { IconComp: Sparkles, label: 'Số may mắn', value: `#${scanResult.ticket.lucky_number || '-'}` },
+                        { IconComp: Sparkles, label: 'Số may mắn', value: scanResult.ticket.lucky_number !== undefined && scanResult.ticket.lucky_number !== null ? `#${String(scanResult.ticket.lucky_number).padStart(3, '0')}` : '-' },
                       ].map(({ IconComp, label, value }) => (
                         <div key={label} className="flex items-center justify-between py-1 border-b border-white/5 last:border-none">
                           <div className="flex items-center gap-2 text-slate-400">
