@@ -55,7 +55,7 @@ const activities: ActivityItem[] = [
     date: 'Tháng 3, 2024',
     venue: 'Cung Thể thao Tiên Sơn - Đà Nẵng',
     attendees: '60+ Khán giả',
-    type: 'offline',
+    type: 'other',
     imageUrl: 'images/Activity/khac.jpg',
     description: 'CLB vinh dự đã được Viện Nam Khuê ngỏ lời mời biểu diễn cho sự kiện chào đón TSV khóa mới.',
     tags: ['Collab', 'Live Performance', 'Acoustic'],
@@ -85,10 +85,10 @@ const activities: ActivityItem[] = [
 ]
 
 const typeBadge = {
-  offline: 'bg-emerald-500/10 text-emerald-800 border-emerald-500/30',
+  offline: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
   liveshow: 'bg-[#E53935]/15 text-[#E53935] border-[#E53935]/30',
   reward: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
-  other : 'bg-amber-500/15 text-amber-900 border-amber-500/30',
+  other : ' bg-[#D4AF37]/15 text-[#D4AF37] border-[#D4AF37]/30',
 }
 
 const typeLabel = {
