@@ -35,7 +35,7 @@ const activities: ActivityItem[] = [
     attendees: '5 Thành viên band nhạc',
     type: 'reward',
     imageUrl: '/images/Activity/LienHoanBand.jpg',
-    description: 'Buổi chia sẻ kỹ thuật đệm hát acoustic, hòa âm guitar và làm chủ sự tự tin khi biểu diễn trên sân khấu lớn.',
+    description: 'Vượt qua hàng chục band nhạc hết sức đáng gờm, CLB đã xuất sắc đạt được giải A trong cuộc thi liên hoan band.',
     tags: ['Vocal & Live Performance', 'Band Battle'],
   },
   {
