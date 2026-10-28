@@ -78,7 +78,7 @@ const activities: ActivityItem[] = [
     venue: 'Miên Cafe - Đà Nẵng',
     attendees: '60+ Khán giả',
     type: 'liveshow',
-    imageUrl: 'images/activity/SN8Tuoi.jpg',
+    imageUrl: 'images/Activity/SN8Tuoi.jpg',
     description: 'Live show nhân dịp sinh nhật 8 tuổi của CLB.',
     tags: ['Birthday','Anniversary', 'Acoustic'],
   },
