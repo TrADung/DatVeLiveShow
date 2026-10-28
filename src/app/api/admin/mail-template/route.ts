@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import nodemailer from 'nodemailer'
 import QRCode from 'qrcode'
+import path from 'path'
+import fs from 'fs'
 import {
   DEFAULT_EMAIL_SUBJECT,
   DEFAULT_EMAIL_TEMPLATE,
@@ -11,7 +13,6 @@ import {
   compileEmailSubject,
   compileEmailTemplate,
 } from '@/lib/emailTemplate'
-import { EVENT_INFO } from '@/lib/constants'
 
 function getAdminSupabase() {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -50,15 +51,46 @@ export async function GET() {
     const { data: settings } = await dbClient
       .from('site_settings')
       .select('key, value')
-      .in('key', ['ticket_email_subject', 'ticket_email_template'])
+      .in('key', [
+        'ticket_email_subject',
+        'ticket_email_template',
+        'event_venue_name',
+        'event_venue_address',
+        'event_venue_maps_url',
+        'event_venue',
+      ])
 
     const map = Object.fromEntries(settings?.map((s) => [s.key, s.value]) || [])
+
+    const venueName = (map.event_venue_name || '').trim()
+    const venueAddress = (map.event_venue_address || '').trim()
+    const venueMapsUrl = (map.event_venue_maps_url || '').trim()
+    const generalVenue = (map.event_venue || '').trim()
+    const combinedVenueText = generalVenue || [venueName, venueAddress].filter(Boolean).join(' - ')
+
+    let eventVenueHTML = ''
+    if (venueMapsUrl) {
+      const text = combinedVenueText || 'Xem vị trí trên Google Maps'
+      eventVenueHTML = `<a href="${venueMapsUrl}" target="_blank" style="color: #B45309; text-decoration: underline; font-weight: 700;">📍 ${text} (Mở chỉ đường Google Maps ↗)</a>`
+    } else if (combinedVenueText) {
+      eventVenueHTML = combinedVenueText
+    } else {
+      eventVenueHTML = '<span style="color: #64748B; font-style: italic;">Sẽ thông báo chính thức trước ngày diễn ra sự kiện</span>'
+    }
+
+    const dynamicMock = {
+      ...MOCK_TICKET_DATA,
+      event_venue: eventVenueHTML,
+      event_venue_name: venueName,
+      event_venue_address: venueAddress,
+      event_venue_maps_url: venueMapsUrl,
+    }
 
     return NextResponse.json({
       subject: map.ticket_email_subject || DEFAULT_EMAIL_SUBJECT,
       template: map.ticket_email_template || DEFAULT_EMAIL_TEMPLATE,
       placeholders: EMAIL_PLACEHOLDERS,
-      mockData: MOCK_TICKET_DATA,
+      mockData: dynamicMock,
       adminEmail: admin.email,
     })
   } catch (err: any) {
@@ -85,7 +117,6 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'save') {
-      // Save subject and template to site_settings
       const now = new Date().toISOString()
       const updates = [
         {
@@ -120,13 +151,22 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Địa chỉ nhận email thử nghiệm không hợp lệ' }, { status: 400 })
       }
 
-      // Query SMTP settings
-      const { data: smtpSettings } = await dbClient
+      // Query SMTP settings + venue
+      const { data: settings } = await dbClient
         .from('site_settings')
         .select('key, value')
-        .in('key', ['smtp_host', 'smtp_port', 'smtp_user', 'smtp_pass'])
+        .in('key', [
+          'smtp_host',
+          'smtp_port',
+          'smtp_user',
+          'smtp_pass',
+          'event_venue_name',
+          'event_venue_address',
+          'event_venue_maps_url',
+          'event_venue',
+        ])
 
-      const smtpMap = Object.fromEntries(smtpSettings?.map((s) => [s.key, s.value]) || [])
+      const smtpMap = Object.fromEntries(settings?.map((s) => [s.key, s.value]) || [])
       const smtpUser = (smtpMap.smtp_user || process.env.SMTP_USER || '').trim()
       const smtpPass = (smtpMap.smtp_pass || process.env.SMTP_PASS || '').trim()
 
@@ -147,7 +187,7 @@ export async function POST(request: NextRequest) {
       const qrPngBuffer = await QRCode.toBuffer(
         JSON.stringify({
           id: 'demo-ticket-id-preview',
-          order_code: 'CLB-DEMO',
+          order_code: 'CLB-LG6FHWZ',
           hash: 'preview-hash-demo',
         }),
         {
@@ -157,24 +197,63 @@ export async function POST(request: NextRequest) {
         }
       )
 
-      const compiledSubject = compileEmailSubject(subject, MOCK_TICKET_DATA)
-      const compiledHTML = compileEmailTemplate(template, {
+      const venueName = (smtpMap.event_venue_name || '').trim()
+      const venueAddress = (smtpMap.event_venue_address || '').trim()
+      const venueMapsUrl = (smtpMap.event_venue_maps_url || '').trim()
+      const generalVenue = (smtpMap.event_venue || '').trim()
+      const combinedVenueText = generalVenue || [venueName, venueAddress].filter(Boolean).join(' - ')
+
+      let eventVenueHTML = ''
+      if (venueMapsUrl) {
+        const text = combinedVenueText || 'Xem vị trí trên Google Maps'
+        eventVenueHTML = `<a href="${venueMapsUrl}" target="_blank" style="color: #B45309; text-decoration: underline; font-weight: 700;">📍 ${text} (Mở chỉ đường Google Maps ↗)</a>`
+      } else if (combinedVenueText) {
+        eventVenueHTML = combinedVenueText
+      } else {
+        eventVenueHTML = '<span style="color: #64748B; font-style: italic;">Sẽ thông báo chính thức trước ngày diễn ra sự kiện</span>'
+      }
+
+      const dynamicMock = {
         ...MOCK_TICKET_DATA,
-        qr_code: '<img src="cid:ticketqrcode" alt="Mã QR Demo" class="qr-img" />',
-      })
+        event_venue: eventVenueHTML,
+        event_venue_name: venueName,
+        event_venue_address: venueAddress,
+        event_venue_maps_url: venueMapsUrl,
+        qr_code: '<img src="cid:ticketqrcode" alt="Mã QR Check-in" class="qr-img" style="width: 190px; height: 190px; display: block; margin: 0 auto; border: 3px solid #D4AF37; border-radius: 14px; padding: 6px; background: #FFFFFF; box-shadow: 0 4px 12px rgba(0,0,0,0.08);" />',
+      }
+
+      const compiledSubject = compileEmailSubject(subject, dynamicMock)
+      let compiledHTML = compileEmailTemplate(template, dynamicMock)
+
+      const bannerPngPath = path.join(process.cwd(), 'public', 'images', 'EmailForm', 'ticket.png')
+      const bannerJpgPath = path.join(process.cwd(), 'public', 'images', 'EmailForm', 'ticket.jpg')
+      const bannerPath = fs.existsSync(bannerPngPath) ? bannerPngPath : fs.existsSync(bannerJpgPath) ? bannerJpgPath : null
+      const hasBanner = Boolean(bannerPath)
+      const bannerFilename = bannerPath && bannerPath.endsWith('.png') ? 'ticket.png' : 'ticket.jpg'
+
+      const attachments: any[] = [
+        {
+          filename: 'ticket-demo.png',
+          content: qrPngBuffer,
+          cid: 'ticketqrcode',
+        },
+      ]
+
+      if (hasBanner && bannerPath) {
+        compiledHTML = compiledHTML.replace(/\/images\/EmailForm\/ticket\.(png|jpg)/g, 'cid:ticketbanner')
+        attachments.push({
+          filename: bannerFilename,
+          path: bannerPath,
+          cid: 'ticketbanner',
+        })
+      }
 
       await transporter.sendMail({
         from: `CLB DTU Acoustic <${smtpUser}>`,
         to: recipient,
         subject: `[EMAIL THỬ NGHIỆM] ${compiledSubject}`,
         html: compiledHTML,
-        attachments: [
-          {
-            filename: 'ticket-demo.png',
-            content: qrPngBuffer,
-            cid: 'ticketqrcode',
-          },
-        ],
+        attachments,
       })
 
       return NextResponse.json({

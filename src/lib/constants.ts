@@ -4,14 +4,15 @@ export const EVENT_INFO = {
   eventDate: '07 Tháng 11, 2026',
   eventDateShort: '07.11.2026',
   eventTime: '19:00 - 21:30',
-  // Địa điểm tạm thời bỏ trống (khi có chính thức sẽ điền vào đây hoặc sửa trong Dev Panel)
+  // Tên địa điểm & Địa chỉ & Link Maps (khi có sẽ gắn vào đây hoặc sửa trong Dev Panel)
   eventVenue: '',
-  // Đường link Google Maps (khi có sẽ gắn vào đây hoặc sửa trong Dev Panel)
+  eventVenueName: '',
+  eventVenueAddress: '',
   eventVenueMapsUrl: '',
   ticketPrice: 89000,
-  bankId: 'TCB',
-  bankAccountNo: '2611102006',
-  bankAccountName: 'TRAN ANH DUNG',
+  bankId: 'TPB',
+  bankAccountNo: '00000498382',
+  bankAccountName: 'PHAN THI BICH NGOC',
   hotline: '0362161480',
   hotlineName: 'Bích Ngọc - Chủ Nhiệm',
   email: 'dtuacousticclub@gmail.com',

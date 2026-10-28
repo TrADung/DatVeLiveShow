@@ -71,9 +71,9 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
   })
 
   const TICKET_PRICE = 89000
-  const BANK_ID = process.env.NEXT_PUBLIC_VIETQR_BANK_ID || 'TCB'
-  const ACCOUNT_NO = process.env.NEXT_PUBLIC_VIETQR_ACCOUNT_NO || '2611102006'
-  const ACCOUNT_NAME = process.env.NEXT_PUBLIC_VIETQR_ACCOUNT_NAME || 'TRAN ANH DUNG'
+  const BANK_ID = process.env.NEXT_PUBLIC_VIETQR_BANK_ID || 'TPB'
+  const ACCOUNT_NO = process.env.NEXT_PUBLIC_VIETQR_ACCOUNT_NO || '00000498382'
+  const ACCOUNT_NAME = process.env.NEXT_PUBLIC_VIETQR_ACCOUNT_NAME || 'PHAN THI BICH NGOC'
 
   useEffect(() => {
     setMounted(true)
@@ -388,36 +388,20 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                     </div>
                   </div>
 
-                  {/* Phone & Organization */}
-                  <div className="grid grid-cols-2 gap-3.5">
-                    <div>
-                      <label className="flex items-center gap-1.5 text-xs font-bold text-neutral-300 mb-1.5">
-                        <Phone size={13} className="text-[#D4AF37]" />
-                        <span>Số điện thoại <span className="text-[#E53935]">*</span></span>
-                      </label>
-                      <input
-                        required
-                        type="tel"
-                        value={form.phone}
-                        onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-                        placeholder="0912 345 678"
-                        className="w-full bg-[#141414] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="flex items-center gap-1.5 text-xs font-bold text-neutral-300 mb-1.5">
-                        <Building size={13} className="text-[#D4AF37]" />
-                        <span>Trường / Đơn vị <span className="text-[#E53935]">*</span></span>
-                      </label>
-                      <input
-                        required
-                        type="text"
-                        value={form.organization}
-                        onChange={(e) => setForm((f) => ({ ...f, organization: e.target.value }))}
-                        placeholder="ĐH Ngoại Thương..."
-                        className="w-full bg-[#141414] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-all"
-                      />
-                    </div>
+                  {/* Phone */}
+                  <div>
+                    <label className="flex items-center gap-1.5 text-xs font-bold text-neutral-300 mb-1.5">
+                      <Phone size={13} className="text-[#D4AF37]" />
+                      <span>Số điện thoại <span className="text-[#E53935]">*</span></span>
+                    </label>
+                    <input
+                      required
+                      type="tel"
+                      value={form.phone}
+                      onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                      placeholder="0912 345 678"
+                      className="w-full bg-[#141414] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-all"
+                    />
                   </div>
 
                   {/* Referral Source */}

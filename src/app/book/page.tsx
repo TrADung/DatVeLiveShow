@@ -76,9 +76,9 @@ export default function BookPage() {
   })
 
   const TICKET_PRICE = EVENT_INFO.ticketPrice || 89000
-  const BANK_ID = process.env.NEXT_PUBLIC_VIETQR_BANK_ID || 'TCB'
-  const ACCOUNT_NO = process.env.NEXT_PUBLIC_VIETQR_ACCOUNT_NO || '2611102006'
-  const ACCOUNT_NAME = process.env.NEXT_PUBLIC_VIETQR_ACCOUNT_NAME || 'TRAN ANH DUNG'
+  const BANK_ID = process.env.NEXT_PUBLIC_VIETQR_BANK_ID || EVENT_INFO.bankId || 'TPB'
+  const ACCOUNT_NO = process.env.NEXT_PUBLIC_VIETQR_ACCOUNT_NO || EVENT_INFO.bankAccountNo || '00000498382'
+  const ACCOUNT_NAME = process.env.NEXT_PUBLIC_VIETQR_ACCOUNT_NAME || EVENT_INFO.bankAccountName || 'PHAN THI BICH NGOC'
 
   // Autofill user details when logged in
   useEffect(() => {
@@ -513,36 +513,20 @@ export default function BookPage() {
                     </div>
                   </div>
 
-                  {/* Phone & Organization */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="flex items-center gap-1.5 text-xs font-bold text-neutral-300 mb-1.5">
-                        <Phone size={14} className="text-[#D4AF37]" />
-                        <span>Số điện thoại <span className="text-[#E53935]">*</span></span>
-                      </label>
-                      <input
-                        required
-                        type="tel"
-                        value={form.phone}
-                        onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-                        placeholder="0912 345 678"
-                        className="w-full bg-[#141414] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="flex items-center gap-1.5 text-xs font-bold text-neutral-300 mb-1.5">
-                        <Building size={14} className="text-[#D4AF37]" />
-                        <span>Trường học / Đơn vị <span className="text-[#E53935]">*</span></span>
-                      </label>
-                      <input
-                        required
-                        type="text"
-                        value={form.organization}
-                        onChange={(e) => setForm((f) => ({ ...f, organization: e.target.value }))}
-                        placeholder="ĐH Ngoại Thương, ĐH Bách Khoa..."
-                        className="w-full bg-[#141414] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all"
-                      />
-                    </div>
+                  {/* Phone */}
+                  <div>
+                    <label className="flex items-center gap-1.5 text-xs font-bold text-neutral-300 mb-1.5">
+                      <Phone size={14} className="text-[#D4AF37]" />
+                      <span>Số điện thoại <span className="text-[#E53935]">*</span></span>
+                    </label>
+                    <input
+                      required
+                      type="tel"
+                      value={form.phone}
+                      onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                      placeholder="0912 345 678"
+                      className="w-full bg-[#141414] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all"
+                    />
                   </div>
 
                   {/* Referral Source */}

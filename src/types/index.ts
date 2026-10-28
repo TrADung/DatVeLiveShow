@@ -56,7 +56,7 @@ export interface BookingFormData {
   dob: string
   gender: Gender
   phone: string
-  organization: string
+  organization?: string
   referral_source: string
   feedback?: string
 }

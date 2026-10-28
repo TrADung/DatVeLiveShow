@@ -1,23 +1,24 @@
 import { EVENT_INFO } from './constants'
 import { formatCurrency, formatDate, formatLuckyNumber } from './utils'
 
-export const DEFAULT_EMAIL_SUBJECT = '[Vé Điện Tử] {{event_name}} | Mã vé: {{order_code}} | Khán giả: {{full_name}}'
+export const DEFAULT_EMAIL_SUBJECT = '[Vé Điện Tử] SẮC I. VÁN CỜ | Khán giả: {{full_name}} | Mã: {{order_code}}'
 
 export const EMAIL_PLACEHOLDERS = [
   { key: '{{full_name}}', label: 'Họ và tên', desc: 'Tên đầy đủ của khán giả', example: 'Trần Anh Dũng' },
-  { key: '{{order_code}}', label: 'Mã đơn vé', desc: 'Mã định danh vé duy nhất', example: 'CLB-LG6FHWZ' },
   { key: '{{lucky_number}}', label: 'Số may mắn', desc: 'Số bốc thăm 3 chữ số (000-999)', example: '009' },
+  { key: '{{feedback}}', label: 'Lời nhắn gửi ban nhạc', desc: 'Lời nhắn lúc đặt vé (nếu không có thì hiển thị "Không")', example: 'Mong được nghe bài Diễm Xưa ạ!' },
+  { key: '{{event_venue}}', label: 'Địa điểm (Tự động)', desc: 'Địa chỉ kèm link Google Maps nếu có', example: 'Hội trường lớn - 03 Quang Trung, Đà Nẵng' },
+  { key: '{{order_code}}', label: 'Mã đơn vé', desc: 'Mã định danh vé duy nhất', example: 'CLB-LG6FHWZ' },
   { key: '{{qr_code}}', label: 'Ảnh mã QR', desc: 'Ảnh QR dùng check-in tại cổng', example: '[Hình ảnh mã QR]' },
   { key: '{{event_name}}', label: 'Tên sự kiện', desc: 'Tên chính thức của liveshow', example: 'SẮC I. VÁN CỜ' },
   { key: '{{event_date}}', label: 'Ngày diễn ra', desc: 'Ngày tổ chức liveshow', example: '07/11/2026' },
   { key: '{{event_time}}', label: 'Giờ diễn ra', desc: 'Khung giờ biểu diễn', example: '19:00 - 21:30' },
-  { key: '{{event_venue}}', label: 'Địa điểm', desc: 'Địa chỉ tổ chức sự kiện', example: 'Hội trường lớn Đại học Duy Tân, TP. Đà Nẵng' },
-  { key: '{{event_venue_maps_url}}', label: 'Link Google Maps', desc: 'Đường dẫn bản đồ chỉ đường', example: 'https://maps.google.com' },
+  { key: '{{event_venue_name}}', label: 'Tên địa điểm', desc: 'Tên nơi tổ chức (cấu hình trong /dev)', example: 'Hội trường lớn Đại học Duy Tân' },
+  { key: '{{event_venue_address}}', label: 'Địa chỉ', desc: 'Địa chỉ chi tiết (cấu hình trong /dev)', example: '03 Quang Trung, Q. Hải Châu, Đà Nẵng' },
+  { key: '{{event_venue_maps_url}}', label: 'Link Google Maps', desc: 'Đường dẫn mở ứng dụng Google Maps', example: 'https://maps.google.com' },
   { key: '{{user_email}}', label: 'Email khán giả', desc: 'Địa chỉ hòm thư người nhận', example: 'khangia@gmail.com' },
   { key: '{{phone}}', label: 'Số điện thoại', desc: 'Số liên hệ của người đặt vé', example: '0905 123 456' },
-  { key: '{{organization}}', label: 'Trường / Đơn vị', desc: 'Đơn vị học tập hoặc làm việc', example: 'Đại học Duy Tân' },
-  { key: '{{amount}}', label: 'Giá vé', desc: 'Số tiền thanh toán', example: '89.000 ₫' },
-  { key: '{{hotline}}', label: 'Hotline BTC', desc: 'Số điện thoại hỗ trợ', example: '0905 123 456' },
+  { key: '{{hotline}}', label: 'Hotline BTC', desc: 'Số điện thoại hỗ trợ', example: '0362161480 (Bích Ngọc - Chủ Nhiệm)' },
 ]
 
 export const DEFAULT_EMAIL_TEMPLATE = `<!DOCTYPE html>
@@ -25,104 +26,153 @@ export const DEFAULT_EMAIL_TEMPLATE = `<!DOCTYPE html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{event_name}} - Vé Điện Tử</title>
+  <title>Vé Điện Tử - SẮC I. VÁN CỜ</title>
   <style>
-    body { margin: 0; padding: 0; background-color: #0D0D0D !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #FFFFFF !important; }
-    .container { max-width: 580px; margin: 20px auto; background-color: #141414 !important; border: 1px solid rgba(212, 175, 55, 0.35); border-radius: 20px; overflow: hidden; box-shadow: 0 10px 35px rgba(0,0,0,0.6); }
-    .header { background: linear-gradient(135deg, #1F1916 0%, #0D0D0D 100%) !important; padding: 36px 24px; text-align: center; border-bottom: 2px solid #D4AF37; }
-    .chess-icon { font-size: 42px; display: block; margin-bottom: 8px; color: #D4AF37 !important; }
-    .title { color: #D4AF37 !important; font-size: 26px; font-weight: 900; margin: 0; letter-spacing: 2px; text-transform: uppercase; }
-    .subtitle { color: #A8A090 !important; font-size: 13px; margin: 8px 0 0; font-weight: 500; }
-    .body { padding: 32px 24px; }
-    .greeting { color: #FFFFFF !important; font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-    .text { color: #A8A090 !important; font-size: 14px; line-height: 1.6; margin-bottom: 24px; }
-    .ticket-card { background-color: #0D0D0D !important; border: 1px solid #D4AF37; border-radius: 16px; padding: 24px; margin: 20px 0; }
-    .ticket-header { font-size: 11px; color: #A8A090 !important; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; font-weight: 700; }
-    .order-code { font-size: 28px; font-weight: 900; color: #D4AF37 !important; margin: 0 0 18px; font-family: monospace; letter-spacing: 2px; }
-    .info-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; font-size: 13px; }
-    .info-label { color: #8E8E93 !important; font-size: 12px; font-weight: 600; text-transform: uppercase; }
-    .info-value { color: #FFFFFF !important; font-weight: 700; text-align: right; max-width: 65%; }
-    .maps-btn { display: inline-block; margin-top: 8px; padding: 7px 14px; background-color: #D4AF37 !important; color: #0D0D0D !important; text-decoration: none; border-radius: 8px; font-size: 11px; font-weight: 900; letter-spacing: 0.5px; }
-    .divider { border: none; border-top: 1px dashed rgba(255, 255, 255, 0.15); margin: 18px 0; }
-    .lucky-section { text-align: center; padding: 18px; background: linear-gradient(135deg, rgba(212, 175, 55, 0.12) 0%, rgba(185, 28, 28, 0.12) 100%) !important; border-radius: 14px; border: 1px solid rgba(212, 175, 55, 0.35); margin: 20px 0; }
-    .lucky-label { color: #D4AF37 !important; font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: bold; }
-    .lucky-number { color: #FFFFFF !important; font-size: 40px; font-weight: 900; letter-spacing: 6px; margin: 6px 0; font-family: monospace; text-shadow: 0 0 15px rgba(212,175,55,0.4); }
-    .qr-section { text-align: center; margin: 24px 0 12px; }
-    .qr-label { color: #A8A090 !important; font-size: 12px; margin-bottom: 14px; font-weight: 600; }
-    .qr-container { display: inline-block; padding: 12px; background-color: #FFFFFF !important; border-radius: 14px; border: 3px solid #D4AF37; }
-    .qr-img { width: 190px; height: 190px; display: block; }
-    .warning { background-color: rgba(229, 57, 53, 0.08) !important; border: 1px solid rgba(229, 57, 53, 0.3); border-radius: 10px; padding: 14px; margin: 20px 0; }
-    .warning-text { color: #FF8A80 !important; font-size: 12px; margin: 0; line-height: 1.5; }
-    .footer { background-color: #080808 !important; padding: 24px; text-align: center; border-top: 1px solid rgba(255, 255, 255, 0.08); }
-    .footer-text { color: #636366 !important; font-size: 11px; line-height: 1.6; margin: 0; }
+    body { margin: 0; padding: 0; background-color: #EEE5D8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #111827; }
+    .email-wrapper { max-width: 590px; margin: 20px auto; background-color: #FAF7F2; border: 1px solid rgba(180, 150, 100, 0.35); border-radius: 24px; overflow: hidden; box-shadow: 0 10px 35px rgba(60, 45, 20, 0.08); }
+    .email-body { padding: 26px 30px; }
+    .greeting-name { font-size: 19px; font-weight: 800; color: #111827; margin: 0 0 10px 0; }
+    .greeting-text { font-size: 16px; line-height: 1.6; color: #374151; margin: 0 0 26px 0; }
+    .info-box-title { font-size: 16px; font-weight: 800; color: #111827; margin: 0 0 12px 0; }
+    .info-card { background-color: #EFE8DC; border-left: 8px solid #E5C158; border-radius: 0 16px 16px 0; padding: 20px 24px; margin-bottom: 30px; }
+    .info-line { margin: 8px 0; font-size: 15px; line-height: 1.7; color: #111827; }
+    .info-label { font-weight: 600; color: #4B5563; }
+    .info-val { font-weight: 700; color: #111827; }
+    .lucky-val { font-weight: 900; color: #B45309; font-family: monospace; font-size: 19px; letter-spacing: 1.5px; }
+    .feedback-val { font-style: italic; color: #374151; }
+    .section-title { text-align: center; font-size: 17px; font-weight: 900; letter-spacing: 2px; color: #111827; margin: 34px 0 16px 0; text-transform: uppercase; }
+    .timeline-box { background-color: #F5EFE6; border: 1px solid rgba(180, 150, 100, 0.28); border-radius: 16px; padding: 18px 24px; margin-bottom: 12px; }
+    .timeline-item { font-size: 15px; line-height: 1.9; color: #374151; font-weight: 500; }
+    .venue-row { font-size: 15px; line-height: 1.7; color: #111827; margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(180, 150, 100, 0.35); }
+    .dresscode-table { width: 100%; max-width: 480px; margin: 0 auto 12px auto; border-spacing: 8px; }
+    .dress-card { text-align: center; padding: 14px 8px; border-radius: 16px; background-color: #F5EFE6; border: 1px solid rgba(180, 150, 100, 0.28); }
+    .dress-box { width: 56px; height: 56px; border-radius: 14px; margin: 0 auto 8px auto; box-shadow: 0 2px 6px rgba(0,0,0,0.12); }
+    .dress-box-black { background-color: #0A0A0A; border: 2px solid #27272A; }
+    .dress-box-white { background-color: #FFFFFF; border: 2px solid #CBD5E1; }
+    .dress-box-red { background-color: #DC2626; border: 2px solid #EF4444; }
+    .dress-box-gold { background: linear-gradient(135deg, #F3D063 0%, #E2B83E 100%); border: 2px solid #F0DA85; }
+    .dress-name { font-size: 14px; font-weight: 900; letter-spacing: 0.5px; color: #111827; margin-bottom: 5px; }
+    .dress-badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 12px; }
+    .badge-gray { background-color: #E5DCCE; color: #4B5563; }
+    .badge-gold { background-color: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+    .qr-container { text-align: center; margin: 18px 0; }
+    .closing-text { text-align: center; font-size: 16px; font-weight: 600; color: #374151; margin: 18px 0 24px 0; line-height: 1.6; }
+    .btn-fanpage { display: inline-block; background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%); color: #FFFFFF !important; font-size: 16px; font-weight: 800; text-decoration: none; padding: 14px 44px; border-radius: 30px; box-shadow: 0 8px 22px rgba(184, 134, 11, 0.35); text-align: center; }
+    .footer { text-align: center; padding: 22px 28px; background-color: #E8DFC8; border-top: 1px solid rgba(180, 150, 100, 0.28); font-size: 13px; color: #4B5563; line-height: 1.7; }
   </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #0D0D0D; color: #FFFFFF; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-  <div class="container" style="max-width: 580px; margin: 20px auto; background-color: #141414; border: 1px solid rgba(212, 175, 55, 0.35); border-radius: 20px; overflow: hidden;">
-    <div class="header" style="background: linear-gradient(135deg, #1F1916 0%, #0D0D0D 100%); padding: 36px 24px; text-align: center; border-bottom: 2px solid #D4AF37;">
-      <span class="chess-icon" style="font-size: 42px; display: block; margin-bottom: 8px; color: #D4AF37;">♟</span>
-      <h1 class="title" style="color: #D4AF37 !important; font-size: 26px; font-weight: 900; margin: 0; letter-spacing: 2px; text-transform: uppercase;">{{event_name}}</h1>
-      <p class="subtitle" style="color: #A8A090 !important; font-size: 13px; margin: 8px 0 0; font-weight: 500;">Live Show Kỷ Niệm 11 Năm Thành Lập CLB DTU Acoustic</p>
-    </div>
+<body style="margin: 0; padding: 0; background-color: #EEE5D8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #111827;">
+  <div class="email-wrapper" style="max-width: 590px; margin: 20px auto; background-color: #FAF7F2; border: 1px solid rgba(180, 150, 100, 0.35); border-radius: 24px; overflow: hidden; box-shadow: 0 10px 35px rgba(60, 45, 20, 0.08);">
     
-    <div class="body" style="padding: 32px 24px;">
-      <div class="greeting" style="color: #FFFFFF !important; font-size: 18px; font-weight: 700; margin-bottom: 8px;">Xin chào, {{full_name}}! 🎶</div>
-      <p class="text" style="color: #A8A090 !important; font-size: 14px; line-height: 1.6; margin-bottom: 24px;">
-        Cảm ơn bạn đã lựa chọn đồng hành cùng đêm diễn <strong style="color: #D4AF37 !important;">{{event_name}}</strong>. 
-        Đơn đặt vé của bạn đã được ban tổ chức xác nhận thanh toán thành công. Dưới đây là thông tin vé điện tử chính thức của bạn:
-      </p>
-      
-      <div class="ticket-card" style="background-color: #0D0D0D !important; border: 1px solid #D4AF37; border-radius: 16px; padding: 24px; margin: 20px 0;">
-        <div class="ticket-header" style="font-size: 11px; color: #A8A090 !important; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; font-weight: 700;">MÃ VÉ THAM DỰ</div>
-        <div class="order-code" style="font-size: 28px; font-weight: 900; color: #D4AF37 !important; margin: 0 0 18px; font-family: monospace; letter-spacing: 2px;">{{order_code}}</div>
-        
-        <div class="info-row" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; font-size: 13px;">
-          <span class="info-label" style="color: #8E8E93 !important; font-size: 12px; font-weight: 600; text-transform: uppercase;">Khán giả:</span>
-          <span class="info-value" style="color: #FFFFFF !important; font-weight: 700; text-align: right;">{{full_name}}</span>
+    <!-- BANNER VÉ ĐẦU EMAIL (.PNG NÉT) -->
+    <div style="width: 100%; text-align: center; background-color: #0A0A0A; line-height: 0;">
+      <img src="/images/EmailForm/ticket.png" alt="Vé Live Show SẮC I. VÁN CỜ" style="width: 100%; max-width: 590px; height: auto; display: block; margin: 0 auto;" />
+    </div>
+
+    <div class="email-body" style="padding: 26px 30px;">
+      <!-- LỜI CHÀO -->
+      <div class="greeting-name" style="font-size: 19px; font-weight: 800; color: #111827; margin: 0 0 10px 0;">
+        Xin chào <strong>{{full_name}}</strong>
+      </div>
+      <div class="greeting-text" style="font-size: 16px; line-height: 1.6; color: #374151; margin: 0 0 26px 0;">
+        Chúc mừng bạn đã “Thành công” bước vào ván cờ âm nhạc <strong>Sắc I. Ván cờ</strong>
+      </div>
+
+      <!-- THÔNG TIN NGƯỜI ĐẶT VÉ (CỘT VÀNG BÊN TRÁI - KHÔNG CÓ SỐ LƯỢNG VÉ) -->
+      <div class="info-box-title" style="font-size: 16px; font-weight: 800; color: #111827; margin: 0 0 12px 0;">
+        Thông tin người đặt vé
+      </div>
+      <div class="info-card" style="background-color: #EFE8DC; border-left: 8px solid #E5C158; border-radius: 0 16px 16px 0; padding: 20px 24px; margin-bottom: 30px;">
+        <div class="info-line" style="margin: 8px 0; font-size: 15px; line-height: 1.7; color: #111827;">
+          <span class="info-label" style="font-weight: 600; color: #4B5563;">Họ và tên:</span>
+          <span class="info-val" style="font-weight: 700; color: #111827; margin-left: 6px;">{{full_name}}</span>
         </div>
-        <div class="info-row" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; font-size: 13px;">
-          <span class="info-label" style="color: #8E8E93 !important; font-size: 12px; font-weight: 600; text-transform: uppercase;">Đơn vị:</span>
-          <span class="info-value" style="color: #FFFFFF !important; font-weight: 700; text-align: right;">{{organization}}</span>
+        <div class="info-line" style="margin: 8px 0; font-size: 15px; line-height: 1.7; color: #111827;">
+          <span class="info-label" style="font-weight: 600; color: #4B5563;">Số may mắn:</span>
+          <span class="lucky-val" style="font-weight: 900; color: #B45309; font-family: monospace; font-size: 19px; letter-spacing: 1.5px; margin-left: 6px;">#{{lucky_number}}</span>
         </div>
-        <div class="info-row" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; font-size: 13px;">
-          <span class="info-label" style="color: #8E8E93 !important; font-size: 12px; font-weight: 600; text-transform: uppercase;">Thời gian:</span>
-          <span class="info-value" style="color: #FFFFFF !important; font-weight: 700; text-align: right;">{{event_date}} • {{event_time}}</span>
-        </div>
-        <div class="info-row" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; font-size: 13px;">
-          <span class="info-label" style="color: #8E8E93 !important; font-size: 12px; font-weight: 600; text-transform: uppercase;">Địa điểm:</span>
-          <span class="info-value" style="color: #FFFFFF !important; font-weight: 700; text-align: right;">{{event_venue}}</span>
-        </div>
-        
-        <hr class="divider" style="border: none; border-top: 1px dashed rgba(255, 255, 255, 0.15); margin: 18px 0;">
-        
-        <div class="lucky-section" style="text-align: center; padding: 18px; background: linear-gradient(135deg, rgba(212, 175, 55, 0.12) 0%, rgba(185, 28, 28, 0.12) 100%) !important; border-radius: 14px; border: 1px solid rgba(212, 175, 55, 0.35); margin: 20px 0;">
-          <div class="lucky-label" style="color: #D4AF37 !important; font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: bold;">✦ SỐ MAY MẮN LUCKY DRAW ✦</div>
-          <div class="lucky-number" style="color: #FFFFFF !important; font-size: 40px; font-weight: 900; letter-spacing: 6px; margin: 6px 0; font-family: monospace; text-shadow: 0 0 15px rgba(212,175,55,0.4);">#{{lucky_number}}</div>
-          <div style="color: #A8A090 !important; font-size: 11px;">Lưu lại mã số này để tham gia quay thưởng các phần quà đặc biệt từ BTC!</div>
-        </div>
-        
-        <div class="qr-section" style="text-align: center; margin: 24px 0 12px;">
-          <div class="qr-label" style="color: #A8A090 !important; font-size: 12px; margin-bottom: 14px; font-weight: 600;">MÃ QR CHECK-IN TẠI CỔNG</div>
-          <div class="qr-container" style="display: inline-block; padding: 12px; background-color: #FFFFFF !important; border-radius: 14px; border: 3px solid #D4AF37;">
-            {{qr_code}}
-          </div>
-          <div style="color: #8E8E93 !important; font-size: 11px; margin-top: 10px;">Vui lòng xuất trình mã QR này cho ban tổ chức tại bàn check-in vào cửa</div>
+        <div class="info-line" style="margin: 8px 0; font-size: 15px; line-height: 1.7; color: #111827;">
+          <span class="info-label" style="font-weight: 600; color: #4B5563;">Lời nhắn (nếu có):</span>
+          <span class="feedback-val" style="font-style: italic; color: #374151; margin-left: 6px;">{{feedback}}</span>
         </div>
       </div>
-      
-      <div class="warning" style="background-color: rgba(229, 57, 53, 0.08) !important; border: 1px solid rgba(229, 57, 53, 0.3); border-radius: 10px; padding: 14px; margin: 20px 0;">
-        <p class="warning-text" style="color: #FF8A80 !important; font-size: 12px; margin: 0; line-height: 1.5;">
-          ⚠️ <strong>Lưu ý quan trọng:</strong> Mỗi mã QR chỉ có giá trị check-in một lần duy nhất. Vui lòng bảo mật thông tin vé và không chia sẻ ảnh mã QR cho người khác để tránh trường hợp bị chiếm dụng quyền vào cửa.
-        </p>
+
+      <!-- THÔNG TIN CHƯƠNG TRÌNH -->
+      <div class="section-title" style="text-align: center; font-size: 17px; font-weight: 900; letter-spacing: 2px; color: #111827; margin: 34px 0 16px 0; text-transform: uppercase;">
+        THÔNG TIN CHƯƠNG TRÌNH
+      </div>
+      <div class="timeline-box" style="background-color: #F5EFE6; border: 1px solid rgba(180, 150, 100, 0.28); border-radius: 16px; padding: 18px 24px; margin-bottom: 12px;">
+        <div class="timeline-item" style="font-size: 15px; line-height: 1.9; color: #374151; font-weight: 500;">
+          • <strong>18H30 - 19H00:</strong> Check in - đón tiếp
+        </div>
+        <div class="timeline-item" style="font-size: 15px; line-height: 1.9; color: #374151; font-weight: 500;">
+          • <strong>19h00 - 21h15:</strong> Liveshow
+        </div>
+        <div class="timeline-item" style="font-size: 15px; line-height: 1.9; color: #374151; font-weight: 500;">
+          • <strong>21h15 - 21h30:</strong> Kết thúc “Ván cờ”
+        </div>
+        <div class="venue-row" style="font-size: 15px; line-height: 1.7; color: #111827; margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(180, 150, 100, 0.35);">
+          <strong>Địa điểm:</strong> {{event_venue}}
+        </div>
+      </div>
+
+      <!-- DRESSCODE (4 Ô MÀU TO Ở GIỮA - VÀNG GOLD NHẠT HƠN) -->
+      <div class="section-title" style="text-align: center; font-size: 17px; font-weight: 900; letter-spacing: 2px; color: #111827; margin: 36px 0 16px 0; text-transform: uppercase;">
+        DRESSCODE
+      </div>
+      <table class="dresscode-table" style="width: 100%; max-width: 480px; margin: 0 auto 12px auto; border-spacing: 8px;">
+        <tr>
+          <!-- ĐEN -->
+          <td class="dress-card" style="width: 25%; text-align: center; padding: 14px 6px; border-radius: 16px; background-color: #F5EFE6; border: 1px solid rgba(180, 150, 100, 0.28);">
+            <div class="dress-box dress-box-black" style="width: 56px; height: 56px; border-radius: 14px; margin: 0 auto 8px auto; background-color: #0A0A0A; border: 2px solid #27272A; box-shadow: 0 2px 6px rgba(0,0,0,0.15);"></div>
+            <div class="dress-name" style="font-size: 14px; font-weight: 900; letter-spacing: 1px; color: #111827; margin-bottom: 5px;">ĐEN</div>
+            <span class="dress-badge badge-gray" style="display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 12px; background-color: #E5DCCE; color: #4B5563;">Chủ đạo</span>
+          </td>
+          <!-- TRẮNG -->
+          <td class="dress-card" style="width: 25%; text-align: center; padding: 14px 6px; border-radius: 16px; background-color: #F5EFE6; border: 1px solid rgba(180, 150, 100, 0.28);">
+            <div class="dress-box dress-box-white" style="width: 56px; height: 56px; border-radius: 14px; margin: 0 auto 8px auto; background-color: #FFFFFF; border: 2px solid #CBD5E1; box-shadow: 0 2px 6px rgba(0,0,0,0.08);"></div>
+            <div class="dress-name" style="font-size: 14px; font-weight: 900; letter-spacing: 1px; color: #111827; margin-bottom: 5px;">TRẮNG</div>
+            <span class="dress-badge badge-gray" style="display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 12px; background-color: #E5DCCE; color: #4B5563;">Chủ đạo</span>
+          </td>
+          <!-- ĐỎ -->
+          <td class="dress-card" style="width: 25%; text-align: center; padding: 14px 6px; border-radius: 16px; background-color: #F5EFE6; border: 1px solid rgba(180, 150, 100, 0.28);">
+            <div class="dress-box dress-box-red" style="width: 56px; height: 56px; border-radius: 14px; margin: 0 auto 8px auto; background-color: #DC2626; border: 2px solid #EF4444; box-shadow: 0 2px 6px rgba(220,38,38,0.25);"></div>
+            <div class="dress-name" style="font-size: 14px; font-weight: 900; letter-spacing: 1px; color: #111827; margin-bottom: 5px;">ĐỎ</div>
+            <span class="dress-badge badge-gray" style="display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 12px; background-color: #E5DCCE; color: #4B5563;">Chủ đạo</span>
+          </td>
+          <!-- VÀNG GOLD (NHẠT HƠN, THEO ĐÚNG ẢNH MẪU) -->
+          <td class="dress-card" style="width: 25%; text-align: center; padding: 14px 6px; border-radius: 16px; background-color: #F5EFE6; border: 1px solid rgba(180, 150, 100, 0.28);">
+            <div class="dress-box dress-box-gold" style="width: 56px; height: 56px; border-radius: 14px; margin: 0 auto 8px auto; background: linear-gradient(135deg, #F3D063 0%, #E2B83E 100%); border: 2px solid #F0DA85; box-shadow: 0 2px 8px rgba(226,184,62,0.35);"></div>
+            <div class="dress-name" style="font-size: 14px; font-weight: 900; letter-spacing: 0.5px; color: #111827; margin-bottom: 5px; line-height: 1.2;">VÀNG<br>GOLD</div>
+            <span class="dress-badge badge-gold" style="display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 12px; background-color: #FEF3C7; color: #92400E; border: 1px solid #FCD34D;">Điểm nhấn</span>
+          </td>
+        </tr>
+      </table>
+
+      <!-- MÃ CHECK IN -->
+      <div class="section-title" style="text-align: center; font-size: 17px; font-weight: 900; letter-spacing: 2px; color: #111827; margin: 36px 0 16px 0; text-transform: uppercase;">
+        MÃ CHECK IN
+      </div>
+      <div class="qr-container" style="text-align: center; margin: 18px 0;">
+        {{qr_code}}
+      </div>
+
+      <div class="closing-text" style="text-align: center; font-size: 16px; font-weight: 600; color: #374151; margin: 18px 0 24px 0; line-height: 1.6;">
+        Chúc bạn có một hành trình âm nhạc tuyệt vời tại Sắc I. Ván cờ - Album Sắc
+      </div>
+
+      <!-- NÚT LIÊN HỆ FANPAGE -->
+      <div style="text-align: center; margin: 24px 0 12px 0;">
+        <a href="https://www.facebook.com/dtuacoustic" target="_blank" class="btn-fanpage" style="display: inline-block; background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%); color: #FFFFFF !important; font-size: 16px; font-weight: 800; text-decoration: none; padding: 14px 44px; border-radius: 30px; box-shadow: 0 8px 22px rgba(184, 134, 11, 0.35); text-align: center;">
+          Liên hệ Fanpage
+        </a>
       </div>
     </div>
-    
-    <div class="footer" style="background-color: #080808 !important; padding: 24px; text-align: center; border-top: 1px solid rgba(255, 255, 255, 0.08);">
-      <p class="footer-text" style="color: #636366 !important; font-size: 11px; line-height: 1.6; margin: 0;">
-        Hotline hỗ trợ: {{hotline}}<br>
-        Email: dtuacousticclub@gmail.com<br>
-        © 2026 CLB DTU Acoustic • {{event_name}}
-      </p>
+
+    <!-- FOOTER -->
+    <div class="footer" style="text-align: center; padding: 22px 28px; background-color: #E8DFC8; border-top: 1px solid rgba(180, 150, 100, 0.28); font-size: 13px; color: #4B5563; line-height: 1.7;">
+      Hotline: {{hotline}} • Email: dtuacousticclub@gmail.com<br>
+      © 2026 CLB DTU Acoustic • SẮC I. VÁN CỜ
     </div>
   </div>
 </body>
@@ -132,17 +182,20 @@ export const MOCK_TICKET_DATA: Record<string, string> = {
   full_name: 'Trần Anh Dũng',
   order_code: 'CLB-LG6FHWZ',
   lucky_number: '009',
-  qr_code: '<img src="https://api.qrserver.com/v1/create-qr-code/?size=190x190&data=CLB-DEMO-TICKET" alt="Mã QR Demo" class="qr-img" style="width: 190px; height: 190px; display: block;" />',
+  feedback: 'Mong được nghe ban nhạc biểu diễn ca khúc Diễm Xưa ạ!',
+  qr_code: '<img src="https://api.qrserver.com/v1/create-qr-code/?size=190x190&data=CLB-DEMO-TICKET" alt="Mã QR Check-in" class="qr-img" style="width: 190px; height: 190px; display: block; margin: 0 auto; border: 3px solid #D4AF37; border-radius: 16px; padding: 8px; background: #FFFFFF; box-shadow: 0 4px 14px rgba(60,45,20,0.1);" />',
   event_name: 'SẮC I. VÁN CỜ',
   event_date: '07/11/2026',
   event_time: '19:00 - 21:30',
-  event_venue: 'Hội trường lớn Đại học Duy Tân, TP. Đà Nẵng',
-  event_venue_maps_url: 'https://maps.google.com',
+  event_venue: '<span style="color: #64748B; font-style: italic;">Sẽ thông báo chính thức trước ngày diễn ra sự kiện</span>',
+  event_venue_name: '',
+  event_venue_address: '',
+  event_venue_maps_url: '',
   user_email: 'trananhdung11102006@gmail.com',
   phone: '0905 123 456',
-  organization: 'Đại học Duy Tân',
+  organization: 'Tự do',
   amount: '89.000 ₫',
-  hotline: '0905 123 456 (CLB DTU Acoustic)',
+  hotline: '0362161480 (Bích Ngọc - Chủ Nhiệm)',
 }
 
 export function compileEmailTemplate(template: string, data: Record<string, any>): string {

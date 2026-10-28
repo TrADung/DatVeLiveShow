@@ -12,14 +12,16 @@ import Header from '@/components/Header'
 
 const SETTING_DESCRIPTIONS: Record<string, string> = {
   ticket_price: 'Giá vé mặc định (VND)',
-  bank_id: 'Mã ngân hàng VietQR (ví dụ: MB, VCB, TCB, ACB)',
-  bank_account_no: 'Số tài khoản ngân hàng thụ hưởng',
-  bank_account_name: 'Tên chủ tài khoản ngân hàng',
+  bank_id: 'Mã ngân hàng VietQR (ví dụ: TPB cho TPBank, TCB, VCB, MB)',
+  bank_account_no: 'Số tài khoản ngân hàng thụ hưởng (TPBank: 00000498382)',
+  bank_account_name: 'Tên chủ tài khoản ngân hàng (PHAN THI BICH NGOC)',
   event_name: 'Tên sự kiện / liveshow (Mặc định: SẮC I. VÁN CỜ)',
   event_date: 'Ngày tổ chức sự kiện (ví dụ: 07 Tháng 11, 2026)',
   event_time: 'Khung giờ diễn ra sự kiện (ví dụ: 19:00 - 21:30)',
-  event_venue: 'Địa điểm tổ chức sự kiện (để trống nếu chưa công bố)',
-  event_venue_maps_url: 'Link Google Maps địa điểm (người dùng bấm vào sẽ mở Google Maps)',
+  event_venue_name: 'Tên địa điểm tổ chức (ví dụ: Hội trường lớn Đại học Duy Tân)',
+  event_venue_address: 'Địa chỉ cụ thể (ví dụ: 03 Quang Trung, Q. Hải Châu, TP. Đà Nẵng)',
+  event_venue_maps_url: 'Link Google Maps địa điểm (Khách bấm vào sẽ mở trực tiếp ứng dụng Google Maps)',
+  event_venue: 'Địa điểm tổng hợp (Nếu điền ô này thì sẽ ưu tiên hiển thị)',
   ticket_sale_open: 'Mở bán vé trực tuyến (true / false)',
   smtp_host: 'Địa chỉ máy chủ SMTP (ví dụ: smtp.gmail.com)',
   smtp_port: 'Cổng kết nối SMTP (587 hoặc 465)',
@@ -56,7 +58,7 @@ export default function DevPanel() {
         // Fallback default settings
         const defaults = Object.keys(SETTING_DESCRIPTIONS).map((key) => ({
           key,
-          value: key === 'ticket_price' ? '89000' : key === 'bank_id' ? 'TCB' : key === 'bank_account_no' ? '2611102006' : key === 'bank_account_name' ? 'TRAN ANH DUNG' : '',
+          value: key === 'ticket_price' ? '89000' : key === 'bank_id' ? 'TPB' : key === 'bank_account_no' ? '00000498382' : key === 'bank_account_name' ? 'PHAN THI BICH NGOC' : '',
           updated_at: new Date().toISOString(),
         }))
         setSettings(defaults)

@@ -21,8 +21,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { full_name, dob, gender, phone, organization, referral_source, feedback, user_email } = body
 
-    // Validate required fields
-    if (!full_name || !dob || !gender || !phone || !organization || !referral_source) {
+    // Validate required fields (bỏ trường organization theo yêu cầu)
+    if (!full_name || !dob || !gender || !phone || !referral_source) {
       return NextResponse.json({ error: 'Thiếu thông tin bắt buộc' }, { status: 400 })
     }
 
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       dob,
       gender,
       phone,
-      organization,
+      organization: (organization || 'Tự do').trim(),
       referral_source,
       feedback: feedback || null,
       amount,

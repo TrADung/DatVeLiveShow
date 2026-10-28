@@ -33,6 +33,7 @@ export default function MailTemplatePage() {
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('mobile')
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
+  const [mockData, setMockData] = useState<Record<string, string>>(MOCK_TICKET_DATA)
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -46,6 +47,7 @@ export default function MailTemplatePage() {
           if (data.subject) setSubject(data.subject)
           if (data.template) setTemplate(data.template)
           if (data.adminEmail) setTestEmail(data.adminEmail)
+          if (data.mockData) setMockData(data.mockData)
         }
       } catch (err) {
         console.error('Failed to load email template:', err)
@@ -154,8 +156,8 @@ export default function MailTemplatePage() {
   }
 
   // Compile live preview
-  const previewSubject = compileEmailSubject(subject, MOCK_TICKET_DATA)
-  const previewHTML = compileEmailTemplate(template, MOCK_TICKET_DATA)
+  const previewSubject = compileEmailSubject(subject, mockData)
+  const previewHTML = compileEmailTemplate(template, mockData)
 
   if (authLoading || isLoading) {
     return (
