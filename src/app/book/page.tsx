@@ -112,6 +112,16 @@ export default function BookPage() {
       return
     }
 
+    const birthDate = new Date(form.dob)
+    const today = new Date()
+    const birthYear = birthDate.getFullYear()
+    const currentYear = today.getFullYear()
+    if (!form.dob || isNaN(birthDate.getTime()) || birthDate > today || birthYear < 1930 || birthYear > currentYear - 6) {
+      setError('Ngày tháng năm sinh không hợp lệ: Khán giả tham gia phải từ 6 tuổi trở lên và năm sinh không thể ở tương lai.')
+      playErrorSound()
+      return
+    }
+
     setLoading(true)
     setError('')
 
@@ -492,7 +502,8 @@ export default function BookPage() {
                         type="date"
                         value={form.dob}
                         onChange={(e) => setForm((f) => ({ ...f, dob: e.target.value }))}
-                        max="2026-12-31"
+                        min="1930-01-01"
+                        max={`${new Date().getFullYear() - 6}-12-31`}
                         className="w-full bg-[#141414] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all"
                       />
                     </div>

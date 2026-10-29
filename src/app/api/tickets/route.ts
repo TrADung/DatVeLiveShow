@@ -26,6 +26,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Thiếu thông tin bắt buộc' }, { status: 400 })
     }
 
+    // Validate ngày tháng năm sinh hợp lệ (khán giả >= 6 tuổi và không vượt quá thời điểm hiện tại)
+    const birthDate = new Date(dob)
+    const today = new Date()
+    const birthYear = birthDate.getFullYear()
+    const currentYear = today.getFullYear()
+    if (isNaN(birthDate.getTime()) || birthDate > today || birthYear < 1930 || birthYear > currentYear - 6) {
+      return NextResponse.json({
+        error: 'Ngày sinh không hợp lệ: Khán giả tham gia sự kiện phải từ 6 tuổi trở lên và năm sinh không thể ở tương lai.'
+      }, { status: 400 })
+    }
+
     const email = (user_email || '').trim().toLowerCase()
     if (!email || !email.includes('@')) {
       return NextResponse.json({ error: 'Email không hợp lệ' }, { status: 400 })

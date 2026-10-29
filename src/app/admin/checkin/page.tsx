@@ -49,14 +49,6 @@ type ScanResult = {
   message?: string
 }
 
-type RecentScanItem = {
-  name: string
-  code: string
-  lucky?: number
-  time: string
-  status: 'ok' | 'dup' | 'err'
-}
-
 export default function QRScannerPage() {
   const { user, userRole, loading: authLoading } = useAuth()
   const { playClickSound, playSuccessSound, playErrorSound } = useAudio()
@@ -67,17 +59,9 @@ export default function QRScannerPage() {
   const [cameras, setCameras] = useState<Array<{ id: string; label: string }>>([])
   const [selectedCameraIndex, setSelectedCameraIndex] = useState(0)
 
-  // Camera Speed & Torch Enhancements
-  const [continuousMode, setContinuousMode] = useState(true)
+  // Flashlight (Torch) state
   const [hasTorch, setHasTorch] = useState(false)
   const [torchOn, setTorchOn] = useState(false)
-  const [fastBanner, setFastBanner] = useState<{
-    status: 'success' | 'already_checked_in' | 'error'
-    message: string
-    sub?: string
-    luckyNumber?: number
-  } | null>(null)
-  const [recentScans, setRecentScans] = useState<RecentScanItem[]>([])
 
   const [scanLoading, setScanLoading] = useState(false)
   const [scanResult, setScanResult] = useState<ScanResult | null>(null)
@@ -87,31 +71,13 @@ export default function QRScannerPage() {
 
   const html5QrcodeRef = useRef<any>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const lastScannedCodeRef = useRef<{ code: string; time: number } | null>(null)
-  const continuousModeRef = useRef(continuousMode)
   const isProcessingRef = useRef(false)
 
-  // Synchronize continuousModeRef
-  useEffect(() => {
-    continuousModeRef.current = continuousMode
-  }, [continuousMode])
-
-  // Auto-dismiss fastBanner after 2.8s
-  useEffect(() => {
-    if (!fastBanner) return
-    const timer = setTimeout(() => {
-      setFastBanner(null)
-    }, 2800)
-    return () => clearTimeout(timer)
-  }, [fastBanner])
-
-  // Verify and process ticket QR or order code with AUTOMATIC CHECK-IN
-  const handleQRScan = useCallback(async (qrData: string, isContinuous = false) => {
+  // Verify and process ticket QR or order code with AUTOMATIC CHECK-IN & POP-UP
+  const handleQRScan = useCallback(async (qrData: string) => {
     if (!qrData || !qrData.trim()) return
     isProcessingRef.current = true
-    if (!isContinuous) {
-      setScanLoading(true)
-    }
+    setScanLoading(true)
 
     try {
       const res = await fetch('/api/admin/checkin', {
@@ -120,111 +86,43 @@ export default function QRScannerPage() {
         body: JSON.stringify({ qr_data: qrData.trim() }),
       })
       const data = await res.json()
-      const nowTimeStr = new Date().toLocaleTimeString('vi-VN', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-      })
 
       if (res.status === 409) {
         playErrorSound()
         if (typeof window !== 'undefined' && 'vibrate' in navigator) {
           try { navigator.vibrate([200, 100, 200]) } catch {}
         }
-
-        if (isContinuous) {
-          setFastBanner({
-            status: 'already_checked_in',
-            message: `VÉ ĐÃ SỬ DỤNG: ${data.ticket?.full_name || 'Khách'}`,
-            sub: `Mã: ${data.ticket?.order_code || qrData.slice(0, 15)} (Đã quét lúc ${data.checked_in_at ? formatDateTime(data.checked_in_at) : 'trước đó'})`,
-          })
-          if (data.ticket) {
-            setRecentScans((prev) => [
-              {
-                name: data.ticket.full_name,
-                code: data.ticket.order_code,
-                lucky: data.ticket.lucky_number,
-                time: nowTimeStr,
-                status: 'dup',
-              },
-              ...prev.slice(0, 4),
-            ])
-          }
-        } else {
-          setScanResult({
-            status: 'already_checked_in',
-            error: data.error || 'Vé này đã được check-in trước đó!',
-            ticket: data.ticket,
-            checked_in_at: data.checked_in_at,
-          })
-        }
+        setScanResult({
+          status: 'already_checked_in',
+          error: data.error || 'Vé này đã được check-in trước đó!',
+          ticket: data.ticket,
+          checked_in_at: data.checked_in_at,
+        })
       } else if (res.ok) {
         playSuccessSound()
         if (typeof window !== 'undefined' && 'vibrate' in navigator) {
           try { navigator.vibrate([100, 50, 100]) } catch {}
         }
-
-        if (isContinuous) {
-          const luckyStr =
-            data.ticket?.lucky_number !== undefined && data.ticket?.lucky_number !== null
-              ? ` • Số may mắn: #${String(data.ticket.lucky_number).padStart(3, '0')}`
-              : ''
-          setFastBanner({
-            status: 'success',
-            message: `CHECK-IN THÀNH CÔNG: ${data.ticket?.full_name}`,
-            sub: `Mã: ${data.ticket?.order_code}${luckyStr}`,
-            luckyNumber: data.ticket?.lucky_number,
-          })
-          if (data.ticket) {
-            setRecentScans((prev) => [
-              {
-                name: data.ticket.full_name,
-                code: data.ticket.order_code,
-                lucky: data.ticket.lucky_number,
-                time: nowTimeStr,
-                status: 'ok',
-              },
-              ...prev.slice(0, 4),
-            ])
-          }
-        } else {
-          setScanResult({
-            status: 'success',
-            ticket: data.ticket,
-            checked_in_at: data.checked_in_at,
-            message: data.message || 'Check-in thành công!',
-          })
-        }
+        setScanResult({
+          status: 'success',
+          ticket: data.ticket,
+          checked_in_at: data.checked_in_at,
+          message: data.message || 'Check-in thành công!',
+        })
       } else {
         playErrorSound()
-        if (isContinuous) {
-          setFastBanner({
-            status: 'error',
-            message: 'KHÔNG THỂ CHECK-IN',
-            sub: data.error || 'Mã QR không hợp lệ hoặc vé chưa duyệt.',
-          })
-        } else {
-          setScanResult({
-            status: 'error',
-            error: data.error || 'Mã QR không hợp lệ hoặc vé chưa duyệt thanh toán.',
-            ticket: data.ticket,
-          })
-        }
+        setScanResult({
+          status: 'error',
+          error: data.error || 'Mã QR không hợp lệ hoặc vé chưa duyệt thanh toán.',
+          ticket: data.ticket,
+        })
       }
     } catch {
       playErrorSound()
-      if (isContinuous) {
-        setFastBanner({
-          status: 'error',
-          message: 'LỖI KẾT NỐI MÁY CHỦ',
-          sub: 'Vui lòng kiểm tra lại đường truyền internet.',
-        })
-      } else {
-        setScanResult({
-          status: 'error',
-          error: 'Lỗi kết nối máy chủ. Vui lòng kiểm tra lại mạng hoặc thử lại.',
-        })
-      }
+      setScanResult({
+        status: 'error',
+        error: 'Lỗi kết nối máy chủ. Vui lòng kiểm tra lại mạng hoặc thử lại.',
+      })
     } finally {
       isProcessingRef.current = false
       setScanLoading(false)
@@ -266,12 +164,11 @@ export default function QRScannerPage() {
     }
   }, [torchOn, playClickSound])
 
-  // Start camera scanner with hardware acceleration & continuous focus
+  // Start camera scanner with hardware acceleration, high FPS & continuous autofocus
   const startScanner = useCallback(async (camIndex = 0) => {
     playClickSound()
     setCameraError(null)
     setScanResult(null)
-    setFastBanner(null)
     setStartingCamera(true)
 
     try {
@@ -293,7 +190,7 @@ export default function QRScannerPage() {
       setHasTorch(false)
       await new Promise((r) => setTimeout(r, 60))
 
-      // 1. TỐI ƯU HÓA PHẦN CỨNG: Chỉ giải mã QR_CODE (Bỏ 16 loại barcode khác) + Bật Native BarcodeDetector
+      // 1. TỐI ƯU HÓA: Chỉ giải mã QR_CODE + Bật BarcodeDetector tăng tốc chip GPU/NPU
       const scanner = new Html5Qrcode('qr-reader', {
         formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
         experimentalFeatures: {
@@ -303,7 +200,7 @@ export default function QRScannerPage() {
       })
       html5QrcodeRef.current = scanner
 
-      // 2. CHỌN CAMERA PHÙ HỢP: Ưu tiên camera sau (environment)
+      // 2. CHỌN CAMERA: Ưu tiên camera sau
       let cameraConfig: any = { facingMode: 'environment' }
       if (cameras.length > 0) {
         const backCamIndex = cameras.findIndex((c) =>
@@ -319,52 +216,34 @@ export default function QRScannerPage() {
         cameraConfig = cameras[chosenIndex].id
       }
 
-      // 3. TỐI ƯU TẦN SỐ QUÉT & VÙNG QUÉT RỘNG (25 FPS, 720p, Lấy nét liên tục)
+      // 3. CẤU HÌNH QUÉT SIÊU TỐC: 25 FPS, Vùng quét 80%, Lấy nét liên tục, 720p
       const scanConfig = {
-        fps: 25, // Tăng lên 25 khung hình/giây để bắt QR tức thì
+        fps: 25, // Tần số 25 khung hình/giây giúp bắt dính mã ngay lập tức
         qrbox: (viewfinderWidth: number, viewfinderHeight: number) => {
           const minEdge = Math.min(viewfinderWidth, viewfinderHeight)
-          const qrboxEdge = Math.floor(minEdge * 0.8) // Vùng quét rộng 80%
+          const qrboxEdge = Math.floor(minEdge * 0.8)
           return { width: qrboxEdge, height: qrboxEdge }
         },
         aspectRatio: 1.0,
         videoConstraints: {
           facingMode: 'environment',
-          focusMode: 'continuous', // Bắt nét liên tục không ngừng
-          width: { ideal: 1280, min: 640 }, // 720p tỷ lệ vàng cho xử lý ảnh di động
+          focusMode: 'continuous', // Lấy nét liên tục
+          width: { ideal: 1280, min: 640 },
           height: { ideal: 720, min: 480 },
         },
       }
 
       const onScanSuccess = async (decodedText: string) => {
         if (!decodedText || !decodedText.trim()) return
-
-        // Cơ chế chống quét trùng: Nếu cùng 1 mã trong vòng 2.5 giây thì bỏ qua
-        const now = Date.now()
-        if (
-          lastScannedCodeRef.current &&
-          lastScannedCodeRef.current.code === decodedText.trim() &&
-          now - lastScannedCodeRef.current.time < 2500
-        ) {
-          return
-        }
-
-        // Bỏ qua nếu đang gửi request check-in vé trước
         if (isProcessingRef.current) return
+        isProcessingRef.current = true
 
-        lastScannedCodeRef.current = { code: decodedText.trim(), time: now }
-
-        if (continuousModeRef.current) {
-          // CHẾ ĐỘ QUÉT SIÊU TỐC LIÊN TỤC: Giữ camera mở liên tục
-          await handleQRScan(decodedText, true)
-        } else {
-          // CHẾ ĐỘ TIÊU CHUẨN: Dừng camera và hiển thị bảng chi tiết
-          try {
-            await scanner.stop()
-          } catch {}
-          setScanning(false)
-          await handleQRScan(decodedText, false)
-        }
+        // Ngắt camera ngay khi bắt được mã để hiện Pop-up kết quả rõ ràng cho Staff
+        try {
+          await scanner.stop()
+        } catch {}
+        setScanning(false)
+        await handleQRScan(decodedText.trim())
       }
 
       try {
@@ -387,7 +266,7 @@ export default function QRScannerPage() {
         }
       } catch {}
 
-      // Lấy danh sách camera ở chế độ nền (không làm nghẽn khởi động)
+      // Lấy danh sách camera ở chế độ nền (không chặn luồng khởi động)
       if (cameras.length === 0) {
         Html5Qrcode.getCameras().then((found) => {
           if (found && found.length > 0) {
@@ -440,7 +319,7 @@ export default function QRScannerPage() {
       })
       const decodedText = await scanner.scanFile(file, true)
       await scanner.clear()
-      await handleQRScan(decodedText, false)
+      await handleQRScan(decodedText)
     } catch (err: any) {
       console.warn('File scan notice:', err?.message || err)
       playErrorSound()
@@ -548,7 +427,7 @@ export default function QRScannerPage() {
 
       <main className="flex-1 pt-28 sm:pt-36 pb-20 px-4 max-w-md mx-auto w-full flex flex-col items-center">
         {/* Top Header Card */}
-        <div className="w-full card-luxury rounded-2xl p-4 sm:p-5 border border-white/10 mb-4 flex items-center justify-between">
+        <div className="w-full card-luxury rounded-2xl p-4 sm:p-5 border border-white/10 mb-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/admin" className="text-slate-400 hover:text-white transition-colors">
               <ArrowLeft size={20} />
@@ -567,33 +446,6 @@ export default function QRScannerPage() {
           </div>
         </div>
 
-        {/* MODE TOGGLE SWITCH: Quét Siêu Tốc (Liên Tục) vs Chi Tiết */}
-        <div className="w-full bg-[#18181B] border border-white/10 rounded-2xl p-2.5 mb-5 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${continuousMode ? 'bg-amber-500/20 text-amber-400' : 'bg-white/5 text-slate-400'}`}>
-              <Zap size={16} />
-            </div>
-            <div>
-              <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                <span>Quét Siêu Tốc Liên Tục</span>
-                <span className="text-[10px] bg-amber-500/20 text-amber-300 font-mono px-1.5 py-0.2 rounded border border-amber-500/30 font-bold">Khuyên Dùng</span>
-              </div>
-              <div className="text-[10px] text-slate-400 leading-tight">
-                {continuousMode ? 'Không tắt camera, quét liên tục từng người' : 'Dừng camera sau mỗi vé để xem chi tiết'}
-              </div>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => setContinuousMode(!continuousMode)}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${continuousMode ? 'bg-amber-500' : 'bg-neutral-700'}`}
-          >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${continuousMode ? 'translate-x-6' : 'translate-x-1'}`}
-            />
-          </button>
-        </div>
-
         {/* Camera Permission or Runtime Error Warning */}
         {cameraError && (
           <div className="w-full mb-6 rounded-2xl bg-amber-950/40 border border-amber-500/40 p-4 text-xs text-amber-200">
@@ -609,47 +461,9 @@ export default function QRScannerPage() {
 
         <div className="w-full">
           {/* CAMERA SCANNER CONTAINER (ALWAYS IN DOM, TOGGLED WITH CSS) */}
-          <div className={`relative bg-black rounded-3xl overflow-hidden shadow-2xl p-2 border border-white/10 mb-4 ${scanning ? 'block' : 'hidden'}`}>
-            
-            {/* FLOATING FAST BANNER OVER CAMERA IN CONTINUOUS MODE */}
-            <AnimatePresence>
-              {fastBanner && (
-                <motion.div
-                  initial={{ opacity: 0, y: -20, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                  className={`absolute top-4 left-4 right-4 z-20 rounded-2xl p-3.5 shadow-2xl backdrop-blur-md border ${
-                    fastBanner.status === 'success'
-                      ? 'bg-emerald-950/90 border-emerald-500/80 text-emerald-100 shadow-emerald-500/20'
-                      : fastBanner.status === 'already_checked_in'
-                      ? 'bg-red-950/90 border-red-500/80 text-red-100 shadow-red-500/20'
-                      : 'bg-amber-950/90 border-amber-500/80 text-amber-100 shadow-amber-500/20'
-                  }`}
-                >
-                  <div className="flex items-start gap-2.5">
-                    {fastBanner.status === 'success' ? (
-                      <CheckCircle size={22} className="text-emerald-400 shrink-0 mt-0.5" />
-                    ) : (
-                      <AlertTriangle size={22} className="text-red-400 shrink-0 mt-0.5" />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="font-black text-xs uppercase tracking-wide truncate">
-                        {fastBanner.message}
-                      </div>
-                      {fastBanner.sub && (
-                        <div className="text-[11px] opacity-90 truncate font-mono mt-0.5">
-                          {fastBanner.sub}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* The QR Video element */}
+          <div className={`relative bg-black rounded-3xl overflow-hidden shadow-2xl p-2 border border-white/10 mb-5 ${scanning ? 'block' : 'hidden'}`}>
             <div id="qr-reader" className="w-full rounded-2xl overflow-hidden" />
-
+            
             {/* Camera Controls Bar */}
             <div className="flex gap-2 mt-3">
               {/* Đèn Flash (Torch) */}
@@ -669,7 +483,7 @@ export default function QRScannerPage() {
                 </button>
               )}
 
-              {/* Đổi camera */}
+              {/* Đổi Camera (nếu có nhiều camera) */}
               {cameras.length > 1 && (
                 <button
                   type="button"
@@ -681,7 +495,7 @@ export default function QRScannerPage() {
                 </button>
               )}
 
-              {/* Tắt camera */}
+              {/* Tắt Camera */}
               <button
                 type="button"
                 onClick={stopScanner}
@@ -698,7 +512,7 @@ export default function QRScannerPage() {
               <div className="w-52 h-52 mx-auto mb-5 rounded-3xl border-2 border-dashed border-white/20 bg-white/5 flex flex-col items-center justify-center shadow-2xl">
                 <Camera size={52} className="text-slate-500 mb-2" />
                 <span className="text-[11px] font-bold text-slate-400">Hướng camera về phía mã QR</span>
-                <span className="text-[10px] text-amber-400/80 mt-1">Đã bật tối ưu lấy nét nhanh</span>
+                <span className="text-[10px] text-amber-400/80 mt-1">Lấy nét nhanh • Nhận diện tức thì</span>
               </div>
 
               <motion.button
@@ -752,7 +566,7 @@ export default function QRScannerPage() {
             </div>
           )}
 
-          {/* Loading scan query in manual mode */}
+          {/* Loading scan query */}
           {scanLoading && (
             <div className="card-luxury rounded-2xl p-6 text-center my-4 border border-white/10">
               <Loader2 size={32} className="animate-spin text-[#D4AF37] mx-auto mb-3" />
@@ -760,7 +574,7 @@ export default function QRScannerPage() {
             </div>
           )}
 
-          {/* Detailed Scan Results (shown when continuousMode is OFF, or when uploading file/manual code) */}
+          {/* POP-UP KẾT QUẢ CHECK-IN (HIỂN THỊ TO RÕ CHO STAFF NON-IT) */}
           <AnimatePresence>
             {scanResult && (
               <motion.div
@@ -769,33 +583,41 @@ export default function QRScannerPage() {
                 exit={{ opacity: 0, y: 15 }}
                 className="mb-6"
               >
-                {/* 1. Already Checked-in Alert */}
+                {/* 1. POP-UP CẢNH BÁO: VÉ ĐÃ SỬ DỤNG (ĐỎ RỰC) */}
                 {scanResult.status === 'already_checked_in' && (
                   <div className="rounded-3xl border-2 border-red-500 bg-red-950/40 p-6 shadow-2xl">
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="w-12 h-12 rounded-2xl bg-red-600 text-white flex items-center justify-center shrink-0">
+                      <div className="w-12 h-12 rounded-2xl bg-red-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-red-600/30">
                         <AlertTriangle size={26} />
                       </div>
                       <div>
                         <div className="font-black text-red-400 text-base">CẢNH BÁO: VÉ ĐÃ SỬ DỤNG!</div>
-                        <div className="text-xs text-red-200">{scanResult.error}</div>
+                        <div className="text-xs text-red-200">
+                          {scanResult.checked_in_at
+                            ? `CẢNH BÁO: Vé này ĐÃ ĐƯỢC CHECK-IN lúc ${formatDateTime(scanResult.checked_in_at)}!`
+                            : scanResult.error || 'Vé này đã được check-in trước đó!'}
+                        </div>
                       </div>
                     </div>
 
                     {scanResult.ticket && (
                       <div className="bg-[#18181B] rounded-2xl p-4 text-xs space-y-2 border border-white/10 mb-4">
-                        <div className="flex justify-between">
+                        <div className="flex justify-between items-center py-1 border-b border-white/5">
                           <span className="text-slate-400">Khách hàng:</span>
-                          <span className="font-bold text-white">{scanResult.ticket.full_name}</span>
+                          <span className="font-bold text-white text-sm">{scanResult.ticket.full_name}</span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex justify-between items-center py-1 border-b border-white/5">
                           <span className="text-slate-400">Mã đơn:</span>
                           <span className="font-mono font-bold text-red-400">{scanResult.ticket.order_code}</span>
                         </div>
+                        <div className="flex justify-between items-center py-1 border-b border-white/5">
+                          <span className="text-slate-400">Đơn vị:</span>
+                          <span className="text-white">{scanResult.ticket.organization || 'Tự do'}</span>
+                        </div>
                         {scanResult.checked_in_at && (
-                          <div className="flex justify-between border-t border-white/5 pt-2">
+                          <div className="flex justify-between items-center pt-1">
                             <span className="text-slate-400">Thời gian quét lần trước:</span>
-                            <span className="font-mono text-red-300">{formatDateTime(scanResult.checked_in_at)}</span>
+                            <span className="font-mono text-red-300 font-bold">{formatDateTime(scanResult.checked_in_at)}</span>
                           </div>
                         )}
                       </div>
@@ -807,19 +629,19 @@ export default function QRScannerPage() {
                         setScanResult(null)
                         startScanner(selectedCameraIndex)
                       }}
-                      className="w-full bg-white text-slate-900 font-bold py-3.5 rounded-xl text-xs hover:bg-slate-200 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                      className="w-full bg-white text-slate-900 font-black py-4 rounded-xl text-xs hover:bg-slate-200 transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-lg"
                     >
-                      <RefreshCw size={14} />
+                      <RefreshCw size={15} />
                       <span>Tiếp Tục Quét Vé Khác</span>
                     </button>
                   </div>
                 )}
 
-                {/* 2. SUCCESS CHECK-IN (AUTOMATICALLY RECORDED) */}
+                {/* 2. POP-UP THÀNH CÔNG: CHECK-IN THÀNH CÔNG (XANH LÁ) */}
                 {(scanResult.status === 'success' || scanResult.status === 'ready') && scanResult.ticket && (
                   <div className="rounded-3xl border-2 border-emerald-500 bg-emerald-950/40 p-6 shadow-2xl">
                     <div className="flex items-center gap-3 mb-5">
-                      <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-slate-900 flex items-center justify-center shrink-0 font-bold shadow-lg shadow-emerald-500/20">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-slate-900 flex items-center justify-center shrink-0 font-bold shadow-lg shadow-emerald-500/30">
                         <CheckCircle size={28} />
                       </div>
                       <div>
@@ -829,31 +651,52 @@ export default function QRScannerPage() {
                     </div>
 
                     <div className="bg-[#18181B] rounded-2xl p-4 border border-white/10 space-y-3 mb-5 text-xs">
-                      {[
-                        { IconComp: User, label: 'Khách hàng', value: scanResult.ticket.full_name },
-                        { IconComp: Hash, label: 'Mã vé', value: scanResult.ticket.order_code },
-                        { IconComp: Calendar, label: 'Ngày sinh', value: formatDate(scanResult.ticket.dob) },
-                        { IconComp: Building, label: 'Đơn vị', value: scanResult.ticket.organization || 'Khách vãng lai' },
-                        {
-                          IconComp: Sparkles,
-                          label: 'Số may mắn',
-                          value:
-                            scanResult.ticket.lucky_number !== undefined && scanResult.ticket.lucky_number !== null
-                              ? `#${String(scanResult.ticket.lucky_number).padStart(3, '0')}`
-                              : '-',
-                        },
-                      ].map(({ IconComp, label, value }) => (
-                        <div key={label} className="flex items-center justify-between py-1 border-b border-white/5 last:border-none">
-                          <div className="flex items-center gap-2 text-slate-400">
-                            <IconComp size={14} className="text-[#D4AF37]" />
-                            <span>{label}:</span>
-                          </div>
-                          <span className="font-bold text-white font-mono">{value}</span>
+                      <div className="flex items-center justify-between py-1 border-b border-white/5">
+                        <div className="flex items-center gap-2 text-slate-400">
+                          <User size={14} className="text-[#D4AF37]" />
+                          <span>Khách hàng:</span>
                         </div>
-                      ))}
+                        <span className="font-bold text-white text-sm">{scanResult.ticket.full_name}</span>
+                      </div>
+
+                      <div className="flex items-center justify-between py-1 border-b border-white/5">
+                        <div className="flex items-center gap-2 text-slate-400">
+                          <Hash size={14} className="text-[#D4AF37]" />
+                          <span>Mã vé:</span>
+                        </div>
+                        <span className="font-bold text-white font-mono">{scanResult.ticket.order_code}</span>
+                      </div>
+
+                      <div className="flex items-center justify-between py-1 border-b border-white/5">
+                        <div className="flex items-center gap-2 text-slate-400">
+                          <Calendar size={14} className="text-[#D4AF37]" />
+                          <span>Ngày sinh:</span>
+                        </div>
+                        <span className="font-bold text-white font-mono">{formatDate(scanResult.ticket.dob)}</span>
+                      </div>
+
+                      <div className="flex items-center justify-between py-1 border-b border-white/5">
+                        <div className="flex items-center gap-2 text-slate-400">
+                          <Building size={14} className="text-[#D4AF37]" />
+                          <span>Đơn vị:</span>
+                        </div>
+                        <span className="font-bold text-white">{scanResult.ticket.organization || 'Tự do'}</span>
+                      </div>
+
+                      <div className="flex items-center justify-between py-1">
+                        <div className="flex items-center gap-2 text-slate-400">
+                          <Sparkles size={14} className="text-[#D4AF37]" />
+                          <span>Số may mắn:</span>
+                        </div>
+                        <span className="font-black text-amber-400 font-mono text-base tracking-wider bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                          {scanResult.ticket.lucky_number !== undefined && scanResult.ticket.lucky_number !== null
+                            ? `#${String(scanResult.ticket.lucky_number).padStart(3, '0')}`
+                            : '-'}
+                        </span>
+                      </div>
                     </div>
 
-                    {/* Action buttons: Next ticket or Undo */}
+                    {/* Action buttons: Quét vé tiếp theo & Hủy check-in */}
                     <div className="space-y-2.5">
                       <motion.button
                         whileHover={{ scale: 1.02 }}
@@ -863,7 +706,7 @@ export default function QRScannerPage() {
                           setScanResult(null)
                           startScanner(selectedCameraIndex)
                         }}
-                        className="w-full btn-crimson py-4 rounded-2xl text-sm font-black shadow-lg shadow-red-600/30 flex items-center justify-center gap-2 cursor-pointer"
+                        className="w-full btn-crimson py-4 rounded-2xl text-sm font-black shadow-lg shadow-red-600/30 flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider"
                       >
                         <Camera size={18} />
                         <span>QUÉT VÉ TIẾP THEO</span>
@@ -881,7 +724,7 @@ export default function QRScannerPage() {
                   </div>
                 )}
 
-                {/* 3. Error (Not Paid / Invalid QR / Not Found) */}
+                {/* 3. POP-UP LỖI (CHƯA DUYỆT / MÃ KHÔNG HỢP LỆ) */}
                 {(scanResult.status === 'error' || scanResult.status === 'not_paid' || scanResult.status === 'invalid_qr' || scanResult.status === 'not_found') && (
                   <div className="rounded-3xl border-2 border-red-500/50 bg-red-950/30 p-6 shadow-2xl">
                     <div className="flex items-center gap-3 mb-4">
@@ -923,45 +766,6 @@ export default function QRScannerPage() {
             )}
           </AnimatePresence>
 
-          {/* RECENT SCANS LOG IN SESSION */}
-          {recentScans.length > 0 && (
-            <div className="mb-5 bg-[#18181B] border border-white/10 rounded-2xl p-3.5">
-              <div className="text-xs font-bold text-slate-300 mb-2.5 flex items-center justify-between">
-                <span>Vừa Check-in Gần Đây:</span>
-                <span className="text-[10px] text-slate-500">{recentScans.length} vé gần nhất</span>
-              </div>
-              <div className="space-y-1.5">
-                {recentScans.map((item, idx) => (
-                  <div
-                    key={`${item.code}-${idx}`}
-                    className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs border ${
-                      item.status === 'ok'
-                        ? 'bg-emerald-950/20 border-emerald-500/20 text-emerald-200'
-                        : 'bg-red-950/20 border-red-500/20 text-red-200'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 truncate">
-                      {item.status === 'ok' ? (
-                        <CheckCircle size={14} className="text-emerald-400 shrink-0" />
-                      ) : (
-                        <AlertTriangle size={14} className="text-red-400 shrink-0" />
-                      )}
-                      <span className="font-bold text-white truncate">{item.name}</span>
-                      {item.lucky !== undefined && item.lucky !== null && (
-                        <span className="text-amber-400 font-mono font-bold text-[11px]">
-                          #{String(item.lucky).padStart(3, '0')}
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-[10px] opacity-70 font-mono shrink-0 ml-2">
-                      {item.time}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Manual Input Fallback (Order Code or QR JSON) */}
           {!scanning && !scanResult && (
             <div className="mt-2 card-luxury rounded-2xl p-4 sm:p-5 border border-white/10">
@@ -976,7 +780,7 @@ export default function QRScannerPage() {
                 onSubmit={(e) => {
                   e.preventDefault()
                   if (manualCode.trim()) {
-                    handleQRScan(manualCode.trim(), false)
+                    handleQRScan(manualCode.trim())
                   }
                 }}
                 className="flex gap-2"
@@ -1003,13 +807,13 @@ export default function QRScannerPage() {
           <div className="mt-6 rounded-xl bg-white/5 border border-white/5 p-4 text-[11px] text-slate-400 space-y-1.5">
             <div className="flex items-center gap-1.5 font-bold text-slate-300">
               <Info size={13} className="text-[#D4AF37]" />
-              <span>Quy Trình Soát Vé Tự Động Siêu Tốc:</span>
+              <span>Quy Trình Soát Vé Tự Động:</span>
             </div>
             <ul className="list-disc pl-4 space-y-1 leading-relaxed text-slate-400">
-              <li>Đã bật <strong>Tự động lấy nét liên tục</strong> và <strong>Tăng tốc phần cứng AI</strong>.</li>
-              <li>Ở chế độ <strong>Quét Siêu Tốc</strong>, camera không dừng lại mà tiếp tục quét vé kế tiếp sau mỗi tiếng Bíp.</li>
-              <li>Nếu sảnh soát vé tối, hãy bật nút <strong>Bật Flash</strong> cạnh nút đổi camera.</li>
-              <li>Mỗi vé chỉ có thể check-in <strong>một lần duy nhất</strong>. Nếu quét lại sẽ lập tức báo động đỏ.</li>
+              <li>Camera tự động lấy nét nhanh với <strong>tốc độ quét 25 FPS</strong> và <strong>tăng tốc AI BarcodeDetector</strong>.</li>
+              <li>Mỗi khi quét trúng vé, <strong>Bảng thông báo lớn sẽ hiện lên ngay lập tức</strong> để Staff dễ dàng đọc tên và số may mắn trao quà/vòng tay.</li>
+              <li>Bấm nút <strong>QUÉT VÉ TIẾP THEO</strong> để mở camera quét người kế tiếp trong 0.2 giây.</li>
+              <li>Nếu sảnh soát vé tối, hãy bấm nút <strong>Bật Flash</strong> để trợ sáng.</li>
             </ul>
           </div>
         </div>
