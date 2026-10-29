@@ -3,7 +3,7 @@ export const EVENT_INFO = {
   subName: 'Live Show Kỷ Niệm 11 Năm Thành Lập CLB DTU Acoustic',
   eventDate: '07 Tháng 11, 2026',
   eventDateShort: '07.11.2026',
-  eventTime: '19:00 - 21:30',
+  eventTime: '18:30 - 21:30',
   // Tên địa điểm & Địa chỉ & Link Maps chính thức
   eventVenue: 'T&K Coffee - 177 Hồ Tùng Mậu',
   eventVenueName: 'T&K Coffee',

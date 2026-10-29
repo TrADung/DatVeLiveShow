@@ -153,7 +153,7 @@ export default function TimelineSection() {
           <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-28">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-[#D4AF37]">
               <Sparkles size={13} className="text-[#D4AF37]" />
-              <span>Hành Trình Âm Nhạc 19:00 - 21:30</span>
+              <span>Hành Trình Âm Nhạc 18:30 - 21:30</span>
             </div>
 
             

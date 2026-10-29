@@ -320,7 +320,7 @@ export default function AdminDashboard() {
     // Sheet 3: Báo cáo thống kê
     const summaryRows = [
       { 'Chỉ Số Báo Cáo': 'Tên sự kiện', 'Chi Tiết': 'Live Show SẮC I. VÁN CỜ' },
-      { 'Chỉ Số Báo Cáo': 'Thời gian tổ chức', 'Chi Tiết': '19:00 - 21:30 ngày 07/11/2026' },
+      { 'Chỉ Số Báo Cáo': 'Thời gian tổ chức', 'Chi Tiết': '18:30 - 21:30 ngày 07/11/2026' },
       { 'Chỉ Số Báo Cáo': 'Tổng số lượt đặt vé', 'Chi Tiết': stats?.kpi.total || tickets.length },
       {
         'Chỉ Số Báo Cáo': 'Vé đã xác nhận (Hợp lệ)',

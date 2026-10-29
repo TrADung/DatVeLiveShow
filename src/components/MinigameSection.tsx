@@ -13,12 +13,12 @@ export default function MinigameSection() {
   useEffect(() => {
     const calculateTime = () => {
       const current = new Date()
-      let targetDate = new Date('2026-11-07T19:00:00')
+      let targetDate = new Date('2026-11-07T18:30:00')
 
       // If the target date has passed relative to the computer's system clock,
       // target the upcoming event date (2027-07-11) so the countdown is actively ticking
       if (targetDate.getTime() <= current.getTime()) {
-        targetDate = new Date('2027-11-07T19:00:00')
+        targetDate = new Date('2027-11-07T18:30:00')
       }
 
       const diff = targetDate.getTime() - current.getTime()
@@ -64,14 +64,14 @@ export default function MinigameSection() {
         </h2>
 
         <p className="text-sm md:text-base text-neutral-400 max-w-2xl mx-auto mb-12 leading-relaxed font-normal">
-          Liveshow chính thức diễn ra vào lúc <strong className="text-[#D4AF37]">19:00 ngày 07/11/2026</strong>. Hãy chuẩn bị tinh thần để hòa mình vào những giai điệu acoustic mộc mạc và những màn trình diễn thăng hoa nhất!
+          Liveshow chính thức diễn ra vào lúc <strong className="text-[#D4AF37]">18:30 ngày 07/11/2026</strong>. Hãy chuẩn bị tinh thần để hòa mình vào những giai điệu acoustic mộc mạc và những màn trình diễn thăng hoa nhất!
         </p>
 
         {/* Large Monospace Countdown */}
         <div className="mb-10">
           <div className="inline-flex items-center gap-2 text-xs font-bold text-neutral-400 uppercase tracking-widest mb-6">
             <Clock size={15} className="text-[#D4AF37]" />
-            <span>ĐẾM NGƯỢC ĐẾN THỜI ĐIỂM DIỄN RA SHOW (19:00 • 07/11/2026)</span>
+            <span>ĐẾM NGƯỢC ĐẾN THỜI ĐIỂM DIỄN RA SHOW (18:30 • 07/11/2026)</span>
           </div>
 
           <div className="flex items-center justify-center gap-3 sm:gap-6">

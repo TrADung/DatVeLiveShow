@@ -17,7 +17,7 @@ const SETTING_DESCRIPTIONS: Record<string, string> = {
   bank_account_name: 'Tên chủ tài khoản ngân hàng (PHAN THI BICH NGOC)',
   event_name: 'Tên sự kiện / liveshow (Mặc định: SẮC I. VÁN CỜ)',
   event_date: 'Ngày tổ chức sự kiện (ví dụ: 07 Tháng 11, 2026)',
-  event_time: 'Khung giờ diễn ra sự kiện (ví dụ: 19:00 - 21:30)',
+  event_time: 'Khung giờ diễn ra sự kiện (ví dụ: 18:30 - 21:30)',
   event_venue_name: 'Tên địa điểm tổ chức (ví dụ: Hội trường lớn Đại học Duy Tân)',
   event_venue_address: 'Địa chỉ cụ thể (ví dụ: 03 Quang Trung, Q. Hải Châu, TP. Đà Nẵng)',
   event_venue_maps_url: 'Link Google Maps địa điểm (Khách bấm vào sẽ mở trực tiếp ứng dụng Google Maps)',
