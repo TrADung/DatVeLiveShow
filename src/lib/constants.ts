@@ -4,11 +4,11 @@ export const EVENT_INFO = {
   eventDate: '07 Tháng 11, 2026',
   eventDateShort: '07.11.2026',
   eventTime: '19:00 - 21:30',
-  // Tên địa điểm & Địa chỉ & Link Maps (khi có sẽ gắn vào đây hoặc sửa trong Dev Panel)
-  eventVenue: '',
-  eventVenueName: '',
-  eventVenueAddress: '',
-  eventVenueMapsUrl: '',
+  // Tên địa điểm & Địa chỉ & Link Maps chính thức
+  eventVenue: 'T&K Coffee - 177 Hồ Tùng Mậu',
+  eventVenueName: 'T&K Coffee',
+  eventVenueAddress: '177 Hồ Tùng Mậu',
+  eventVenueMapsUrl: 'https://maps.app.goo.gl/qS7bS6jx4Qev1ZeP7?g_st=ic',
   ticketPrice: 89000,
   bankId: 'TPB',
   bankAccountNo: '00000498382',
