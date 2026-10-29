@@ -71,7 +71,9 @@ export default function MinigameSection() {
         <div className="mb-10">
           <div className="inline-flex items-center gap-2 text-xs font-bold text-neutral-400 uppercase tracking-widest mb-6">
             <Clock size={15} className="text-[#D4AF37]" />
-            <span>ĐẾM NGƯỢC ĐẾN THỜI ĐIỂM DIỄN RA SHOW (18:30 • 07/11/2026)</span>
+            <span>ĐẾM NGƯỢC ĐẾN THỜI ĐIỂM DIỄN RA SHOW  
+              <br />(18:30 • 07/11/2026)<br />
+              </span>
           </div>
 
           <div className="flex items-center justify-center gap-3 sm:gap-6">

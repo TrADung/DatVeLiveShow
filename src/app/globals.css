@@ -270,6 +270,41 @@ html.light body,
   color: #6B7280 !important;
 }
 
+/* Exemption: Keep-dark containers retain their high-contrast white & gold colors */
+[data-theme="light"] .keep-dark,
+[data-theme="light"] .keep-dark h1,
+[data-theme="light"] .keep-dark h2,
+[data-theme="light"] .keep-dark h3,
+[data-theme="light"] .keep-dark h4,
+[data-theme="light"] .keep-dark h5,
+[data-theme="light"] .keep-dark h6,
+[data-theme="light"] .keep-dark p,
+[data-theme="light"] .keep-dark span,
+[data-theme="light"] .keep-dark div,
+[data-theme="light"] .keep-dark button,
+[data-theme="light"] .keep-dark .text-white {
+  color: #FFFFFF !important;
+}
+
+[data-theme="light"] .keep-dark .text-\[\#D4AF37\],
+[data-theme="light"] .keep-dark .text-amber-400,
+[data-theme="light"] .keep-dark .text-amber-300,
+[data-theme="light"] .keep-dark .text-yellow-400,
+[data-theme="light"] .keep-dark .text-gold {
+  color: #F0CA50 !important;
+}
+
+[data-theme="light"] .keep-dark .text-slate-300,
+[data-theme="light"] .keep-dark .text-slate-400,
+[data-theme="light"] .keep-dark .text-neutral-400 {
+  color: #CBD5E1 !important;
+}
+
+[data-theme="light"] .keep-dark .text-slate-500,
+[data-theme="light"] .keep-dark .text-neutral-500 {
+  color: #94A3B8 !important;
+}
+
 /* 5. Deep High-Contrast Gold & Yellow Elements */
 [data-theme="light"] .text-\[\#D4AF37\],
 [data-theme="light"] .text-amber-400,

@@ -10,7 +10,7 @@ import {
   Users, Ticket, TrendingUp, CheckCircle, Mail, DollarSign,
   RefreshCw, Send, Shield, Download, Search, Eye,
   X, Loader2, Sparkles, AlertTriangle, ArrowLeft, Camera, ExternalLink,
-  FileSpreadsheet, FileEdit
+  FileSpreadsheet, FileEdit, Image as ImageIcon, AlertCircle
 } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { useAuth } from '@/hooks/useAuth'
@@ -880,12 +880,39 @@ export default function AdminDashboard() {
                 </span>
               </div>
 
-              {selectedTicket.payment_proof_url && (
-                <div className="pt-2">
-                  <div className="font-bold text-slate-300 mb-2">Ảnh biên lai thanh toán:</div>
-                  <div className="p-2 bg-black/50 border border-white/10 rounded-2xl text-center">
+              {selectedTicket.payment_proof_url ? (
+                <div className="pt-3 border-t border-white/10">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-bold text-slate-300 text-xs flex items-center gap-1.5">
+                      <ImageIcon size={14} className="text-[#D4AF37]" />
+                      <span>Ảnh biên lai chuyển khoản:</span>
+                    </span>
+                    <a
+                      href={selectedTicket.payment_proof_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] text-[#D4AF37] hover:underline flex items-center gap-1 font-semibold"
+                    >
+                      <span>Mở ảnh gốc</span>
+                      <ExternalLink size={11} />
+                    </a>
+                  </div>
+                  <div className="p-2 bg-black/60 border border-white/10 rounded-2xl text-center overflow-hidden">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={selectedTicket.payment_proof_url} alt="Proof" className="max-h-56 mx-auto rounded-lg object-contain" />
+                    <img
+                      src={selectedTicket.payment_proof_url}
+                      alt="Biên lai thanh toán"
+                      className="max-h-64 sm:max-h-80 mx-auto rounded-xl object-contain cursor-pointer hover:scale-[1.02] transition-transform"
+                      onClick={() => window.open(selectedTicket.payment_proof_url, '_blank')}
+                      title="Bấm để xem ảnh phóng to trong tab mới"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="pt-3 border-t border-white/10">
+                  <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-300 text-xs flex items-center gap-2">
+                    <AlertCircle size={15} className="shrink-0 text-amber-400" />
+                    <span>Khán giả chưa tải lên ảnh biên lai chuyển khoản (hoặc đang tiến hành chuyển khoản).</span>
                   </div>
                 </div>
               )}

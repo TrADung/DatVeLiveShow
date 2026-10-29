@@ -7,6 +7,7 @@ import { useAudio } from '@/hooks/useAudio'
 
 interface VenueBadgeProps {
   className?: string
+  containerClassName?: string
   showLabel?: boolean
   venue?: string
   mapsUrl?: string
@@ -14,6 +15,7 @@ interface VenueBadgeProps {
 
 export default function VenueBadge({
   className = '',
+  containerClassName = 'inline-block',
   showLabel = true,
   venue = EVENT_INFO.eventVenue,
   mapsUrl = EVENT_INFO.eventVenueMapsUrl,
@@ -35,30 +37,32 @@ export default function VenueBadge({
   }
 
   return (
-    <div className="relative inline-block">
+    <div className={`relative ${containerClassName}`}>
       <button
         type="button"
         onClick={handleClick}
-        className={`group flex items-center gap-2 bg-[#1C1C1E] hover:bg-[#252528] border border-white/10 hover:border-[#D4AF37]/50 px-4 py-2.5 rounded-xl shadow-md transition-all duration-200 cursor-pointer text-left ${className}`}
+        className={`group flex items-center gap-3 bg-white/90 dark:bg-[#1C1C1E] hover:bg-white dark:hover:bg-[#252528] border border-amber-900/10 dark:border-white/10 hover:border-[#D4AF37]/50 p-3.5 rounded-2xl shadow-sm transition-all duration-200 cursor-pointer text-left ${className}`}
         title={hasMapsUrl ? 'Bấm để mở bản đồ Google Maps' : 'Địa điểm sẽ được cập nhật sớm nhất'}
       >
-        <MapPin
-          size={15}
-          className={`shrink-0 transition-transform group-hover:scale-110 ${
-            hasMapsUrl ? 'text-[#D4AF37]' : 'text-[#E53935]'
-          }`}
-        />
+        <div className="w-9 h-9 rounded-xl bg-[#D4AF37]/15 text-[#D4AF37] flex items-center justify-center shrink-0">
+          <MapPin
+            size={18}
+            className={`transition-transform group-hover:scale-110 ${
+              hasMapsUrl ? 'text-[#D4AF37]' : 'text-[#E53935]'
+            }`}
+          />
+        </div>
         {showLabel ? (
-          <div className="flex flex-col">
-            <span className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">
+          <div className="flex flex-col min-w-0">
+            <span className="text-[10px] uppercase font-bold text-neutral-500 dark:text-neutral-400 tracking-wider">
               Địa Điểm
             </span>
-            <span className="font-semibold text-white flex items-center gap-1.5 text-xs sm:text-sm">
-              {hasVenue ? venue : 'Sắp công bố'}
+            <span className="font-semibold text-slate-900 dark:text-white flex items-center gap-1.5 text-xs sm:text-sm truncate">
+              <span className="truncate">{hasVenue ? venue : 'Sắp công bố'}</span>
               {hasMapsUrl ? (
                 <ExternalLink
                   size={12}
-                  className="text-[#D4AF37] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+                  className="text-[#D4AF37] shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
                 />
               ) : (
                 <span className="text-[10px] text-[#D4AF37]/80 font-normal italic">
@@ -68,12 +72,12 @@ export default function VenueBadge({
             </span>
           </div>
         ) : (
-          <span className="font-semibold text-white flex items-center gap-1.5 text-xs sm:text-sm whitespace-nowrap">
+          <span className="font-semibold text-slate-900 dark:text-white flex items-center gap-1.5 text-xs sm:text-sm whitespace-nowrap">
             <span>{hasVenue ? venue : 'Địa điểm: Sắp công bố'}</span>
             {hasMapsUrl ? (
               <ExternalLink
                 size={12}
-                className="text-[#D4AF37] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+                className="text-[#D4AF37] shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
               />
             ) : null}
           </span>

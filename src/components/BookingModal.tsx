@@ -23,7 +23,7 @@ import {
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { useAudio } from '@/hooks/useAudio'
-import { generateVietQRUrl } from '@/lib/utils'
+import { generateVietQRUrl, generateOrderCode } from '@/lib/utils'
 import type { BookingFormData, Gender } from '@/types'
 
 interface BookingModalProps {
@@ -55,6 +55,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
   const [luckyNumber, setLuckyNumber] = useState<number | null>(null)
   const [proofFile, setProofFile] = useState<File | null>(null)
   const [proofUploading, setProofUploading] = useState(false)
+  const [dobError, setDobError] = useState<string | null>(null)
   const [proofPreview, setProofPreview] = useState<string | null>(null)
   const [emailInput, setEmailInput] = useState('')
   const [copiedBank, setCopiedBank] = useState(false)
@@ -140,7 +141,30 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
     }
   }
 
-  const handleSubmitForm = async (e: React.FormEvent) => {
+  const handleDobChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value
+    setForm((f) => ({ ...f, dob: val }))
+    if (!val) {
+      setDobError('Vui lòng chọn ngày tháng năm sinh.')
+      return
+    }
+    const birthDate = new Date(val)
+    const today = new Date()
+    const birthYear = birthDate.getFullYear()
+    const currentYear = today.getFullYear()
+    if (isNaN(birthDate.getTime())) {
+      setDobError('Định dạng ngày sinh không hợp lệ.')
+    } else if (birthDate > today || birthYear > currentYear - 6) {
+      setDobError(`Năm sinh không hợp lệ: Khán giả phải từ 6 tuổi trở lên (sinh năm ${currentYear - 6} trở về trước).`)
+    } else if (birthYear < 1930) {
+      setDobError('Năm sinh không hợp lệ (trước năm 1930).')
+    } else {
+      setDobError(null)
+    }
+  }
+
+  // BƯỚC 1: XÁC THỰC FORM & SINH MÃ ĐƠN (CHƯA LƯU VÀO DATABASE ĐỂ TRÁNH RÁC)
+  const handleSubmitForm = (e: React.FormEvent) => {
     e.preventDefault()
     playClickSound()
 
@@ -155,41 +179,19 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
     const birthYear = birthDate.getFullYear()
     const currentYear = today.getFullYear()
     if (!form.dob || isNaN(birthDate.getTime()) || birthDate > today || birthYear < 1930 || birthYear > currentYear - 6) {
-      setError('Ngày tháng năm sinh không hợp lệ: Khán giả tham gia phải từ 6 tuổi trở lên và năm sinh không thể ở tương lai.')
+      const msg = `Ngày tháng năm sinh không hợp lệ: Khán giả tham gia phải từ 6 tuổi trở lên (sinh năm ${currentYear - 6} trở về trước).`
+      setError(msg)
+      setDobError(msg)
       playErrorSound()
       return
     }
 
-    setLoading(true)
+    // Sinh mã đơn để hiển thị trên VietQR
+    const newOrderCode = generateOrderCode()
+    setOrderCode(newOrderCode)
     setError('')
-
-    try {
-      const response = await fetch('/api/tickets', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...form,
-          user_email: finalEmail,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Có lỗi xảy ra khi tạo vé')
-      }
-
-      setOrderCode(data.order_code)
-      setTicketId(data.id)
-      setLuckyNumber(data.lucky_number || null)
-      setStep('payment')
-      playSuccessSound()
-    } catch (err) {
-      playErrorSound()
-      setError(err instanceof Error ? err.message : 'Có lỗi xảy ra khi gửi yêu cầu')
-    } finally {
-      setLoading(false)
-    }
+    setStep('payment')
+    playSuccessSound()
   }
 
   const handleFileChange = (file: File | null) => {
@@ -203,8 +205,8 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
     }
   }
 
+  // BƯỚC 2: CHUYỂN KHOẢN XONG & TẢI BIÊN LAI -> CHÍNH THỨC LƯU VÀO DATABASE & SUPABASE STORAGE!
   const handleProofUpload = async () => {
-    if (!ticketId) return
     playClickSound()
     if (!proofFile && !proofPreview) {
       setError('Vui lòng tải lên ảnh chụp biên lai/bill chuyển khoản để hoàn tất đặt vé!')
@@ -214,40 +216,43 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
     setProofUploading(true)
     setError('')
 
+    const finalEmail = user?.email || emailInput.trim()
+
     try {
-      let finalProofUrl = proofPreview || 'https://via.placeholder.com/400x300.png?text=Payment+Proof'
+      const fd = new FormData()
+      fd.append('full_name', form.full_name)
+      fd.append('dob', form.dob)
+      fd.append('gender', form.gender)
+      fd.append('phone', form.phone)
+      fd.append('organization', form.organization || 'Tự do')
+      fd.append('referral_source', form.referral_source)
+      fd.append('feedback', form.feedback || '')
+      fd.append('user_email', finalEmail)
+      fd.append('order_code', orderCode)
 
       if (proofFile) {
-        try {
-          const fileExt = proofFile.name.split('.').pop()
-          const fileName = `${ticketId}-${Date.now()}.${fileExt}`
-          const { error: uploadError } = await supabase.storage
-            .from('payment-proofs')
-            .upload(fileName, proofFile)
-
-          if (!uploadError) {
-            const { data: urlData } = supabase.storage
-              .from('payment-proofs')
-              .getPublicUrl(fileName)
-            finalProofUrl = urlData.publicUrl
-          }
-        } catch {}
+        fd.append('file', proofFile)
+      } else if (proofPreview) {
+        fd.append('proof_preview', proofPreview)
       }
 
-      await fetch('/api/tickets/proof', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ticket_id: ticketId,
-          payment_proof_url: finalProofUrl,
-        }),
+      const res = await fetch('/api/tickets', {
+        method: 'POST',
+        body: fd,
       })
 
+      const data = await res.json()
+      if (!res.ok) {
+        throw new Error(data.error || 'Có lỗi xảy ra khi lưu thông tin vé')
+      }
+
+      setTicketId(data.ticket_id || data.id)
+      setLuckyNumber(data.lucky_number || null)
       setStep('success')
       playSuccessSound()
-    } catch {
+    } catch (err: any) {
       playErrorSound()
-      setStep('success')
+      setError(err?.message || 'Có lỗi xảy ra khi lưu biên lai chuyển khoản. Vui lòng thử lại.')
     } finally {
       setProofUploading(false)
     }
@@ -376,11 +381,19 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                         required
                         type="date"
                         value={form.dob}
-                        onChange={(e) => setForm((f) => ({ ...f, dob: e.target.value }))}
+                        onChange={handleDobChange}
                         min="1930-01-01"
                         max={`${new Date().getFullYear() - 6}-12-31`}
-                        className="w-full bg-[#141414] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-all"
+                        className={`w-full bg-[#141414] border rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none transition-all ${
+                          dobError ? 'border-red-500 focus:border-red-500' : 'border-white/10 focus:border-[#D4AF37]'
+                        }`}
                       />
+                      {dobError && (
+                        <p className="text-[10px] font-bold text-red-500 mt-1 flex items-center gap-1">
+                          <AlertCircle size={11} className="shrink-0 text-red-500" />
+                          <span>{dobError}</span>
+                        </p>
+                      )}
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-neutral-300 mb-1.5">

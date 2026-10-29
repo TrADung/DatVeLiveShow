@@ -84,9 +84,32 @@ export async function POST(request: NextRequest) {
   // Query tickets: Single ticket (if ticket_id provided) OR batch (paid & unsent only)
   let query = dbClient.from('tickets').select('*')
   if (ticketId) {
-    query = query.eq('id', ticketId)
+    // Kiểm tra bảo mật: KHÔNG BAO GIỜ gửi email cho vé bị từ chối (rejected)
+    const { data: rawTicket } = await dbClient
+      .from('tickets')
+      .select('order_code, payment_status')
+      .eq('id', ticketId)
+      .single()
+
+    if (!rawTicket) {
+      return NextResponse.json({ error: 'Không tìm thấy vé yêu cầu' }, { status: 404 })
+    }
+
+    if (rawTicket.payment_status === 'rejected') {
+      return NextResponse.json({
+        error: `Vé #${rawTicket.order_code} đã bị TỪ CHỐI (Rejected). Hệ thống TUYỆT ĐỐI KHÔNG GỬI email vé cho các đơn bị từ chối!`
+      }, { status: 400 })
+    }
+
+    if (rawTicket.payment_status !== 'paid') {
+      return NextResponse.json({
+        error: `Vé #${rawTicket.order_code} chưa được duyệt thanh toán (trạng thái: ${rawTicket.payment_status}). Vui lòng bấm 'Xác Nhận Đã Nhận Tiền' trước khi gửi vé!`
+      }, { status: 400 })
+    }
+
+    query = query.eq('id', ticketId).eq('payment_status', 'paid')
   } else {
-    // CHỈ GỬI NHỮNG VÉ ĐÃ THANH TOÁN VÀ CHƯA TỪNG ĐƯỢC GỬI EMAIL
+    // CHỈ GỬI NHỮNG VÉ ĐÃ THANH TOÁN (PAID) VÀ CHƯA TỪNG ĐƯỢC GỬI EMAIL (BỎ QUA TOÀN BỘ REJECTED)
     query = query.eq('payment_status', 'paid').eq('is_email_sent', false)
   }
 
@@ -144,6 +167,12 @@ export async function POST(request: NextRequest) {
   const bannerFilename = bannerPath && bannerPath.endsWith('.png') ? 'ticket.png' : 'ticket.jpg'
 
   for (const ticket of tickets) {
+    // BẢO VỆ TUYỆT ĐỐI: Chặn hoàn toàn mọi vé có trạng thái từ chối (rejected) hoặc chưa duyệt
+    if (ticket.payment_status === 'rejected' || ticket.payment_status !== 'paid') {
+      console.warn(`[CHẶN GỬI EMAIL] Bỏ qua vé #${ticket.order_code} do trạng thái là: ${ticket.payment_status}`)
+      continue
+    }
+
     try {
       // Generate QR Code as Buffer for CID attachment (Prevents spam detection)
       const qrData = JSON.stringify({

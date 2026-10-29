@@ -158,27 +158,36 @@ export default function TimelineSection() {
 
             
 
-            <p className="text-sm sm:text-base text-neutral-400 leading-relaxed font-normal">
-              Lịch trình sự kiện gồm {' '}
-              <span className="text-[#D4AF37] font-semibold italic"> 3 mốc.</span>
+            <p className="text-sm sm:text-base text-neutral-600 dark:text-neutral-300 leading-relaxed font-normal">
+              Hành trình âm nhạc được dẫn dắt qua 3 hồi kịch tính: Khai Cuộc đón khách, Trung Cuộc bùng nổ thăng hoa, và Tàn Cuộc lắng đọng dư âm.
             </p>
 
-            {/* Quick Specs Pill Box */}
-            <div className="pt-4 border-t border-white/10 flex flex-col sm:flex-row gap-3 text-xs">
-              <div className="space-y-1 bg-[#1C1C1E] border border-white/10 p-3 rounded-xl flex-1">
-                <span className="text-neutral-500 font-bold uppercase tracking-wider block text-[10px]">Thời Gian</span>
-                <span className="text-white font-semibold flex items-center gap-1.5">
-                  <Calendar size={13} className="text-[#D4AF37]" />
-                  {EVENT_INFO.eventDateShort} • {EVENT_INFO.eventTime}
-                </span>
+            {/* Quick Specs Bento / Pill Box */}
+            <div className="pt-4 border-t border-black/10 dark:border-white/10 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div className="flex items-center gap-3 bg-white/90 dark:bg-[#1C1C1E] border border-amber-900/10 dark:border-white/10 p-3.5 rounded-2xl shadow-sm">
+                <div className="w-9 h-9 rounded-xl bg-[#D4AF37]/15 text-[#D4AF37] flex items-center justify-center shrink-0">
+                  <Calendar size={18} className="text-[#D4AF37]" />
+                </div>
+                <div className="space-y-0.5 min-w-0">
+                  <span className="text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-wider block text-[10px]">
+                    Thời Gian
+                  </span>
+                  <span className="text-slate-900 dark:text-white font-semibold text-xs sm:text-sm block truncate">
+                    {EVENT_INFO.eventDateShort} • {EVENT_INFO.eventTime}
+                  </span>
+                </div>
               </div>
-              <div className="flex-1">
-                <VenueBadge className="w-full h-full" />
+
+              <div className="w-full">
+                <VenueBadge
+                  containerClassName="w-full h-full block"
+                  className="w-full h-full"
+                />
               </div>
             </div>
 
             {/* Quote decoration */}
-            <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 text-xs text-neutral-400 italic">
+            <div className="p-4 rounded-2xl bg-amber-500/5 dark:bg-white/[0.03] border-l-2 border-[#D4AF37] border-y border-r border-amber-900/10 dark:border-white/5 text-xs text-neutral-600 dark:text-neutral-400 italic leading-relaxed">
               &ldquo;Mỗi mốc thời gian là một nước cờ nghệ thuật đưa cảm xúc khán giả chạm tới đỉnh cao.&rdquo;
             </div>
           </div>

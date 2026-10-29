@@ -13,43 +13,153 @@ function getAdminSupabase() {
   )
 }
 
-// In-memory fallback cache in case Supabase schema hasn't been migrated yet
+// In-memory fallback cache
 const localTicketStore: any[] = []
+
+// Upload proof image directly to Supabase Storage bucket 'payment-proofs' via Admin Client
+async function uploadProofToStorage(
+  adminSupabase: any,
+  buffer: Buffer,
+  mimeType: string,
+  orderCode: string
+): Promise<string | null> {
+  if (!adminSupabase) return null
+  try {
+    const ext = mimeType.split('/')[1]?.replace('jpeg', 'jpg') || 'jpg'
+    const fileName = `${orderCode}-${Date.now()}.${ext}`
+
+    const { error: upErr } = await adminSupabase.storage
+      .from('payment-proofs')
+      .upload(fileName, buffer, {
+        contentType: mimeType,
+        upsert: true,
+      })
+
+    if (upErr) {
+      console.error('Storage upload error in tickets/route:', upErr)
+      return null
+    }
+
+    const { data } = adminSupabase.storage
+      .from('payment-proofs')
+      .getPublicUrl(fileName)
+
+    return data?.publicUrl || null
+  } catch (err) {
+    console.error('Storage upload exception in tickets/route:', err)
+    return null
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { full_name, dob, gender, phone, organization, referral_source, feedback, user_email } = body
+    const contentType = request.headers.get('content-type') || ''
+    let full_name = ''
+    let dob = ''
+    let gender = ''
+    let phone = ''
+    let organization = 'Tự do'
+    let referral_source = ''
+    let feedback: string | null = null
+    let user_email = ''
+    let custom_order_code = ''
+    let payment_proof_url: string | null = null
+    let proofFile: File | null = null
+    let proofPreview = ''
 
-    // Validate required fields (bỏ trường organization theo yêu cầu)
+    if (contentType.includes('multipart/form-data')) {
+      const formData = await request.formData()
+      full_name = (formData.get('full_name') as string || '').trim()
+      dob = (formData.get('dob') as string || '').trim()
+      gender = (formData.get('gender') as string || '').trim()
+      phone = (formData.get('phone') as string || '').trim()
+      organization = (formData.get('organization') as string || 'Tự do').trim()
+      referral_source = (formData.get('referral_source') as string || '').trim()
+      feedback = (formData.get('feedback') as string || '').trim() || null
+      user_email = (formData.get('user_email') as string || '').trim().toLowerCase()
+      custom_order_code = (formData.get('order_code') as string || '').trim()
+      proofFile = formData.get('file') as File | null
+      proofPreview = (formData.get('proof_preview') as string || '').trim()
+    } else {
+      const body = await request.json()
+      full_name = (body.full_name || '').trim()
+      dob = (body.dob || '').trim()
+      gender = (body.gender || '').trim()
+      phone = (body.phone || '').trim()
+      organization = (body.organization || 'Tự do').trim()
+      referral_source = (body.referral_source || '').trim()
+      feedback = body.feedback ? String(body.feedback).trim() : null
+      user_email = (body.user_email || '').trim().toLowerCase()
+      custom_order_code = (body.order_code || '').trim()
+      payment_proof_url = body.payment_proof_url || null
+    }
+
+    // Validate required fields
     if (!full_name || !dob || !gender || !phone || !referral_source) {
       return NextResponse.json({ error: 'Thiếu thông tin bắt buộc' }, { status: 400 })
     }
 
-    // Validate ngày tháng năm sinh hợp lệ (khán giả >= 6 tuổi và không vượt quá thời điểm hiện tại)
+    // Validate ngày tháng năm sinh hợp lệ (khán giả >= 6 tuổi và không vượt quá năm hiện tại - 6)
     const birthDate = new Date(dob)
     const today = new Date()
     const birthYear = birthDate.getFullYear()
     const currentYear = today.getFullYear()
     if (isNaN(birthDate.getTime()) || birthDate > today || birthYear < 1930 || birthYear > currentYear - 6) {
       return NextResponse.json({
-        error: 'Ngày sinh không hợp lệ: Khán giả tham gia sự kiện phải từ 6 tuổi trở lên và năm sinh không thể ở tương lai.'
+        error: `Ngày sinh không hợp lệ: Khán giả tham gia sự kiện phải từ 6 tuổi trở lên (sinh năm ${currentYear - 6} trở về trước).`
       }, { status: 400 })
     }
 
-    const email = (user_email || '').trim().toLowerCase()
+    const email = user_email
     if (!email || !email.includes('@')) {
       return NextResponse.json({ error: 'Email không hợp lệ' }, { status: 400 })
     }
 
-    const order_code = generateOrderCode()
+    const order_code = custom_order_code || generateOrderCode()
     const ticket_id = crypto.randomUUID()
     const qr_secret_hash = generateQRHash(ticket_id, order_code)
     const amount = 89000
-
-    // Cấp phát số may mắn 3 chữ số (000-999), đảm bảo ưu tiên có số 09 (9) và 24 (24)
-    let existingLuckyNumbers: number[] = []
     const adminSupabase = getAdminSupabase()
+
+    // 1. Xử lý ảnh biên lai chuyển khoản và upload lên Supabase Storage
+    if (proofFile) {
+      const buffer = Buffer.from(await proofFile.arrayBuffer())
+      const mimeType = proofFile.type || 'image/jpeg'
+      const uploaded = await uploadProofToStorage(adminSupabase, buffer, mimeType, order_code)
+      if (uploaded) {
+        payment_proof_url = uploaded
+      }
+    } else if (proofPreview && proofPreview.startsWith('data:')) {
+      const matches = proofPreview.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/)
+      if (matches && matches.length === 3) {
+        const mimeType = matches[1]
+        const buffer = Buffer.from(matches[2], 'base64')
+        const uploaded = await uploadProofToStorage(adminSupabase, buffer, mimeType, order_code)
+        if (uploaded) {
+          payment_proof_url = uploaded
+        }
+      }
+    } else if (payment_proof_url && payment_proof_url.startsWith('data:')) {
+      const matches = payment_proof_url.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/)
+      if (matches && matches.length === 3) {
+        const mimeType = matches[1]
+        const buffer = Buffer.from(matches[2], 'base64')
+        const uploaded = await uploadProofToStorage(adminSupabase, buffer, mimeType, order_code)
+        if (uploaded) {
+          payment_proof_url = uploaded
+        }
+      }
+    }
+
+    // CHÍNH SÁCH ĐẶT VÉ: CHỈ LƯU VÀO DATABASE KHI ĐÃ CHUYỂN KHOẢN VÀ CÓ BIÊN LAI
+    if (!payment_proof_url) {
+      return NextResponse.json({
+        error: 'Vui lòng hoàn tất chuyển khoản và đính kèm ảnh biên lai giao dịch để lưu vé vào hệ thống!'
+      }, { status: 400 })
+    }
+
+    // Cấp phát số may mắn 3 chữ số (000-999), ưu tiên 09 và 24
+    let existingLuckyNumbers: number[] = []
     if (adminSupabase) {
       try {
         const { data: existingTickets } = await adminSupabase
@@ -78,6 +188,7 @@ export async function POST(request: NextRequest) {
       referral_source,
       feedback: feedback || null,
       amount,
+      payment_proof_url,
       payment_status: 'pending',
       is_email_sent: false,
       is_checked_in: false,
@@ -87,7 +198,7 @@ export async function POST(request: NextRequest) {
       updated_at: new Date().toISOString(),
     }
 
-    // 1. Try saving with Admin Supabase Client (bypasses RLS safely on server)
+    // 1. Lưu vào Database với Admin Supabase Client (bypasses RLS)
     if (adminSupabase) {
       try {
         const { data, error } = await adminSupabase
@@ -97,7 +208,7 @@ export async function POST(request: NextRequest) {
           .single()
 
         if (!error && data) {
-          return NextResponse.json(data, { status: 201 })
+          return NextResponse.json({ ...data, ticket_id: data.id }, { status: 201 })
         }
         if (error) console.error('Admin ticket insert error:', error)
       } catch (adminErr) {
@@ -105,7 +216,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 2. Fallback to standard Supabase client
+    // 2. Fallback standard client
     try {
       const supabase = await createClient()
       const { data, error } = await supabase
@@ -115,10 +226,7 @@ export async function POST(request: NextRequest) {
         .single()
 
       if (!error && data) {
-        return NextResponse.json(data, { status: 201 })
-      }
-      if (error) {
-        console.error('Supabase ticket insert error:', error)
+        return NextResponse.json({ ...data, ticket_id: data.id }, { status: 201 })
       }
     } catch (clientErr) {
       console.error('Supabase ticket insert exception:', clientErr)
@@ -126,7 +234,7 @@ export async function POST(request: NextRequest) {
 
     // Fallback store
     localTicketStore.unshift(newTicket)
-    return NextResponse.json(newTicket, { status: 201 })
+    return NextResponse.json({ ...newTicket, ticket_id: newTicket.id }, { status: 201 })
   } catch (error) {
     console.error('Error creating ticket:', error)
     return NextResponse.json({ error: 'Lỗi hệ thống, vui lòng thử lại' }, { status: 500 })

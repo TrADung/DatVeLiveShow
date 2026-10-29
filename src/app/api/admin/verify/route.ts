@@ -104,9 +104,11 @@ export async function GET(request: NextRequest) {
 
     if (adminClient) {
       try {
+        // CHỈ LẤY CÁC ĐƠN ĐÃ CÓ BIÊN LAI CHUYỂN KHOẢN (TRÁNH CÁC ĐƠN RÁC CHƯA THANH TOÁN)
         let query = adminClient
           .from('tickets')
           .select('*')
+          .not('payment_proof_url', 'is', null)
           .order('created_at', { ascending: false })
           .limit(limit)
 
@@ -123,6 +125,7 @@ export async function GET(request: NextRequest) {
         let query = supabase
           .from('tickets')
           .select('*')
+          .not('payment_proof_url', 'is', null)
           .order('created_at', { ascending: false })
           .limit(limit)
 

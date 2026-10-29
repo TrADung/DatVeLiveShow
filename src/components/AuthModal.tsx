@@ -91,20 +91,27 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             initial={{ opacity: 0, scale: 0.95, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 15 }}
-            className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden"
+            className="w-full max-w-md bg-white dark:bg-[#1A1A1A] rounded-3xl shadow-2xl border border-slate-200 dark:border-white/10 overflow-hidden"
           >
             {/* Header with Chess theme */}
-            <div className="relative bg-slate-900 px-6 py-5 text-white flex items-center justify-between">
+            <div className="keep-dark relative bg-[#0D1117] px-6 py-5 border-b border-white/10 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <span className="text-xl text-[#D4AF37]">♟</span>
+                <span style={{ color: '#F0CA50' }} className="text-xl text-[#D4AF37] shrink-0">♟</span>
                 <div>
-                  <h3 className="text-base font-black tracking-wider uppercase">Đăng Nhập SẮC I. VÁN CỜ</h3>
-                  <p className="text-xs text-slate-300 font-medium">Live Show Sinh Nhật CLB DTU Acoustic</p>
+                  <h3 style={{ color: '#FFFFFF' }} className="text-base font-black tracking-wider uppercase text-white">
+                    Đăng Nhập SẮC I. VÁN CỜ
+                  </h3>
+                  <p style={{ color: '#94A3B8' }} className="text-xs text-slate-300 font-medium">
+                    Live Show Sinh Nhật CLB DTU Acoustic
+                  </p>
                 </div>
               </div>
               <button
+                type="button"
+                style={{ color: '#FFFFFF' }}
                 onClick={() => { playClickSound(); onClose() }}
-                className="p-1.5 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                className="p-1.5 rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                title="Đóng"
               >
                 <X size={18} />
               </button>
