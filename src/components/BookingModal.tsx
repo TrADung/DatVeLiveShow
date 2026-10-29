@@ -12,6 +12,7 @@ import {
   Building,
   Send,
   Check,
+  CheckCircle2,
   Upload,
   Loader2,
   AlertCircle,
@@ -25,6 +26,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useAudio } from '@/hooks/useAudio'
 import { generateVietQRUrl, generateOrderCode } from '@/lib/utils'
 import type { BookingFormData, Gender } from '@/types'
+import { compressImage } from '@/lib/imageCompression'
 
 interface BookingModalProps {
   isOpen: boolean
@@ -60,6 +62,11 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
   const [emailInput, setEmailInput] = useState('')
   const [copiedBank, setCopiedBank] = useState(false)
   const [copiedCode, setCopiedCode] = useState(false)
+  const [compressingImage, setCompressingImage] = useState(false)
+  const [compressionStats, setCompressionStats] = useState<{
+    originalSize: number
+    compressedSize: number
+  } | null>(null)
 
   const [form, setForm] = useState<BookingFormData>({
     full_name: '',
@@ -194,14 +201,55 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
     playSuccessSound()
   }
 
-  const handleFileChange = (file: File | null) => {
-    setProofFile(file)
-    if (file) {
+  const handleFileChange = async (file: File | null) => {
+    if (!file) {
+      setProofFile(null)
+      setProofPreview(null)
+      setCompressionStats(null)
+      return
+    }
+
+    if (!file.type.startsWith('image/')) {
+      setError('Vui lòng chọn file hình ảnh hợp lệ (JPG, PNG, JPEG, WEBP).')
+      playErrorSound()
+      return
+    }
+
+    if (file.size > 30 * 1024 * 1024) {
+      setError('File ảnh quá lớn (> 30MB). Vui lòng chọn ảnh chụp màn hình thông thường.')
+      playErrorSound()
+      return
+    }
+
+    setError('')
+    setCompressingImage(true)
+
+    try {
+      const origSize = file.size
+      const compressed = await compressImage(file, {
+        maxWidth: 1600,
+        maxHeight: 1600,
+        quality: 0.82,
+        mimeType: 'image/jpeg',
+      })
+
+      setProofFile(compressed)
+      setCompressionStats({
+        originalSize: origSize,
+        compressedSize: compressed.size,
+      })
+
+      const reader = new FileReader()
+      reader.onload = (e) => setProofPreview(e.target?.result as string)
+      reader.readAsDataURL(compressed)
+    } catch (err) {
+      console.warn('Lỗi nén ảnh modal, fallback dùng file gốc:', err)
+      setProofFile(file)
       const reader = new FileReader()
       reader.onload = (e) => setProofPreview(e.target?.result as string)
       reader.readAsDataURL(file)
-    } else {
-      setProofPreview(null)
+    } finally {
+      setCompressingImage(false)
     }
   }
 
@@ -566,17 +614,42 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                       </span>
                     </div>
                     <label className={`block border-2 border-dashed rounded-xl p-3.5 text-center cursor-pointer transition-all ${
-                      proofFile || proofPreview
+                      compressingImage
+                        ? 'border-amber-500 bg-amber-950/20'
+                        : proofFile || proofPreview
                         ? 'border-emerald-500 bg-emerald-950/15'
                         : 'border-white/20 hover:border-[#D4AF37] bg-white/5 hover:bg-[#D4AF37]/5'
                     }`}>
-                      <Upload size={20} className={`mx-auto mb-1 ${proofFile || proofPreview ? 'text-emerald-400' : 'text-neutral-400'}`} />
-                      <span className="text-xs text-neutral-300 font-semibold block">
-                        {proofFile ? proofFile.name : 'Tải ảnh biên lai chuyển khoản'}
-                      </span>
+                      {compressingImage ? (
+                        <div className="py-1 flex flex-col items-center">
+                          <Loader2 size={22} className="animate-spin text-[#D4AF37] mb-1" />
+                          <span className="text-xs text-[#D4AF37] font-bold">
+                            Đang tự động tối ưu & nén ảnh...
+                          </span>
+                        </div>
+                      ) : (
+                        <>
+                          <Upload size={20} className={`mx-auto mb-1 ${proofFile || proofPreview ? 'text-emerald-400' : 'text-neutral-400'}`} />
+                          <span className="text-xs text-neutral-300 font-semibold block">
+                            {proofFile ? proofFile.name : 'Tải ảnh biên lai chuyển khoản'}
+                          </span>
+                          <span className="text-[10px] text-neutral-400 block mt-0.5">
+                            Tự động nén tối ưu &lt; 1MB • Bắt buộc tải ảnh
+                          </span>
+                          {compressionStats && (
+                            <div className="mt-1.5 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-950/50 border border-emerald-500/30 text-[10px] font-bold text-emerald-300">
+                              <CheckCircle2 size={11} className="text-emerald-400" />
+                              <span>
+                                Đã nén: {(compressionStats.compressedSize / 1024).toFixed(0)} KB (giảm {Math.max(0, Math.round((1 - compressionStats.compressedSize / compressionStats.originalSize) * 100))}%)
+                              </span>
+                            </div>
+                          )}
+                        </>
+                      )}
                       <input
                         type="file"
                         accept="image/*"
+                        disabled={compressingImage}
                         className="hidden"
                         onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
                       />
@@ -593,11 +666,16 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                   <button
                     type="button"
                     onClick={handleProofUpload}
-                    disabled={proofUploading || (!proofFile && !proofPreview)}
+                    disabled={proofUploading || compressingImage || (!proofFile && !proofPreview)}
                     className="w-full btn-velvet py-3.5 rounded-xl font-black text-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {proofUploading ? (
                       <Loader2 size={18} className="animate-spin" />
+                    ) : compressingImage ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin text-[#D4AF37]" />
+                        <span>ĐANG TỐI ƯU ẢNH...</span>
+                      </>
                     ) : (
                       <>
                         <Check size={18} />

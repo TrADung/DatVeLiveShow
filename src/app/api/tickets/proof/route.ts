@@ -70,14 +70,12 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer())
     const mimeType = file.type || 'image/jpeg'
     const publicUrl = await uploadToStorage(adminSupabase, buffer, mimeType, ticket.order_code || ticketId)
-
-    if (!publicUrl) {
-      return NextResponse.json({ error: 'Không thể lưu ảnh vào Supabase Storage' }, { status: 500 })
-    }
+    // Fallback: nếu upload bucket lỗi, lưu thẳng data base64 để không làm mất bill của khách
+    const finalProofUrl = publicUrl || `data:${mimeType};base64,${buffer.toString('base64')}`
 
     const { error: updateError } = await db
       .from('tickets')
-      .update({ payment_proof_url: publicUrl })
+      .update({ payment_proof_url: finalProofUrl })
       .eq('id', ticketId)
 
     if (updateError) {

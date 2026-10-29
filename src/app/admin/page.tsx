@@ -20,6 +20,7 @@ import { useRouter } from 'next/navigation'
 import type { Ticket as TicketType } from '@/types'
 import Header from '@/components/Header'
 import Link from 'next/link'
+import DevCreateTicketModal from '@/components/DevCreateTicketModal'
 
 const COLORS = ['#EF4444', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899']
 
@@ -65,6 +66,7 @@ export default function AdminDashboard() {
   const [currentSpin, setCurrentSpin] = useState<number | null>(null)
   const [checkingInId, setCheckingInId] = useState<string | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [createTicketOpen, setCreateTicketOpen] = useState(false)
 
   const fetchStats = async (silent = false) => {
     if (!silent && !stats) setStatsLoading(true)
@@ -478,6 +480,15 @@ export default function AdminDashboard() {
               >
                 <RefreshCw size={14} />
                 <span>Làm mới</span>
+              </button>
+
+              <button
+                onClick={() => { playClickSound(); setCreateTicketOpen(true) }}
+                className="flex items-center gap-1.5 bg-gradient-to-r from-amber-600 via-yellow-600 to-[#D4AF37] hover:from-amber-500 hover:to-yellow-400 text-slate-950 text-xs font-black px-4 py-2.5 rounded-xl shadow-lg shadow-amber-500/20 transition-all cursor-pointer border border-amber-300/40"
+                title="Tạo vé thủ công cho khách hàng đối chiếu chuyển khoản trực tiếp"
+              >
+                <Sparkles size={14} className="text-slate-950" />
+                <span>+ Tạo Vé Thủ Công (Dev)</span>
               </button>
 
               <button
@@ -977,6 +988,19 @@ export default function AdminDashboard() {
       )}
 
       {/* Lucky Draw Stage Screen Modal */}
+      <DevCreateTicketModal
+        isOpen={createTicketOpen}
+        onClose={() => setCreateTicketOpen(false)}
+        onSuccess={(newTicket) => {
+          fetchStats(true)
+          fetchTickets(true)
+          setEmailResult({
+            type: 'success',
+            message: `✓ Đã tạo vé thành công cho ${newTicket.full_name} (Mã: #${newTicket.order_code}, Số may mắn: #${String(newTicket.lucky_number || '').padStart(3, '0')}). Vé đã sẵn sàng gửi email!`,
+          })
+        }}
+      />
+
       {luckyDrawOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
           <div className="w-full max-w-lg card-luxury rounded-3xl p-8 border-2 border-red-500 text-center shadow-2xl relative text-white">

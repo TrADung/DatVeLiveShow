@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Crown, Save, CheckCircle, AlertTriangle, ArrowLeft, Loader2, RefreshCw } from 'lucide-react'
+import { Crown, Save, CheckCircle, AlertTriangle, ArrowLeft, Loader2, RefreshCw, Sparkles } from 'lucide-react'
+import DevCreateTicketModal from '@/components/DevCreateTicketModal'
 import { useAuth } from '@/hooks/useAuth'
 import { useAudio } from '@/hooks/useAudio'
 import { useRouter } from 'next/navigation'
@@ -43,6 +44,8 @@ export default function DevPanel() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState<string | null>(null)
   const [savedKeys, setSavedKeys] = useState<string[]>([])
+  const [createTicketOpen, setCreateTicketOpen] = useState(false)
+  const [createdMessage, setCreatedMessage] = useState<string | null>(null)
 
   const fetchSettings = async () => {
     setLoading(true)
@@ -159,13 +162,24 @@ export default function DevPanel() {
               </div>
             </div>
 
-            <button
-              onClick={() => { playClickSound(); fetchSettings() }}
-              className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-slate-300 hover:text-white px-3.5 py-2.5 rounded-xl transition-all cursor-pointer"
-            >
-              <RefreshCw size={13} />
-              <span>Làm mới</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => { playClickSound(); setCreateTicketOpen(true) }}
+                className="flex items-center gap-1.5 bg-gradient-to-r from-amber-600 to-[#D4AF37] hover:from-amber-500 hover:to-yellow-400 text-slate-950 text-xs font-black px-3.5 py-2.5 rounded-xl shadow-lg shadow-amber-500/20 transition-all cursor-pointer border border-amber-300/40"
+                title="Tạo vé thủ công cho khách hàng đối chiếu chuyển khoản"
+              >
+                <Sparkles size={14} className="text-slate-950" />
+                <span>+ Tạo Vé Thủ Công (Dev)</span>
+              </button>
+
+              <button
+                onClick={() => { playClickSound(); fetchSettings() }}
+                className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-slate-300 hover:text-white px-3.5 py-2.5 rounded-xl transition-all cursor-pointer"
+              >
+                <RefreshCw size={13} />
+                <span>Làm mới</span>
+              </button>
+            </div>
           </div>
 
           <div className="p-4 rounded-2xl bg-amber-950/30 border border-amber-500/30 mb-8 flex items-start gap-3">
@@ -229,7 +243,22 @@ export default function DevPanel() {
             </div>
           )}
         </motion.div>
+        {createdMessage && (
+          <div className="mt-4 p-4 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center justify-between">
+            <span>{createdMessage}</span>
+            <button onClick={() => setCreatedMessage(null)} className="text-white/60 hover:text-white">✕</button>
+          </div>
+        )}
       </main>
+
+      <DevCreateTicketModal
+        isOpen={createTicketOpen}
+        onClose={() => setCreateTicketOpen(false)}
+        onSuccess={(ticket) => {
+          setCreatedMessage(`✓ Đã tạo vé thành công cho ${ticket.full_name} (#${ticket.order_code}, Số may mắn: #${String(ticket.lucky_number || '').padStart(3, '0')}). Vé đã sẵn sàng gửi email!`)
+          setTimeout(() => setCreatedMessage(null), 8000)
+        }}
+      />
     </div>
   )
 }

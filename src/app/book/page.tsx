@@ -35,6 +35,7 @@ import { EVENT_INFO } from '@/lib/constants'
 import VenueBadge from '@/components/VenueBadge'
 import AuthModal from '@/components/AuthModal'
 import type { BookingFormData, Gender } from '@/types'
+import { compressImage } from '@/lib/imageCompression'
 
 type Step = 'form' | 'payment' | 'success'
 
@@ -65,6 +66,11 @@ export default function BookPage() {
   const [emailInput, setEmailInput] = useState('')
   const [copiedBank, setCopiedBank] = useState(false)
   const [copiedCode, setCopiedCode] = useState(false)
+  const [compressingImage, setCompressingImage] = useState(false)
+  const [compressionStats, setCompressionStats] = useState<{
+    originalSize: number
+    compressedSize: number
+  } | null>(null)
 
   const [form, setForm] = useState<BookingFormData>({
     full_name: '',
@@ -157,14 +163,55 @@ export default function BookPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const handleFileChange = (file: File | null) => {
-    setProofFile(file)
-    if (file) {
+  const handleFileChange = async (file: File | null) => {
+    if (!file) {
+      setProofFile(null)
+      setProofPreview(null)
+      setCompressionStats(null)
+      return
+    }
+
+    if (!file.type.startsWith('image/')) {
+      setError('Vui lòng chọn file hình ảnh hợp lệ (JPG, PNG, JPEG, WEBP).')
+      playErrorSound()
+      return
+    }
+
+    if (file.size > 30 * 1024 * 1024) {
+      setError('File ảnh quá lớn (> 30MB). Vui lòng chọn ảnh chụp màn hình thông thường.')
+      playErrorSound()
+      return
+    }
+
+    setError('')
+    setCompressingImage(true)
+
+    try {
+      const origSize = file.size
+      const compressed = await compressImage(file, {
+        maxWidth: 1600,
+        maxHeight: 1600,
+        quality: 0.82,
+        mimeType: 'image/jpeg',
+      })
+
+      setProofFile(compressed)
+      setCompressionStats({
+        originalSize: origSize,
+        compressedSize: compressed.size,
+      })
+
+      const reader = new FileReader()
+      reader.onload = (e) => setProofPreview(e.target?.result as string)
+      reader.readAsDataURL(compressed)
+    } catch (err) {
+      console.warn('Lỗi nén ảnh, fallback dùng file gốc:', err)
+      setProofFile(file)
       const reader = new FileReader()
       reader.onload = (e) => setProofPreview(e.target?.result as string)
       reader.readAsDataURL(file)
-    } else {
-      setProofPreview(null)
+    } finally {
+      setCompressingImage(false)
     }
   }
 
@@ -711,20 +758,45 @@ export default function BookPage() {
                       </span>
                     </div>
                     <label className={`block border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all ${
-                      proofFile || proofPreview
+                      compressingImage
+                        ? 'border-amber-500 bg-amber-950/20'
+                        : proofFile || proofPreview
                         ? 'border-emerald-500 bg-emerald-950/15'
                         : 'border-white/20 hover:border-[#D4AF37] bg-white/5 hover:bg-[#D4AF37]/5'
                     }`}>
-                      <Upload size={24} className={`mx-auto mb-2 ${proofFile || proofPreview ? 'text-emerald-400' : 'text-neutral-400'}`} />
-                      <span className="text-xs sm:text-sm text-neutral-300 font-bold block">
-                        {proofFile ? proofFile.name : 'Bấm vào đây để chọn ảnh chụp màn hình biên lai'}
-                      </span>
-                      <span className="text-[11px] text-neutral-400 block mt-1">
-                        Hỗ trợ PNG, JPG, JPEG (Tối đa 10MB) • Bắt buộc tải ảnh để hoàn tất đặt vé
-                      </span>
+                      {compressingImage ? (
+                        <div className="py-2 flex flex-col items-center">
+                          <Loader2 size={28} className="animate-spin text-[#D4AF37] mb-2" />
+                          <span className="text-xs sm:text-sm text-[#D4AF37] font-bold">
+                            Đang tự động tối ưu & nén ảnh...
+                          </span>
+                          <span className="text-[11px] text-neutral-400 mt-1">
+                            Giúp ảnh gửi nhanh tức thì và giữ nguyên độ sắc nét số giao dịch
+                          </span>
+                        </div>
+                      ) : (
+                        <>
+                          <Upload size={24} className={`mx-auto mb-2 ${proofFile || proofPreview ? 'text-emerald-400' : 'text-neutral-400'}`} />
+                          <span className="text-xs sm:text-sm text-neutral-300 font-bold block">
+                            {proofFile ? proofFile.name : 'Bấm vào đây để chọn ảnh chụp màn hình biên lai'}
+                          </span>
+                          <span className="text-[11px] text-neutral-400 block mt-1">
+                            Hệ thống tự động nén tối ưu dưới 1MB • Bắt buộc tải ảnh để hoàn tất đặt vé
+                          </span>
+                          {compressionStats && (
+                            <div className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/50 border border-emerald-500/30 text-[11px] font-bold text-emerald-300">
+                              <CheckCircle2 size={13} className="text-emerald-400" />
+                              <span>
+                                Đã tối ưu: {(compressionStats.compressedSize / 1024).toFixed(0)} KB (giảm {Math.max(0, Math.round((1 - compressionStats.compressedSize / compressionStats.originalSize) * 100))}%)
+                              </span>
+                            </div>
+                          )}
+                        </>
+                      )}
                       <input
                         type="file"
                         accept="image/*"
+                        disabled={compressingImage}
                         className="hidden"
                         onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
                       />
@@ -746,11 +818,19 @@ export default function BookPage() {
                   <button
                     type="button"
                     onClick={handleProofUpload}
-                    disabled={proofUploading || (!proofFile && !proofPreview)}
+                    disabled={proofUploading || compressingImage || (!proofFile && !proofPreview)}
                     className="w-full btn-velvet py-4 rounded-2xl font-black text-base flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-xl"
                   >
                     {proofUploading ? (
-                      <Loader2 size={20} className="animate-spin" />
+                      <>
+                        <Loader2 size={20} className="animate-spin" />
+                        <span>ĐANG LƯU VÉ & BIÊN LAI...</span>
+                      </>
+                    ) : compressingImage ? (
+                      <>
+                        <Loader2 size={20} className="animate-spin text-[#D4AF37]" />
+                        <span>ĐANG TỐI ƯU ẢNH...</span>
+                      </>
                     ) : (
                       <>
                         <Check size={18} />

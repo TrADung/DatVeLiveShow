@@ -128,6 +128,9 @@ export async function POST(request: NextRequest) {
       const uploaded = await uploadProofToStorage(adminSupabase, buffer, mimeType, order_code)
       if (uploaded) {
         payment_proof_url = uploaded
+      } else {
+        // Fallback an toàn: nếu storage bucket gặp trục trặc, lưu dạng base64
+        payment_proof_url = `data:${mimeType};base64,${buffer.toString('base64')}`
       }
     } else if (proofPreview && proofPreview.startsWith('data:')) {
       const matches = proofPreview.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/)
@@ -137,7 +140,11 @@ export async function POST(request: NextRequest) {
         const uploaded = await uploadProofToStorage(adminSupabase, buffer, mimeType, order_code)
         if (uploaded) {
           payment_proof_url = uploaded
+        } else {
+          payment_proof_url = proofPreview
         }
+      } else {
+        payment_proof_url = proofPreview
       }
     } else if (payment_proof_url && payment_proof_url.startsWith('data:')) {
       const matches = payment_proof_url.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/)
