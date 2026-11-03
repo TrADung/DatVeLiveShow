@@ -406,6 +406,33 @@ export default function AdminDashboard() {
     wsSummary['!cols'] = [{ wch: 30 }, { wch: 35 }]
     XLSX.utils.book_append_sheet(wb, wsSummary, 'Báo Cáo Thống Kê')
 
+    // 4. Append Sheet: Lá Thăm 10x10 (100 số sau: 900 -> 999 dành cho bốc thăm Offline)
+    // Tự động loại trừ các số trong 900-999 đã có khách mua (như 939, 947)
+    const existingNumSet = new Set(tickets.map((t) => t.lucky_number).filter((n): n is number => typeof n === 'number'))
+    const offlineAvailable: number[] = []
+    for (let i = 900; i <= 999; i++) {
+      if (!existingNumSet.has(i)) {
+        offlineAvailable.push(i)
+      }
+    }
+    const grid10x10: string[][] = []
+    for (let r = 0; r < 10; r++) {
+      const row: string[] = []
+      for (let c = 0; c < 10; c++) {
+        const idx = r * 10 + c
+        if (idx < offlineAvailable.length) {
+          row.push(String(offlineAvailable[idx]))
+        } else {
+          row.push('')
+        }
+      }
+      grid10x10.push(row)
+    }
+    const wsOffline = XLSX.utils.aoa_to_sheet(grid10x10)
+    wsOffline['!cols'] = Array(10).fill({ wch: 11 })
+    wsOffline['!rows'] = Array(10).fill({ hpt: 40 })
+    XLSX.utils.book_append_sheet(wb, wsOffline, 'Lá Thăm 10x10 Offline')
+
     // Download file .xlsx
     XLSX.writeFile(wb, `SAC_I_VAN_CO_DanhSachVe_${new Date().toISOString().split('T')[0]}.xlsx`)
     playSuccessSound()
