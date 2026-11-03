@@ -171,34 +171,34 @@ export default function DevCreateTicketModal({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 dark:bg-black/80 backdrop-blur-sm sm:backdrop-blur-md overflow-y-auto">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-2xl bg-[#121214] border border-amber-500/30 rounded-3xl p-5 sm:p-7 shadow-2xl text-white my-auto max-h-[90vh] flex flex-col"
+          className="relative w-full max-w-2xl bg-[#FAF7F2] dark:bg-[#121214] border-2 border-amber-500/40 rounded-3xl p-5 sm:p-7 shadow-2xl text-slate-900 dark:text-white my-auto max-h-[90vh] flex flex-col"
         >
           {/* Header */}
-          <div className="flex items-start justify-between pb-4 border-b border-white/10 shrink-0">
+          <div className="flex items-start justify-between pb-4 border-b border-stone-200 dark:border-white/10 shrink-0">
             <div>
               <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 font-mono text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+                <span className="px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 border border-amber-300 dark:border-amber-500/40 text-amber-800 dark:text-amber-400 font-mono text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
                   <ShieldCheck size={12} />
                   <span>DEV SPECIAL PERK</span>
                 </span>
-                <span className="text-xs text-neutral-400 font-medium">Đối chiếu & Cấp vé thủ công</span>
+                <span className="text-xs text-slate-500 dark:text-neutral-400 font-medium">Đối chiếu & Cấp vé thủ công</span>
               </div>
-              <h2 className="text-xl sm:text-2xl font-black text-white mt-1 flex items-center gap-2">
+              <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1 flex items-center gap-2">
                 <span>Tạo Vé Thủ Công</span>
-                <Sparkles size={18} className="text-[#D4AF37]" />
+                <Sparkles size={18} className="text-amber-600 dark:text-[#D4AF37]" />
               </h2>
-              <p className="text-xs text-neutral-400 mt-0.5">
+              <p className="text-xs text-slate-600 dark:text-neutral-400 mt-0.5">
                 Tự động cấp Số may mắn, sinh mã QR check-in hợp lệ và đưa vào danh sách gửi email vé chung.
               </p>
             </div>
             <button
               onClick={() => { playClickSound(); onClose() }}
-              className="p-2 text-neutral-400 hover:text-white rounded-xl bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
+              className="p-2 text-slate-400 hover:text-slate-700 dark:text-neutral-400 dark:hover:text-white rounded-xl bg-stone-200/60 hover:bg-stone-200 dark:bg-white/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
             >
               <X size={18} />
             </button>
@@ -207,8 +207,8 @@ export default function DevCreateTicketModal({
           {/* Form Content */}
           <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto space-y-4 py-4 pr-1 scrollbar-thin">
             {error && (
-              <div className="p-3.5 rounded-xl bg-rose-950/40 border border-rose-500/40 text-rose-300 text-xs font-semibold flex items-center gap-2">
-                <AlertCircle size={16} className="shrink-0 text-rose-400" />
+              <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-500/40 text-rose-800 dark:text-rose-300 text-xs font-semibold flex items-center gap-2">
+                <AlertCircle size={16} className="shrink-0 text-rose-600 dark:text-rose-400" />
                 <span>{error}</span>
               </div>
             )}
@@ -216,35 +216,35 @@ export default function DevCreateTicketModal({
             {/* Row 1: Tên & Email */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
-                <label className="block text-xs font-bold text-neutral-300 mb-1.5">
+                <label className="block text-xs font-bold text-slate-800 dark:text-neutral-300 mb-1.5">
                   Họ và tên khách hàng <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
-                  <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500" />
+                  <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-neutral-500" />
                   <input
                     type="text"
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Nguyễn Văn A"
-                    className="w-full bg-[#1c1c1f] border border-white/10 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 transition-colors"
+                    className="w-full bg-white dark:bg-[#1c1c1f] border border-stone-300 dark:border-white/10 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-amber-500 transition-colors"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-neutral-300 mb-1.5">
+                <label className="block text-xs font-bold text-slate-800 dark:text-neutral-300 mb-1.5">
                   Email nhận vé điện tử <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
-                  <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500" />
+                  <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-neutral-500" />
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="khachhang@gmail.com"
-                    className="w-full bg-[#1c1c1f] border border-white/10 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 transition-colors font-mono"
+                    className="w-full bg-white dark:bg-[#1c1c1f] border border-stone-300 dark:border-white/10 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-amber-500 transition-colors font-mono"
                   />
                 </div>
               </div>
@@ -253,46 +253,46 @@ export default function DevCreateTicketModal({
             {/* Row 2: SĐT, Ngày sinh & Giới tính */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
               <div>
-                <label className="block text-xs font-bold text-neutral-300 mb-1.5">
+                <label className="block text-xs font-bold text-slate-800 dark:text-neutral-300 mb-1.5">
                   Số điện thoại <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
-                  <Phone size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500" />
+                  <Phone size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-neutral-500" />
                   <input
                     type="tel"
                     required
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="0912345678"
-                    className="w-full bg-[#1c1c1f] border border-white/10 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 transition-colors font-mono"
+                    className="w-full bg-white dark:bg-[#1c1c1f] border border-stone-300 dark:border-white/10 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-amber-500 transition-colors font-mono"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-neutral-300 mb-1.5">
+                <label className="block text-xs font-bold text-slate-800 dark:text-neutral-300 mb-1.5">
                   Ngày sinh <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
-                  <Calendar size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500" />
+                  <Calendar size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-neutral-500" />
                   <input
                     type="date"
                     required
                     value={dob}
                     onChange={(e) => setDob(e.target.value)}
-                    className="w-full bg-[#1c1c1f] border border-white/10 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-400 transition-colors"
+                    className="w-full bg-white dark:bg-[#1c1c1f] border border-stone-300 dark:border-white/10 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 transition-colors"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-neutral-300 mb-1.5">
+                <label className="block text-xs font-bold text-slate-800 dark:text-neutral-300 mb-1.5">
                   Giới tính
                 </label>
                 <select
                   value={gender}
                   onChange={(e) => setGender(e.target.value as any)}
-                  className="w-full bg-[#1c1c1f] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-400 transition-colors"
+                  className="w-full bg-white dark:bg-[#1c1c1f] border border-stone-300 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 transition-colors"
                 >
                   <option value="Nam">Nam</option>
                   <option value="Nu">Nữ</option>
@@ -302,16 +302,16 @@ export default function DevCreateTicketModal({
             </div>
 
             {/* Row 3: Mã đơn & Số may mắn */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 p-3.5 rounded-2xl bg-white/[0.03] border border-white/10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 p-3.5 rounded-2xl bg-white dark:bg-white/[0.03] border border-stone-200 dark:border-white/10 shadow-sm dark:shadow-none">
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-bold text-neutral-300">
+                  <label className="text-xs font-bold text-slate-800 dark:text-neutral-300">
                     Mã đơn hàng
                   </label>
                   <button
                     type="button"
                     onClick={handleRandomCode}
-                    className="text-[11px] text-[#D4AF37] hover:underline flex items-center gap-1 font-semibold"
+                    className="text-[11px] text-amber-700 dark:text-[#D4AF37] hover:underline flex items-center gap-1 font-semibold cursor-pointer"
                   >
                     <RefreshCw size={11} />
                     <span>Sinh mã mới</span>
@@ -322,12 +322,12 @@ export default function DevCreateTicketModal({
                   value={orderCode}
                   onChange={(e) => setOrderCode(e.target.value.toUpperCase())}
                   placeholder="CLB-XXXXXXX"
-                  className="w-full bg-[#141416] border border-white/15 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-mono font-bold text-[#D4AF37] focus:outline-none focus:border-amber-400"
+                  className="w-full bg-stone-50 dark:bg-[#141416] border border-stone-300 dark:border-white/15 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-mono font-bold text-amber-700 dark:text-[#D4AF37] focus:outline-none focus:border-amber-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-neutral-300 mb-1.5">
+                <label className="block text-xs font-bold text-slate-800 dark:text-neutral-300 mb-1.5">
                   Số may mắn (000 - 999)
                 </label>
                 <input
@@ -337,7 +337,7 @@ export default function DevCreateTicketModal({
                   value={luckyNumber}
                   onChange={(e) => setLuckyNumber(e.target.value)}
                   placeholder="Để trống để tự động cấp số"
-                  className="w-full bg-[#141416] border border-white/15 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-mono font-bold text-white focus:outline-none focus:border-amber-400 placeholder:font-normal placeholder:text-neutral-500"
+                  className="w-full bg-stone-50 dark:bg-[#141416] border border-stone-300 dark:border-white/15 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-mono font-bold text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 placeholder:font-normal placeholder:text-slate-400 dark:placeholder:text-neutral-500"
                 />
               </div>
             </div>
@@ -345,23 +345,23 @@ export default function DevCreateTicketModal({
             {/* Row 4: Đơn vị / Trường & Trạng thái thanh toán */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
-                <label className="block text-xs font-bold text-neutral-300 mb-1.5">
+                <label className="block text-xs font-bold text-slate-800 dark:text-neutral-300 mb-1.5">
                   Đơn vị / Trường
                 </label>
                 <div className="relative">
-                  <Building size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500" />
+                  <Building size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-neutral-500" />
                   <input
                     type="text"
                     value={organization}
                     onChange={(e) => setOrganization(e.target.value)}
                     placeholder="ĐH Duy Tân, Tự do..."
-                    className="w-full bg-[#1c1c1f] border border-white/10 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400"
+                    className="w-full bg-white dark:bg-[#1c1c1f] border border-stone-300 dark:border-white/10 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-amber-500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-neutral-300 mb-1.5">
+                <label className="block text-xs font-bold text-slate-800 dark:text-neutral-300 mb-1.5">
                   Trạng thái thanh toán
                 </label>
                 <select
@@ -369,8 +369,8 @@ export default function DevCreateTicketModal({
                   onChange={(e) => setPaymentStatus(e.target.value as any)}
                   className={`w-full border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-bold focus:outline-none transition-colors ${
                     paymentStatus === 'paid'
-                      ? 'bg-emerald-950/40 border-emerald-500/50 text-emerald-300'
-                      : 'bg-amber-950/40 border-amber-500/50 text-amber-300'
+                      ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-500/50 text-emerald-800 dark:text-emerald-300'
+                      : 'bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-500/50 text-amber-800 dark:text-amber-300'
                   }`}
                 >
                   <option value="paid">✓ Đã xác nhận tiền (Sẵn sàng gửi vé email)</option>
@@ -381,22 +381,22 @@ export default function DevCreateTicketModal({
 
             {/* Row 5: Upload bill đối chiếu (Tùy chọn) */}
             <div>
-              <label className="block text-xs font-bold text-neutral-300 mb-1.5">
+              <label className="block text-xs font-bold text-slate-800 dark:text-neutral-300 mb-1.5">
                 Ảnh bill biên lai đối chiếu (nếu có):
               </label>
-              <label className="block border-2 border-dashed border-white/20 hover:border-amber-400/60 rounded-2xl p-3 text-center cursor-pointer transition-colors bg-white/[0.02]">
+              <label className="block border-2 border-dashed border-stone-300 dark:border-white/20 hover:border-amber-500 rounded-2xl p-3 text-center cursor-pointer transition-colors bg-white dark:bg-white/[0.02]">
                 {compressing ? (
-                  <div className="flex items-center justify-center gap-2 py-1 text-xs text-amber-400">
+                  <div className="flex items-center justify-center gap-2 py-1 text-xs text-amber-600 dark:text-amber-400">
                     <Loader2 size={16} className="animate-spin" />
                     <span>Đang nén tối ưu ảnh...</span>
                   </div>
                 ) : proofFile ? (
-                  <div className="flex items-center justify-center gap-2 py-1 text-xs text-emerald-400 font-bold">
+                  <div className="flex items-center justify-center gap-2 py-1 text-xs text-emerald-600 dark:text-emerald-400 font-bold">
                     <CheckCircle2 size={16} />
                     <span>{proofFile.name} ({(proofFile.size / 1024).toFixed(0)} KB)</span>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center gap-2 py-1 text-xs text-neutral-400">
+                  <div className="flex items-center justify-center gap-2 py-1 text-xs text-slate-500 dark:text-neutral-400">
                     <Upload size={16} />
                     <span>Bấm để đính kèm ảnh sao kê / biên lai giao dịch</span>
                   </div>
@@ -413,14 +413,14 @@ export default function DevCreateTicketModal({
               {proofPreview && (
                 <div className="mt-2 text-center">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={proofPreview} alt="Bill đối chiếu" className="max-h-28 mx-auto rounded-xl object-contain border border-white/10" />
+                  <img src={proofPreview} alt="Bill đối chiếu" className="max-h-28 mx-auto rounded-xl object-contain border border-stone-200 dark:border-white/10" />
                 </div>
               )}
             </div>
 
             {/* Row 6: Ghi chú đối chiếu */}
             <div>
-              <label className="block text-xs font-bold text-neutral-300 mb-1.5">
+              <label className="block text-xs font-bold text-slate-800 dark:text-neutral-300 mb-1.5">
                 Ghi chú nội bộ Dev đối chiếu:
               </label>
               <textarea
@@ -428,18 +428,18 @@ export default function DevCreateTicketModal({
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Ví dụ: Đã đối chiếu qua app Techcombank 14:05, mã GD 883921..."
-                className="w-full bg-[#1c1c1f] border border-white/10 rounded-xl p-3 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 resize-none"
+                className="w-full bg-white dark:bg-[#1c1c1f] border border-stone-300 dark:border-white/10 rounded-xl p-3 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-amber-500 resize-none"
               />
             </div>
           </form>
 
           {/* Footer Actions */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10 shrink-0">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-stone-200 dark:border-white/10 shrink-0">
             <button
               type="button"
               onClick={() => { playClickSound(); onClose() }}
               disabled={submitting}
-              className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-300 text-xs font-bold transition-colors cursor-pointer"
+              className="px-4 py-2.5 rounded-xl bg-stone-200 hover:bg-stone-300 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-neutral-300 text-xs font-bold transition-colors cursor-pointer"
             >
               Hủy bỏ
             </button>

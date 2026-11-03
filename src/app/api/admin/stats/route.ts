@@ -14,6 +14,28 @@ function getAdminSupabase() {
   )
 }
 
+function isGuestTicket(t: any) {
+  const ref = (t.referral_source || '').toLowerCase()
+  const org = (t.organization || '').toLowerCase()
+  return (
+    t.amount === 0 ||
+    ref.includes('khách mời') ||
+    ref.includes('thư mời') ||
+    ref.includes('thư ngỏ') ||
+    ref === 'guest' ||
+    org.includes('khách mời')
+  )
+}
+
+function isOfflineTicket(t: any) {
+  const ref = (t.referral_source || '').toLowerCase()
+  const org = (t.organization || '').toLowerCase()
+  return (
+    !isGuestTicket(t) &&
+    (ref.includes('offline') || ref.includes('quầy') || org.includes('quầy'))
+  )
+}
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient()
@@ -54,15 +76,36 @@ export async function GET(request: NextRequest) {
       } catch {}
     }
 
-    // Compute live stats from DB
-    const total = tickets.length
-    const paid = tickets.filter(t => t.payment_status === 'paid').length
-    const pending = tickets.filter(t => t.payment_status === 'pending').length
-    const rejected = tickets.filter(t => t.payment_status === 'rejected').length
-    const checkedIn = tickets.filter(t => t.is_checked_in).length
-    const emailSent = tickets.filter(t => t.is_email_sent).length
-    const revenue = tickets.filter(t => t.payment_status === 'paid').reduce((s, t) => s + (t.amount || 89000), 0)
+    // 1. Phân loại vé: Khách Mời (Guest), Vé Bán Offline (Tại Quầy), Vé Bán Online
+    const guestTicketsList = tickets.filter(isGuestTicket)
+    const guestTickets = guestTicketsList.length
+    const guestCheckedIn = guestTicketsList.filter(t => t.is_checked_in).length
 
+    const offlineTicketsList = tickets.filter(isOfflineTicket)
+    const offlineTickets = offlineTicketsList.length
+    const offlinePaid = offlineTicketsList.filter(t => t.payment_status === 'paid').length
+    const offlineRevenue = offlineTicketsList.filter(t => t.payment_status === 'paid').reduce((s, t) => s + (t.amount || 89000), 0)
+    const offlineCheckedIn = offlineTicketsList.filter(t => t.is_checked_in).length
+
+    const onlineTicketsList = tickets.filter(t => !isGuestTicket(t) && !isOfflineTicket(t))
+    const onlineTickets = onlineTicketsList.length
+    const onlinePaid = onlineTicketsList.filter(t => t.payment_status === 'paid').length
+    const onlineRevenue = onlineTicketsList.filter(t => t.payment_status === 'paid').reduce((s, t) => s + (t.amount || 89000), 0)
+    const onlinePending = onlineTicketsList.filter(t => t.payment_status === 'pending').length
+    const onlineRejected = onlineTicketsList.filter(t => t.payment_status === 'rejected').length
+    const onlineCheckedIn = onlineTicketsList.filter(t => t.is_checked_in).length
+
+    // Tổng quan:
+    const total = tickets.length
+    const paid = onlinePaid + offlinePaid
+    const pending = onlinePending
+    const rejected = onlineRejected
+    const checkedIn = onlineCheckedIn + offlineCheckedIn + guestCheckedIn
+    const emailSent = tickets.filter(t => t.is_email_sent).length
+    // DOANH THU: Chỉ tính vé online + offline (Khách mời hoàn toàn 0 VNĐ)
+    const revenue = onlineRevenue + offlineRevenue
+
+    // Tổ chức / Đơn vị
     const orgMap: Record<string, number> = {}
     tickets.forEach(t => {
       const org = t.organization || 'Khác'
@@ -70,6 +113,7 @@ export async function GET(request: NextRequest) {
     })
     const orgData = Object.entries(orgMap).map(([org, count]) => ({ org, count })).sort((a, b) => b.count - a.count)
 
+    // Giới tính
     const genderMap: Record<string, number> = {}
     tickets.forEach(t => {
       const g = t.gender || 'Khác'
@@ -77,6 +121,7 @@ export async function GET(request: NextRequest) {
     })
     const genderData = Object.entries(genderMap).map(([gender, count]) => ({ gender, count }))
 
+    // Kênh tiếp cận
     const refMap: Record<string, number> = {}
     tickets.forEach(t => {
       const r = t.referral_source || 'Khác'
@@ -84,8 +129,46 @@ export async function GET(request: NextRequest) {
     })
     const referralData = Object.entries(refMap).map(([source, count]) => ({ source, count }))
 
+    // Tốc độ đặt vé theo ngày thực tế (Velocity Chart)
+    const dateMap: Record<string, number> = {}
+    tickets.forEach(t => {
+      if (t.created_at) {
+        const d = new Date(t.created_at)
+        if (!isNaN(d.getTime())) {
+          const year = d.getFullYear()
+          const month = String(d.getMonth() + 1).padStart(2, '0')
+          const day = String(d.getDate()).padStart(2, '0')
+          const key = `${year}-${month}-${day}`
+          dateMap[key] = (dateMap[key] || 0) + 1
+        }
+      }
+    })
+
+    const sortedDateKeys = Object.keys(dateMap).sort()
+    const velocityData = sortedDateKeys.length > 0
+      ? sortedDateKeys.map(k => {
+          const parts = k.split('-')
+          return { date: `${parts[2]}/${parts[1]}`, count: dateMap[k], rawDate: k }
+        })
+      : [{ date: 'Chưa có', count: 0 }]
+
     return NextResponse.json({
-      kpi: { total, paid, pending, rejected, checkedIn, emailSent, revenue },
+      kpi: {
+        total,
+        paid,
+        pending,
+        rejected,
+        checkedIn,
+        emailSent,
+        revenue,
+        // Chỉ số tách biệt Online vs Offline vs Khách mời
+        onlineTickets: onlinePaid,
+        onlineRevenue,
+        offlineTickets: offlinePaid,
+        offlineRevenue,
+        guestTickets,
+        guestCheckedIn,
+      },
       orgData,
       ageData: total > 0 ? [
         { age_group: '18-22', count: Math.round(total * 0.6) },
@@ -94,7 +177,7 @@ export async function GET(request: NextRequest) {
       ] : [],
       genderData,
       referralData,
-      velocityData: total > 0 ? [{ date: 'Hôm nay', count: total }] : [],
+      velocityData,
       checkinData: total > 0 ? [{ hour: 'Checkin', count: checkedIn }] : [],
     })
   } catch (error) {

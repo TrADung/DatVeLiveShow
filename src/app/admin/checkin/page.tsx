@@ -30,6 +30,8 @@ import { useAudio } from '@/hooks/useAudio'
 import { formatDate, formatDateTime } from '@/lib/utils'
 import Link from 'next/link'
 import Header from '@/components/Header'
+import OfflineTicketModal from '@/components/OfflineTicketModal'
+import { Ticket } from 'lucide-react'
 
 type ScanResult = {
   status: 'success' | 'ready' | 'already_checked_in' | 'not_paid' | 'not_found' | 'invalid_qr' | 'error'
@@ -66,6 +68,8 @@ export default function QRScannerPage() {
   const [scanLoading, setScanLoading] = useState(false)
   const [scanResult, setScanResult] = useState<ScanResult | null>(null)
   const [undoingCheckIn, setUndoingCheckIn] = useState(false)
+  const [offlineModalOpen, setOfflineModalOpen] = useState(false)
+  const [offlineSuccessMsg, setOfflineSuccessMsg] = useState<string | null>(null)
   const [uploadingImage, setUploadingImage] = useState(false)
   const [manualCode, setManualCode] = useState('')
 
@@ -433,11 +437,11 @@ export default function QRScannerPage() {
               <ArrowLeft size={20} />
             </Link>
             <div>
-              <h1 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-1.5">
+              <h1 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
                 <span>QR Check-in Scanner</span>
                 <span className="text-red-500">♟</span>
               </h1>
-              <p className="text-[11px] text-slate-400">Soát vé tự động & dán vòng tay tại cổng</p>
+              <p className="text-[11px] text-slate-600 dark:text-slate-400">Soát vé tự động & dán vòng tay tại cổng</p>
             </div>
           </div>
           <div className="flex items-center gap-1.5 bg-emerald-950/40 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-bold">
@@ -445,6 +449,23 @@ export default function QRScannerPage() {
             <span>Tự Động Check-in</span>
           </div>
         </div>
+
+        {/* Quick Offline Sales Button for Check-in Staff */}
+        <button
+          type="button"
+          onClick={() => { playClickSound(); setOfflineModalOpen(true) }}
+          className="w-full mb-4 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-slate-950 font-black py-3 px-4 rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 cursor-pointer transition-all border border-emerald-300/40"
+        >
+          <Ticket size={16} className="text-slate-950" />
+          <span>+ BÁN VÉ OFFLINE TRỰC TIẾP TẠI QUẦY</span>
+        </button>
+
+        {offlineSuccessMsg && (
+          <div className="w-full mb-4 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 p-3.5 text-xs text-emerald-300 font-bold flex items-center justify-between gap-2">
+            <span>{offlineSuccessMsg}</span>
+            <button onClick={() => setOfflineSuccessMsg(null)} className="text-white/60 hover:text-white">✕</button>
+          </div>
+        )}
 
         {/* Camera Permission or Runtime Error Warning */}
         {cameraError && (
@@ -509,10 +530,10 @@ export default function QRScannerPage() {
           {/* Idle Mode: Start camera & Upload buttons */}
           {!scanning && !scanResult && (
             <div className="text-center py-2">
-              <div className="w-52 h-52 mx-auto mb-5 rounded-3xl border-2 border-dashed border-white/20 bg-white/5 flex flex-col items-center justify-center shadow-2xl">
+              <div className="w-52 h-52 mx-auto mb-5 rounded-3xl border-2 border-dashed border-stone-300 dark:border-white/20 bg-stone-100 dark:bg-white/5 flex flex-col items-center justify-center shadow-lg dark:shadow-2xl">
                 <Camera size={52} className="text-slate-500 mb-2" />
-                <span className="text-[11px] font-bold text-slate-400">Hướng camera về phía mã QR</span>
-                <span className="text-[10px] text-amber-400/80 mt-1">Lấy nét nhanh • Nhận diện tức thì</span>
+                <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400">Hướng camera về phía mã QR</span>
+                <span className="text-[10px] text-amber-700 dark:text-amber-400/80 mt-1 font-semibold">Lấy nét nhanh • Nhận diện tức thì</span>
               </div>
 
               <motion.button
@@ -548,7 +569,7 @@ export default function QRScannerPage() {
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadingImage}
-                  className="w-full bg-white/5 hover:bg-white/10 border border-white/10 py-3 rounded-xl text-xs font-bold text-slate-300 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                  className="w-full bg-stone-100 hover:bg-stone-200 dark:bg-white/5 dark:hover:bg-white/10 border border-stone-300 dark:border-white/10 py-3 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   {uploadingImage ? (
                     <>
@@ -817,6 +838,14 @@ export default function QRScannerPage() {
             </ul>
           </div>
         </div>
+        <OfflineTicketModal
+          isOpen={offlineModalOpen}
+          onClose={() => setOfflineModalOpen(false)}
+          onSuccess={(data) => {
+            setOfflineSuccessMsg(data.message)
+            setTimeout(() => setOfflineSuccessMsg(null), 8000)
+          }}
+        />
       </main>
     </div>
   )

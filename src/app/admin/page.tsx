@@ -21,6 +21,7 @@ import type { Ticket as TicketType } from '@/types'
 import Header from '@/components/Header'
 import Link from 'next/link'
 import DevCreateTicketModal from '@/components/DevCreateTicketModal'
+import OfflineTicketModal from '@/components/OfflineTicketModal'
 
 const COLORS = ['#EF4444', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899']
 
@@ -33,6 +34,12 @@ interface StatsData {
     checkedIn: number
     emailSent: number
     revenue: number
+    onlineTickets?: number
+    onlineRevenue?: number
+    offlineTickets?: number
+    offlineRevenue?: number
+    guestTickets?: number
+    guestCheckedIn?: number
   }
   orgData: { org: string; count: number }[]
   ageData: { age_group: string; count: number }[]
@@ -67,6 +74,7 @@ export default function AdminDashboard() {
   const [checkingInId, setCheckingInId] = useState<string | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [createTicketOpen, setCreateTicketOpen] = useState(false)
+  const [offlineTicketOpen, setOfflineTicketOpen] = useState(false)
 
   const fetchStats = async (silent = false) => {
     if (!silent && !stats) setStatsLoading(true)
@@ -463,12 +471,12 @@ export default function AdminDashboard() {
                 <Link href="/" className="text-slate-400 hover:text-white transition-colors">
                   <ArrowLeft size={20} />
                 </Link>
-                <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2">
+                <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
                   <Shield className="text-red-500" size={26} />
                   <span>Admin Dashboard</span>
                 </h1>
               </div>
-              <p className="text-xs sm:text-sm text-slate-400 mt-1 ml-7">
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 ml-7">
                 Quản lý vé, đối chiếu biên lai, thống kê sự kiện & quay số minigame
               </p>
             </div>
@@ -476,24 +484,45 @@ export default function AdminDashboard() {
             <div className="flex flex-wrap items-center gap-2.5">
               <button
                 onClick={() => { playClickSound(); fetchStats(); fetchTickets() }}
-                className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white text-xs font-bold px-3.5 py-2.5 rounded-xl transition-all cursor-pointer"
+                className="flex items-center gap-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/5 dark:hover:bg-white/10 border border-stone-300 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-bold px-3.5 py-2.5 rounded-xl transition-all cursor-pointer"
               >
                 <RefreshCw size={14} />
                 <span>Làm mới</span>
               </button>
 
+              {/* Nút Bán Vé Offline Tại Quầy */}
+              <button
+                onClick={() => { playClickSound(); setOfflineTicketOpen(true) }}
+                className="flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-slate-950 text-xs font-black px-4 py-2.5 rounded-xl shadow-lg shadow-emerald-500/20 transition-all cursor-pointer border border-emerald-300/40"
+                title="Bán vé trực tiếp cho khách mua tại quầy check-in (nhanh gọn & tự động tính vào cổng)"
+              >
+                <Ticket size={14} className="text-slate-950" />
+                <span>+ Bán Vé Offline Tại Quầy</span>
+              </button>
+
+              {/* Nút Gửi Mail Khách Mời */}
+              <Link
+                href="/admin/guest-invitation"
+                onClick={playClickSound}
+                className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-[#D4AF37] hover:from-amber-400 hover:to-yellow-300 text-slate-950 text-xs font-black px-4 py-2.5 rounded-xl shadow-lg shadow-amber-500/20 transition-all cursor-pointer border border-amber-300/40"
+                title="Soạn thư mời hoặc thư ngỏ gửi riêng cho khách mời danh dự"
+              >
+                <Mail size={14} className="text-slate-950" />
+                <span>✉️ Gửi Mail Khách Mời</span>
+              </Link>
+
               <button
                 onClick={() => { playClickSound(); setCreateTicketOpen(true) }}
-                className="flex items-center gap-1.5 bg-gradient-to-r from-amber-600 via-yellow-600 to-[#D4AF37] hover:from-amber-500 hover:to-yellow-400 text-slate-950 text-xs font-black px-4 py-2.5 rounded-xl shadow-lg shadow-amber-500/20 transition-all cursor-pointer border border-amber-300/40"
+                className="flex items-center gap-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-800 dark:text-white text-xs font-bold px-3.5 py-2.5 rounded-xl transition-all cursor-pointer border border-stone-300 dark:border-white/10"
                 title="Tạo vé thủ công cho khách hàng đối chiếu chuyển khoản trực tiếp"
               >
-                <Sparkles size={14} className="text-slate-950" />
+                <Sparkles size={14} className="text-amber-400" />
                 <span>+ Tạo Vé Thủ Công (Dev)</span>
               </button>
 
               <button
                 onClick={exportExcel}
-                className="flex items-center gap-1.5 bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-500/30 hover:border-emerald-500/60 text-emerald-300 text-xs font-bold px-3.5 py-2.5 rounded-xl transition-all cursor-pointer shadow-md"
+                className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/50 border border-emerald-300 dark:border-emerald-500/30 hover:border-emerald-400 dark:hover:border-emerald-500/60 text-emerald-800 dark:text-emerald-300 text-xs font-bold px-3.5 py-2.5 rounded-xl transition-all cursor-pointer shadow-sm"
                 title="Xuất file Excel gồm nhiều Sheet (kèm sheet Số bốc thăm để in)"
               >
                 <FileSpreadsheet size={15} className="text-emerald-400" />
@@ -503,7 +532,7 @@ export default function AdminDashboard() {
               <button
                 onClick={handleSendEmails}
                 disabled={sendingEmails}
-                className="flex items-center gap-1.5 bg-white text-slate-900 hover:bg-slate-200 text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg transition-all cursor-pointer disabled:opacity-50"
+                className="flex items-center gap-1.5 bg-white text-slate-900 hover:bg-stone-100 border border-stone-200 dark:border-transparent dark:hover:bg-slate-200 text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-50"
               >
                 {sendingEmails ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
                 <span>Gửi Vé Email</span>
@@ -569,23 +598,132 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* KPI CARDS (Unobstructed, High Contrast) */}
+          {/* KPI CARDS - TÁCH BIỆT ONLINE / OFFLINE / KHÁCH MỜI */}
           {stats && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 mb-8">
-              {[
-                { label: 'Tổng Vé Đặt', value: stats.kpi.total, icon: <Ticket size={18} />, color: 'text-white' },
-                { label: 'Đã Xác Nhận', value: stats.kpi.paid, icon: <CheckCircle size={18} />, color: 'text-emerald-400' },
-                { label: 'Chờ Duyệt', value: stats.kpi.pending, icon: <RefreshCw size={18} />, color: 'text-amber-400' },
-                { label: 'Check-in Thực Tế', value: `${stats.kpi.checkedIn}/${stats.kpi.paid}`, icon: <Users size={18} />, color: 'text-blue-400' },
-                { label: 'Đã Gửi Email', value: stats.kpi.emailSent, icon: <Mail size={18} />, color: 'text-purple-400' },
-                { label: 'Tổng Doanh Thu', value: formatCurrency(stats.kpi.revenue), icon: <DollarSign size={18} />, color: 'text-red-400' },
-              ].map((kpi, idx) => (
-                <div key={idx} className="card-luxury rounded-2xl p-4.5 border border-white/10">
-                  <div className={`${kpi.color} mb-2`}>{kpi.icon}</div>
-                  <div className={`text-xl font-black ${kpi.color} font-mono tracking-tight`}>{kpi.value}</div>
-                  <div className="text-[11px] font-bold text-slate-400 uppercase mt-1">{kpi.label}</div>
+            <div className="space-y-4 mb-8">
+              {/* Hàng 1: Phân bổ Doanh Thu & Số Vé (Online vs Offline vs Khách Mời vs Tổng) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Vé Bán Online */}
+                <div className="card-luxury rounded-2xl p-5 border border-blue-200 dark:border-blue-500/30 bg-blue-50/50 dark:bg-gradient-to-br dark:from-blue-950/30 dark:to-transparent">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[11px] font-black text-blue-800 dark:text-blue-300 uppercase tracking-wider">
+                      Vé Bán Online
+                    </span>
+                    <span className="p-2 rounded-xl bg-blue-100 text-blue-700 border border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20">
+                      <Ticket size={16} />
+                    </span>
+                  </div>
+                  <div className="text-2xl font-black text-slate-900 dark:text-white font-mono">
+                    {stats.kpi.onlineTickets ?? stats.kpi.paid} <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">vé</span>
+                  </div>
+                  <div className="text-sm font-black text-blue-700 dark:text-blue-400 font-mono mt-1">
+                    {formatCurrency(stats.kpi.onlineRevenue ?? stats.kpi.revenue)}
+                  </div>
+                  <div className="text-[11px] text-slate-600 dark:text-slate-400 mt-2 font-medium">
+                    Khách đặt qua Website & VietQR
+                  </div>
                 </div>
-              ))}
+
+                {/* Vé Bán Offline Tại Quầy */}
+                <div className="card-luxury rounded-2xl p-5 border border-emerald-200 dark:border-emerald-500/30 bg-emerald-50/50 dark:bg-gradient-to-br dark:from-emerald-950/30 dark:to-transparent">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[11px] font-black text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">
+                      Vé Bán Offline (Tại Quầy)
+                    </span>
+                    <span className="p-2 rounded-xl bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
+                      <Ticket size={16} />
+                    </span>
+                  </div>
+                  <div className="text-2xl font-black text-slate-900 dark:text-white font-mono">
+                    {stats.kpi.offlineTickets ?? 0} <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">vé</span>
+                  </div>
+                  <div className="text-sm font-black text-emerald-700 dark:text-emerald-400 font-mono mt-1">
+                    {formatCurrency(stats.kpi.offlineRevenue ?? 0)}
+                  </div>
+                  <div className="text-[11px] text-slate-600 dark:text-slate-400 mt-2 font-medium">
+                    Khách mua trực tiếp tại cổng soát vé
+                  </div>
+                </div>
+
+                {/* Khách Mời (Vé Tặng) */}
+                <div className="card-luxury rounded-2xl p-5 border border-amber-200 dark:border-amber-500/30 bg-amber-50/50 dark:bg-gradient-to-br dark:from-amber-950/30 dark:to-transparent">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[11px] font-black text-amber-900 dark:text-amber-300 uppercase tracking-wider">
+                      Khách Mời (Vé Tặng)
+                    </span>
+                    <span className="p-2 rounded-xl bg-amber-100 text-amber-800 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20">
+                      <Users size={16} />
+                    </span>
+                  </div>
+                  <div className="text-2xl font-black text-amber-800 dark:text-amber-400 font-mono">
+                    {stats.kpi.guestTickets ?? 0} <span className="text-xs text-slate-400 font-normal">vé mời</span>
+                  </div>
+                  <div className="text-xs font-bold text-slate-700 dark:text-slate-300 mt-1">
+                    Đã đến dự: <span className="text-emerald-700 dark:text-emerald-400 font-mono font-black">{stats.kpi.guestCheckedIn ?? 0}</span> check-in
+                  </div>
+                  <div className="text-[11px] text-amber-800 dark:text-amber-400/80 mt-2 font-semibold">
+                    (Hoàn toàn miễn phí • Không tính doanh thu)
+                  </div>
+                </div>
+
+                {/* Tổng Doanh Thu Thực Tế */}
+                <div className="card-luxury rounded-2xl p-5 border border-red-200 dark:border-red-500/40 bg-red-50/50 dark:bg-gradient-to-br dark:from-red-950/40 dark:to-transparent shadow-sm dark:shadow-red-950/20">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[11px] font-black text-red-800 dark:text-red-300 uppercase tracking-wider">
+                      Tổng Doanh Thu
+                    </span>
+                    <span className="p-2 rounded-xl bg-red-100 text-red-700 border border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20">
+                      <DollarSign size={16} />
+                    </span>
+                  </div>
+                  <div className="text-2xl font-black text-red-600 dark:text-red-400 font-mono">
+                    {formatCurrency(stats.kpi.revenue)}
+                  </div>
+                  <div className="text-xs font-bold text-slate-700 dark:text-slate-300 mt-1">
+                    Tổng vé đã thu tiền: <span className="text-slate-900 dark:text-white font-mono font-black">{stats.kpi.paid}</span> vé
+                  </div>
+                  <div className="text-[11px] text-slate-600 dark:text-slate-400 mt-2 font-medium">
+                    Doanh thu vé Online + Vé Offline tại quầy
+                  </div>
+                </div>
+              </div>
+
+              {/* Hàng 2: Trạng Thái Vận Hành Nhỏ Gọn */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+                <div className="card-luxury rounded-2xl p-3.5 border border-white/10 flex items-center justify-between">
+                  <div>
+                    <div className="text-[10px] font-bold text-slate-400 uppercase">Tổng Vé Phát Hành</div>
+                    <div className="text-lg font-black text-white font-mono mt-0.5">{stats.kpi.total}</div>
+                  </div>
+                  <span className="text-slate-400"><Ticket size={18} /></span>
+                </div>
+
+                <div className="card-luxury rounded-2xl p-3.5 border border-white/10 flex items-center justify-between">
+                  <div>
+                    <div className="text-[10px] font-bold text-amber-400 uppercase">Chờ Xác Nhận Tiền</div>
+                    <div className="text-lg font-black text-amber-400 font-mono mt-0.5">{stats.kpi.pending}</div>
+                  </div>
+                  <span className="text-amber-400"><RefreshCw size={18} /></span>
+                </div>
+
+                <div className="card-luxury rounded-2xl p-3.5 border border-white/10 flex items-center justify-between">
+                  <div>
+                    <div className="text-[10px] font-bold text-blue-400 uppercase">Check-in Cổng Đón</div>
+                    <div className="text-lg font-black text-blue-400 font-mono mt-0.5">
+                      {stats.kpi.checkedIn} / {stats.kpi.paid + (stats.kpi.guestTickets || 0)}
+                    </div>
+                  </div>
+                  <span className="text-blue-400"><Users size={18} /></span>
+                </div>
+
+                <div className="card-luxury rounded-2xl p-3.5 border border-white/10 flex items-center justify-between">
+                  <div>
+                    <div className="text-[10px] font-bold text-purple-400 uppercase">Đã Gửi Email Vé</div>
+                    <div className="text-lg font-black text-purple-400 font-mono mt-0.5">{stats.kpi.emailSent}</div>
+                  </div>
+                  <span className="text-purple-400"><Mail size={18} /></span>
+                </div>
+              </div>
             </div>
           )}
 
@@ -593,20 +731,20 @@ export default function AdminDashboard() {
           {stats && (
             <div className="card-luxury rounded-2xl p-5 border border-white/10 mb-8">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider">
                   Tiến độ Check-in tại cổng đón khách
                 </span>
-                <span className="text-sm font-black text-red-500 font-mono">
+                <span className="text-sm font-black text-red-600 dark:text-red-500 font-mono">
                   {stats.kpi.paid > 0 ? Math.round((stats.kpi.checkedIn / stats.kpi.paid) * 100) : 0}%
                 </span>
               </div>
-              <div className="h-2.5 bg-white/5 rounded-full overflow-hidden">
+              <div className="h-3 bg-stone-200 dark:bg-white/10 rounded-full overflow-hidden border border-stone-300/50 dark:border-white/5">
                 <div
                   className="h-full bg-gradient-to-r from-red-600 to-rose-400 rounded-full transition-all duration-500"
                   style={{ width: `${stats.kpi.paid > 0 ? (stats.kpi.checkedIn / stats.kpi.paid) * 100 : 0}%` }}
                 />
               </div>
-              <div className="text-[11px] text-slate-400 mt-2 font-medium">
+              <div className="text-[11px] text-slate-600 dark:text-slate-400 mt-2 font-medium">
                 {stats.kpi.checkedIn} / {stats.kpi.paid} người mua đã dán vòng tay check-in vào sự kiện.
               </div>
             </div>
@@ -702,8 +840,8 @@ export default function AdminDashboard() {
           <div id="tickets" className="card-luxury rounded-3xl border border-white/10 overflow-hidden">
             <div className="p-5 sm:p-6 border-b border-white/10 flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h2 className="text-base sm:text-lg font-black text-white">Quản Lý Vé Đã Đặt</h2>
-                <p className="text-xs text-slate-400 mt-0.5">Đối chiếu biên lai ngân hàng và xác nhận duyệt vé</p>
+                <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">Quản Lý Vé Đã Đặt</h2>
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">Đối chiếu biên lai ngân hàng và xác nhận duyệt vé</p>
               </div>
 
               <div className="flex gap-2.5 flex-wrap items-center">
@@ -988,6 +1126,19 @@ export default function AdminDashboard() {
       )}
 
       {/* Lucky Draw Stage Screen Modal */}
+      <OfflineTicketModal
+        isOpen={offlineTicketOpen}
+        onClose={() => setOfflineTicketOpen(false)}
+        onSuccess={(data) => {
+          fetchStats(true)
+          fetchTickets(true)
+          setEmailResult({
+            type: 'success',
+            message: data.message,
+          })
+        }}
+      />
+
       <DevCreateTicketModal
         isOpen={createTicketOpen}
         onClose={() => setCreateTicketOpen(false)}

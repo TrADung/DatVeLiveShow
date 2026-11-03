@@ -324,7 +324,7 @@ html.light body,
 }
 
 /* 6. Inputs, Textareas & Selects */
-[data-theme="light"] input,
+[data-theme="light"] input:not(.bg-transparent):not([type="checkbox"]):not([type="radio"]),
 [data-theme="light"] select,
 [data-theme="light"] textarea {
   background-color: #FFFFFF !important;
@@ -333,12 +333,29 @@ html.light body,
   box-shadow: 0 1px 3px 0 rgba(60, 45, 20, 0.05) !important;
 }
 
+/* Ensure inputs with bg-transparent are NEVER forced white */
+input.bg-transparent,
+[data-theme="light"] input.bg-transparent,
+[data-theme="light"] input[class*="bg-transparent"] {
+  background-color: transparent !important;
+  border: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
 [data-theme="light"] input:focus,
 [data-theme="light"] select:focus,
 [data-theme="light"] textarea:focus {
   border-color: #8A6508 !important;
   outline: none !important;
   box-shadow: 0 0 0 2px rgba(180, 130, 40, 0.2) !important;
+}
+
+[data-theme="light"] input.bg-transparent:focus {
+  border: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
 [data-theme="light"] input::placeholder,
@@ -535,7 +552,8 @@ html.light body,
   stroke: rgba(180, 150, 100, 0.2) !important;
 }
 
-[data-theme="light"] .recharts-text {
+[data-theme="light"] .recharts-text,
+[data-theme="light"] .recharts-text tspan {
   fill: #4B5563 !important;
 }
 
@@ -544,6 +562,10 @@ html.light body,
   border: 1px solid rgba(180, 150, 100, 0.3) !important;
   color: #111827 !important;
   box-shadow: 0 8px 24px -4px rgba(60, 45, 20, 0.1) !important;
+}
+
+[data-theme="light"] .recharts-default-tooltip * {
+  color: #111827 !important;
 }
 
 /* 15. Footer */
